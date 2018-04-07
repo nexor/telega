@@ -1,0 +1,4 @@
+name "echobot"
+description "A simple telegram echo bot"
+
+dependency "telega" version="~master" path="../../"
