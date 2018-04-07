@@ -1,4 +1,4 @@
-module telega.botapi.botapi;
+module telega.botapi;
 
 import vibe.http.client;
 import vibe.stream.operations;
