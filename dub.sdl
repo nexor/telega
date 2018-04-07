@@ -1,0 +1,15 @@
+name        "telega"
+description "Telegram Bot API implementation"
+authors     "Pavel Chebotarev"
+
+license "MIT"
+
+dependency "vibe-d:http" version="~>0.8.3"
+dependency "asdf" version="~>0.1.8"
+
+configuration "default" {
+    versions   "VibeDisableCommandLineParsing"
+    versions   "VibeUseOpenSSL11"
+
+    targetType "library"
+}
