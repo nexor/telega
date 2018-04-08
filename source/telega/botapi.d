@@ -8,6 +8,7 @@ import asdf;
 import std.conv;
 import std.typecons;
 import std.exception;
+import std.traits;
 
 class TelegramBotApiException : Exception
 {
@@ -20,6 +21,8 @@ class TelegramBotApiException : Exception
         super(description, file, line, next);
     }
 }
+
+enum isTelegramId(T) = isSomeString!T || isIntegral!T;
 
 /******************************************************************/
 /*                    Telegram types and enums                    */
@@ -247,40 +250,42 @@ class BotApi
             return callMethod!(User, GetMeMethod)(m);
         }
 
-        Message sendMessage(string chatId, string text)
+        Message sendMessage(T)(T chatId, string text)
+            if (isTelegramId!T)
         {
             SendMessageMethod m = {
-                chat_id    : chatId,
                 text       : text,
             };
 
+            static if (isIntegral!T) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
             return callMethod!(Message, SendMessageMethod)(m);
         }
 
-        Message sendMessage(long chatId, string text)
-        {
-            return sendMessage(chatId.to!string, text);
-        }
-
-        Message sendMessage(ref SendMessageMethod m)
-        {
-            return callMethod!(Message, SendMessageMethod)(m);
-        }
-
-        Message forwardMessage(string chatId, string fromChatId, uint messageId)
+        Message forwardMessage(T1, T2)(T1 chatId, T2 fromChatId, uint messageId)
+            if (isTelegramId!T1 && isTelegramId!T2)
         {
             ForwardMessageMethod m = {
-                chat_id : chatId,
-                from_chat_id : fromChatId,
                 message_id : messageId
             };
 
-            return callMethod!(Message, ForwardMessageMethod)(m);
-        }
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
 
-        Message forwardMessage(long chatId, long fromChatId, uint messageId)
-        {
-            return forwardMessage(chatId.to!string, fromChatId.to!string, messageId);
+            static if (isIntegral!T2) {
+                m.from_chat_id = fromChatId.to!string;
+            } else {
+                m.from_chat_id = fromChatId;
+            }
+
+            return callMethod!(Message, ForwardMessageMethod)(m);
         }
 
         Message forwardMessage(ref ForwardMessageMethod m)

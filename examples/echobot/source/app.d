@@ -6,7 +6,7 @@ string botToken = "123456789:BotTokenHerE";
 
 int main(string[] args)
 {
-    if (args[1] != null) {
+    if (args.length > 1 && args[1] != null) {
         logInfo("Setting token from first argument");
         botToken = args[1];
     }
