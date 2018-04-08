@@ -64,6 +64,12 @@ struct Message
     string      language_code;
     string      text;
     Nullable!PhotoSize[] photo;
+
+    @property
+    uint id()
+    {
+        return message_id;
+    }
 }
 
 struct Update
@@ -134,6 +140,19 @@ struct SendMessageMethod
     string    chat_id;
     string    text;
     ParseMode parse_mode;
+}
+
+struct ForwardMessageMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/forwardMessage";
+
+    string chat_id;
+    string from_chat_id;
+    bool   disable_notification;
+    uint   message_id;
 }
 
 /******************************************************************/
@@ -246,5 +265,26 @@ class BotApi
         Message sendMessage(ref SendMessageMethod m)
         {
             return callMethod!(Message, SendMessageMethod)(m);
+        }
+
+        Message forwardMessage(string chatId, string fromChatId, uint messageId)
+        {
+            ForwardMessageMethod m = {
+                chat_id : chatId,
+                from_chat_id : fromChatId,
+                message_id : messageId
+            };
+
+            return callMethod!(Message, ForwardMessageMethod)(m);
+        }
+
+        Message forwardMessage(long chatId, long fromChatId, uint messageId)
+        {
+            return forwardMessage(chatId.to!string, fromChatId.to!string, messageId);
+        }
+
+        Message forwardMessage(ref ForwardMessageMethod m)
+        {
+            return callMethod!(Message, ForwardMessageMethod)(m);
         }
 }
