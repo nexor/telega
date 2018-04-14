@@ -1,6 +1,8 @@
 # Telega
 Telegram bot API implementation.
 
+[![Build Status](https://travis-ci.org/nexor/telega.svg?branch=master)](https://travis-ci.org/nexor/telega)
+
 ## Implemented features
 
 ### Methods

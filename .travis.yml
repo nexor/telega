@@ -1,0 +1,11 @@
+language: d
+
+d:
+  - dmd
+  - ldc
+
+script:
+  - dub test
+
+notifications:
+  email: false
