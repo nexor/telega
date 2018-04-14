@@ -433,6 +433,10 @@ struct ResponseParameters
     uint retry_after;
 }
 
+alias InputMediaStructs = AliasSeq!(InputMediaPhoto, InputMediaVideo);
+
+alias InputMedia = JsonableAlgebraic!InputMediaStructs;
+
 struct InputMediaPhoto
 {
     string type;
