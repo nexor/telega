@@ -71,6 +71,29 @@ struct JsonableAlgebraic(Typelist ...)
     }
 }
 
+unittest
+{
+    import vibe.data.json;
+
+    struct S1
+    {
+        int s1;
+    }
+
+    struct S2
+    {
+        string s2;
+    }
+
+    JsonableAlgebraic!(S1, S2) jsonable;
+
+    jsonable = S1(42);
+    assert(`{"s1":42}` == jsonable.serializeToJsonString());
+
+    jsonable = S2("s2 value");
+    assert(`{"s2":"s2 value"}` == jsonable.serializeToJsonString());
+}
+
 /******************************************************************/
 /*                    Telegram types and enums                    */
 /******************************************************************/
