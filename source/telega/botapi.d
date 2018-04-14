@@ -8,7 +8,6 @@ import asdf;
 import std.conv;
 import std.typecons;
 import std.exception;
-import std.traits;
 
 class TelegramBotApiException : Exception
 {
@@ -23,6 +22,54 @@ class TelegramBotApiException : Exception
 }
 
 enum isTelegramId(T) = isSomeString!T || isIntegral!T;
+
+struct JsonableAlgebraic(Typelist ...)
+{
+    import std.meta;
+    import std.variant;
+    import vibe.data.json : Json;
+
+    private Algebraic!Typelist types;
+
+    void opAssign(T)(T value)
+        if (staticIndexOf!(T, Typelist) >= 0)
+    {
+        types = value;
+    }
+
+    @safe
+    Json toJson() const
+    {
+        if (!types.hasValue) {
+            return Json(null);
+        }
+
+        return getJson();
+    }
+
+    // this method should not be used
+    @safe
+    typeof(this) fromJson(Json src)
+    {
+        return typeof(this).init;
+    }
+
+    @trusted
+    protected Json getJson() const
+    {
+        import vibe.data.json : serializeToJson;
+
+        static foreach (T; Typelist) {
+            if (types.type == typeid(T)) {
+                T reply = cast(T)types.get!T;
+
+                return reply.serializeToJson();
+            }
+        }
+
+        return Json(null);
+    }
+}
 
 /******************************************************************/
 /*                    Telegram types and enums                    */
@@ -56,7 +103,7 @@ struct Chat
 	string username;
 }
 
-struct Message
+struct MessageBase
 {
     uint                 message_id;
     uint                 date;
@@ -67,7 +114,6 @@ struct Message
     uint                 forward_from_message_id;
     string               forward_signature;
     uint                 forward_date;
-    Nullable!ReplyToMessage reply_to_message;
     uint                 edit_date;
     string               media_group_id;
     string               author_signature;
@@ -76,6 +122,7 @@ struct Message
     Nullable!MessageEntity[] caption_entities;
     Nullable!Audio           audio;
     Nullable!Document        document;
+    Nullable!Game            game;
     Nullable!PhotoSize[]     photo;
     Nullable!Sticker         sticker;
     Nullable!Video           video;
@@ -95,9 +142,8 @@ struct Message
     bool                channel_chat_created;
     long                migrate_to_chat_id;
     long                migrate_from_chat_id;
-    // TODO Nullable!Message         pinned_message;
-    // TODO Nullable!Invoice         invoice;
-    // TODO Nullable!SuccessfulPayment successful_payment;
+    Nullable!Invoice         invoice;
+    Nullable!SuccessfulPayment successful_payment;
     string              connected_website;
 
     @property
@@ -107,54 +153,13 @@ struct Message
     }
 }
 
-struct ReplyToMessage
+struct Message
 {
-    uint                 message_id;
-    uint                 date;
-    Chat                 chat;
-    Nullable!User        from;
-    Nullable!User        forward_from;
-    Nullable!Chat        forward_from_chat;
-    uint                 forward_from_message_id;
-    string               forward_signature;
-    uint                 forward_date;
-    uint                 edit_date;
-    string               media_group_id;
-    string               author_signature;
-    string               text;
-    Nullable!MessageEntity[] entities;
-    Nullable!MessageEntity[] caption_entities;
-    Nullable!Audio           audio;
-    Nullable!Document        document;
-    Nullable!PhotoSize[]     photo;
-    Nullable!Sticker         sticker;
-    Nullable!Video           video;
-    Nullable!Voice           voice;
-    Nullable!VideoNote       video_note;
-    string              caption;
-    Nullable!Contact         contact;
-    Nullable!Location        location;
-    Nullable!Venue           venue;
-    Nullable!User[]          new_chat_members;
-    Nullable!User            left_chat_member;
-    string              new_chat_title;
-    Nullable!PhotoSize[]     new_chat_photo;
-    bool                delete_chat_photo;
-    bool                group_chat_created;
-    bool                supergroup_chat_created;
-    bool                channel_chat_created;
-    long                migrate_to_chat_id;
-    long                migrate_from_chat_id;
-    // TODO Nullable!Message         pinned_message;
-    // TODO Nullable!Invoice         invoice;
-    // TODO Nullable!SuccessfulPayment successful_payment;
-    string              connected_website;
+    MessageBase          baseMessage;
+    Nullable!MessageBase reply_to_message;
+    Nullable!MessageBase pinned_message;
 
-    @property
-    uint id()
-    {
-        return message_id;
-    }
+    alias baseMessage this;
 }
 
 struct Update
@@ -165,6 +170,11 @@ struct Update
     Nullable!Message edited_message;
     Nullable!Message channel_post;
     Nullable!Message edited_channel_post;
+    Nullable!InlineQuery        inline_query;
+    Nullable!ChosenInlineResult chosen_inline_result;
+    Nullable!CallbackQuery      callback_query;
+    Nullable!ShippingQuery      shipping_query;
+    Nullable!PreCheckoutQuery   pre_checkout_query;
 
     @property
     uint id()
@@ -291,72 +301,16 @@ struct File
     string file_path;
 }
 
-import std.variant;
-import vibe.data.json : Json;
+import std.meta : AliasSeq;
+import std.variant : Algebraic;
 
-alias ReplyMarkupAlgebraic =
-    Algebraic!(ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, ForceReply);
-enum isReplyMarkup(T) =
-    is(T == ReplyKeyboardMarkup) || is(T == ReplyKeyboardRemove) ||
-    is(T == InlineKeyboardMarkup) || is(T == ForceReply);
+alias ReplyMarkupStructs = AliasSeq!(ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, ForceReply);
 
 /**
  Abstract structure for unioining ReplyKeyboardMarkup, ReplyKeyboardRemove,
  InlineKeyboardMarkup and ForceReply
 */
-struct ReplyMarkup
-{
-    ReplyMarkupAlgebraic replyMarkup;
-
-    void opAssign(T)(T markup)
-        if (isReplyMarkup!T)
-    {
-        replyMarkup = markup;
-    }
-
-    @safe
-    Json toJson() const
-    {
-        if (!replyMarkup.hasValue) {
-            return Json(null);
-        }
-
-        return getJson();
-    }
-
-    // this method should not be used
-    @safe
-    ReplyMarkup fromJson(Json src)
-    {
-        return ReplyMarkup.init;
-    }
-
-    @trusted
-    protected Json getJson() const
-    {
-        import vibe.data.json : serializeToJson;
-
-        if (replyMarkup.type == typeid(ReplyKeyboardMarkup)) {
-            ReplyKeyboardMarkup reply = cast(ReplyKeyboardMarkup)replyMarkup.get!ReplyKeyboardMarkup;
-
-            return reply.serializeToJson();
-        } else if (replyMarkup.type == typeid(ReplyKeyboardRemove)) {
-            ReplyKeyboardRemove reply = cast(ReplyKeyboardRemove)replyMarkup.get!ReplyKeyboardRemove;
-
-            return reply.serializeToJson();
-        } else if (replyMarkup.type == typeid(InlineKeyboardMarkup)) {
-            InlineKeyboardMarkup reply = cast(InlineKeyboardMarkup)replyMarkup.get!InlineKeyboardMarkup;
-
-            return reply.serializeToJson();
-        } else if (replyMarkup.type == typeid(ForceReply)) {
-            ForceReply reply = cast(ForceReply)replyMarkup.get!ForceReply;
-
-            return reply.serializeToJson();
-        }
-
-        return Json(null);
-    }
-}
+alias ReplyMarkup = JsonableAlgebraic!ReplyMarkupStructs;
 
 struct ReplyKeyboardMarkup
 {
@@ -403,7 +357,19 @@ struct InlineKeyboardButton
     string       callback_data;
     string       switch_inline_query;
     string       switch_inline_query_current_chat;
+    CallbackGame callback_game;
     bool         pay;
+}
+
+struct CallbackQuery
+{
+    string           id;
+    User             from;
+    Nullable!Message message;
+    string           inline_message_id;
+    string           chat_instance;
+    string           data;
+    string           game_short_name;
 }
 
 struct ForceReply
@@ -466,7 +432,7 @@ struct InputMediaVideo
 
 struct InputFile
 {
-
+    // no fields
 }
 
 struct Sticker
@@ -495,6 +461,458 @@ struct MaskPosition
     float  x_shift;
     float  y_shift;
     float  scale;
+}
+
+
+/*** Inline mode types ***/
+
+struct InlineQuery
+{
+    string id;
+    User from;
+    Nullable!Location location;
+    string query;
+    string offset;
+}
+
+alias InlineQueryResultStructs = AliasSeq!(
+    InlineQueryResultArticle, InlineQueryResultPhoto, InlineQueryResultGif, InlineQueryResultMpeg4Gif,
+    InlineQueryResultVideo, InlineQueryResultAudio, InlineQueryResultVoice, InlineQueryResultDocument,
+    InlineQueryResultLocation, InlineQueryResultVenue, InlineQueryResultContact, InlineQueryResultGame,
+    InlineQueryResultCachedPhoto, InlineQueryResultCachedGif, InlineQueryResultCachedMpeg4Gif,
+    InlineQueryResultCachedSticker, InlineQueryResultCachedDocument, InlineQueryResultCachedVideo,
+    InlineQueryResultCachedVoice, InlineQueryResultCachedAudio
+);
+
+alias InlineQueryResult = JsonableAlgebraic!InlineQueryResultStructs;
+
+mixin template InlineQueryFields()
+{
+    Nullable!InlineKeyboardMarkup reply_markup;
+    Nullable!InputMessageContent  input_message_content;
+}
+
+struct InlineQueryResultArticle
+{
+    immutable string type = "article";
+    string id;
+    string title;
+    string url;
+    bool hide_url;
+    string description;
+    string thumb_url;
+    uint thumb_width;
+    uint thumb_height;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultPhoto
+{
+    immutable string type = "photo";
+    string id;
+    string photo_url;
+    string thumb_url;
+    uint photo_width;
+    uint photo_height;
+    string title;
+    string description;
+    string caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultGif
+{
+    immutable string type = "gif";
+    string id;
+    string gif_url;
+    uint gif_width;
+    uint gif_height;
+    uint gif_duration;
+    string thumb_url;
+    string title;
+    string caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultMpeg4Gif
+{
+    immutable string type ="mpeg4_gif";
+    string id;
+    string mpeg4_url;
+    uint mpeg4_width;
+    uint mpeg4_height;
+    uint mpeg4_duration;
+    string thumb_url;
+    string title;
+    string caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultVideo
+{
+    immutable string type ="video";
+    string id;
+    string video_url;
+    string mime_type;
+    string thumb_url;
+    string title;
+    string caption;
+    ParseMode parse_mode;
+    uint video_width;
+    uint video_height;
+    uint video_duration;
+    string description;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultAudio
+{
+    const string type = "audio";
+    string    id;
+    string    audio_url;
+    string    title;
+    string    caption;
+    ParseMode parse_mode;
+    string    performer;
+    uint      audio_duration;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultVoice
+{
+    const string type = "voice";
+    string    id;
+    string    voice_url;
+    string    title;
+    string    caption;
+    ParseMode parse_mode;
+    uint      voice_duration;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultDocument
+{
+    const string type = "document";
+    string    id;
+    string    title;
+    string    caption;
+    ParseMode parse_mode;
+    string    document_url;
+    string    mime_type;
+    string    description;
+    string    thumb_url;
+    uint      thumb_width;
+    uint      thumb_height;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultLocation
+{
+    const string type = "location";
+    string id;
+    float latitude;
+    float longitude;
+    string title;
+    uint live_period;
+    string thumb_url;
+    uint thumb_width;
+    uint thumb_height;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultVenue
+{
+    const string type = "venue";
+    string id;
+    float latitude;
+    float longitude;
+    string title;
+    string address;
+    string foursquare_id;
+    string thumb_url;
+    uint thumb_width;
+    uint thumb_height;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultContact
+{
+    const string type = "contact";
+    string id;
+    string phone_number;
+    string first_name;
+    string last_name;
+    string thumb_url;
+    uint thumb_width;
+    uint thumb_height;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultGame
+{
+    const string type = "game";
+    string id;
+    string game_short_name;
+    Nullable!InlineKeyboardMarkup reply_markup;
+}
+
+
+struct InlineQueryResultCachedPhoto
+{
+    const string type = "photo";
+    string id;
+    string photo_file_id;
+    string title;
+    string description;
+    string caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultCachedGif
+{
+    const string type = "gif";
+    string id;
+    string gif_file_id;
+    string title;
+    string caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultCachedMpeg4Gif
+{
+    const string type = "mpeg4_gif";
+    string id;
+    string mpeg4_file_id;
+    string title;
+    string caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultCachedSticker
+{
+    const string type = "sticker";
+    string id;
+    string sticker_file_id;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultCachedDocument
+{
+    const string type = "document";
+    string    id;
+    string    title;
+    string    document_file_id;
+    string    description;
+    string    caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultCachedVideo
+{
+    const string type = "video";
+    string    id;
+    string    video_file_id;
+    string    title;
+    string    description;
+    string    caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+struct InlineQueryResultCachedVoice
+{
+    const string type = "voice";
+    string    id;
+    string    voice_file_id;
+    string    title;
+    string    caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+
+struct InlineQueryResultCachedAudio
+{
+    const string type = "audio";
+    string    id;
+    string    audio_file_id;
+    string    caption;
+    ParseMode parse_mode;
+
+    mixin InlineQueryFields;
+}
+
+alias InputMessageContentStructs = AliasSeq!(
+    InputTextMessageContent, InputLocationMessageContent, InputVenueMessageContent, InputContactMessageContent
+);
+
+alias InputMessageContent = JsonableAlgebraic!InputMessageContentStructs;
+
+struct InputTextMessageContent
+{
+    string message_text;
+    string parse_mode;
+    bool   disable_web_page_preview;
+}
+
+struct InputLocationMessageContent
+{
+    float latitude;
+    float longitude;
+    uint  live_period;
+}
+
+struct InputVenueMessageContent
+{
+    float  latitude;
+    float  longitude;
+    string title;
+    string address;
+    string foursquare_id;
+}
+
+struct InputContactMessageContent
+{
+    string phone_number;
+    string first_name;
+    string last_name;
+}
+
+struct ChosenInlineResult
+{
+    string   result_id;
+    User     from;
+    Nullable!Location location;
+    string   inline_message_id;
+    string   query;
+}
+
+/*** Payments types ***/
+struct LabeledPrice
+{
+    string label;
+    uint   amount;
+}
+
+struct Invoice
+{
+    string title;
+    string description;
+    string start_parameter;
+    string currency;
+    uint   total_amount;
+}
+
+struct ShippingAddress
+{
+    string country_code;
+    string state;
+    string city;
+    string street_line1;
+    string street_line2;
+    string post_code;
+}
+
+struct OrderInfo
+{
+    string name;
+    string phone_number;
+    string email;
+    Nullable!ShippingAddress shipping_address;
+}
+
+struct ShippingOption
+{
+    string id;
+    string title;
+    LabeledPrice[] prices;
+}
+struct SuccessfulPayment
+{
+    string currency;
+    uint   total_amount;
+    string invoice_payload;
+    string shipping_option_id;
+    Nullable!OrderInfo order_info;
+    string telegram_payment_charge_id;
+    string provider_payment_charge_id;
+}
+
+struct ShippingQuery
+{
+    string id;
+    User   from;
+    string invoice_payload;
+    ShippingAddress shipping_address;
+}
+
+struct PreCheckoutQuery
+{
+    string             id;
+    User               from;
+    string             currency;
+    uint               total_amount;
+    string             invoice_payload;
+    string             shipping_option_id;
+    Nullable!OrderInfo order_info;
+}
+
+/*** Games types ***/
+
+struct Game
+{
+    string        title;
+    string        description;
+    PhotoSize[]   photo;
+    string        text;
+    MessageEntity text_entities;
+    Animation     animation;
+}
+
+struct Animation
+{
+    string    file_id;
+    PhotoSize thumb;
+    string    file_name;
+    string    mime_type;
+    uint      file_size;
+}
+
+struct CallbackGame
+{
+    // no fields
+}
+
+struct GameHighScore
+{
+    uint  position;
+    User  user;
+    uint  score;
 }
 
 /******************************************************************/
