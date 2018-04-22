@@ -1,0 +1,17 @@
+FROM debian:buster-slim
+
+RUN apt-get update && apt-get install -y curl dub libcurl3 build-essential zlib1g-dev libssl-dev \
+ && curl -fsS -o /tmp/install.sh https://dlang.org/install.sh \
+ && apt-get install -y gcc cmake
+
+WORKDIR /src
+
+COPY . .
+
+RUN bash /tmp/install.sh -p /dlang install ldc
+RUN dub build --compiler=ldc2
+
+#RUN bash /tmp/install.sh -p /dlang install dmd
+#RUN dub build
+
+CMD ["dub", "test"]
