@@ -1,0 +1,14 @@
+sudo: required
+
+services:
+  - docker
+
+before_install:
+  - docker build -t nexor/telega -f Dockerfile.travisci .
+  - docker images
+
+script:
+  - docker run -it --rm nexor/telega
+
+notifications:
+  email: false
