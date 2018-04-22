@@ -7,11 +7,11 @@ Telegram bot API implementation.
 
 ### Methods
 
-getUpdates, getMe, sendMessage, forwardMessage
+getUpdates, getMe, sendMessage, forwardMessage, sendPhoto, sendAudio
+sendDocument, sendVideo, sendVoice, sendVideoNote, sendMediaGroup,
+sendLocation
 
 **TBD:** setWebhook, deleteWebhook, getWebhookInfo,
-sendPhoto, sendAudio, sendDocument, sendVideo,
-sendVoice, sendVideoNote, sendMediaGroup, sendLocation,
 editMessageLiveLocation, stopMessageLiveLocation, sendVenue, sendContact,
 sendChatAction, getUserProfilePhotos, getFile, kickChatMember,
 unbanChatMember, restrictChatMember, promoteChatMember, exportChatInviteLink,
@@ -33,5 +33,3 @@ ForceReply, ChatPhoto, ChatMember, ResponseParameters, InputMedia,
 InputMediaPhoto, InputMediaVideo, InputFile, ChosenInlineResult
 InlineQuery, all InlineQueryResult* types,
 all InputMessageContent types
-
-**TBD:** Message

@@ -8,6 +8,7 @@ import asdf;
 import std.conv;
 import std.typecons;
 import std.exception;
+import std.traits;
 
 class TelegramBotApiException : Exception
 {
@@ -982,6 +983,9 @@ struct SendMessageMethod
     string    chat_id;
     string    text;
     ParseMode parse_mode;
+    bool      disable_web_page_preview;
+    bool      disable_notification;
+    uint      reply_to_message_id;
 
     ReplyMarkup reply_markup;
 }
@@ -997,6 +1001,456 @@ struct ForwardMessageMethod
     string from_chat_id;
     bool   disable_notification;
     uint   message_id;
+}
+
+struct SendPhotoMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendPhoto";
+
+    string      chat_id;
+    string      photo;
+    string      caption;
+    ParseMode   parse_mode;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct SendAudioMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendAudio";
+
+    string      chat_id;
+    string      audio;
+    string      caption;
+    ParseMode   parse_mode;
+    uint        duration;
+    string      performer;
+    string      title;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+
+}
+
+struct SendDocumentMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendDocument";
+
+    string      chat_id;
+    string      document;
+    string      caption;
+    ParseMode   parse_mode;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct SendVideoMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendVideo";
+
+    string      chat_id;
+    string      video;
+    uint        duration;
+    uint        width;
+    uint        height;
+    string      caption;
+    ParseMode   parse_mode;
+    bool        supports_streaming;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct SendVoiceMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendVoice";
+
+    string      chat_id;
+    string      voice;
+    string      caption;
+    ParseMode   parse_mode;
+    uint        duration;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct SendVideoNoteMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendVideoNote";
+
+    string      chat_id;
+    string      video_note;
+    uint        duration;
+    uint        length;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+
+}
+
+struct SendMediaGroupMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendMediaGroup";
+
+    string       chat_id;
+    InputMedia[] media;
+    bool         disable_notification;
+    uint         reply_to_message_id;
+}
+
+struct SendLocationMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendLocation";
+
+    string      chat_id;
+    float       latitude;
+    float       longitude;
+    uint        live_period;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct editMessageLiveLocationMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/editMessageLiveLocation";
+
+    string      chat_id;
+    uint        message_id;
+    string      inline_message_id;
+    float       latitude;
+    float       longitude;
+    ReplyMarkup reply_markup;
+}
+
+struct stopMessageLiveLocationMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/stopMessageLiveLocation";
+
+    string      chat_id;
+    uint        message_id;
+    string      inline_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct SendVenueMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendVenue";
+
+    string      chat_id;
+    float       latitude;
+    float       longitude;
+    string      title;
+    string      address;
+    string      foursquare_id;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct SendContactMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendContact";
+
+    string      chat_id;
+    string      phone_number;
+    string      first_name;
+    string      last_name;
+    bool        disable_notification;
+    uint        reply_to_message_id;
+    ReplyMarkup reply_markup;
+}
+
+struct sendChatActionMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/sendChatAction";
+
+    string chat_id;
+    string action; // TODO enum
+}
+
+struct getUserProfilePhotosMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getUserProfilePhotos";
+
+    int  user_id;
+    uint offset;
+    uint limit;
+}
+
+struct getFileMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getFile";
+
+    string file_id;
+}
+
+struct kickChatMemberMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/kickChatMember";
+
+    string chat_id;
+    uint   user_id;
+    uint   until_date;
+}
+
+struct unbanChatMemberMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/unbanChatMember";
+
+    string chat_id;
+    uint   user_id;
+}
+
+struct restrictChatMemberMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/restrictChatMember";
+
+    string chat_id;
+    uint   user_id;
+    uint   until_date;
+    bool   can_send_messages;
+    bool   can_send_media_messages;
+    bool   can_send_other_messages;
+    bool   can_add_web_page_previews;
+}
+
+struct promoteChatMemberMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/promoteChatMember";
+
+    string chat_id;
+    uint   user_id;
+    bool   can_change_info;
+    bool   can_post_messages;
+    bool   can_edit_messages;
+    bool   can_delete_messages;
+    bool   can_invite_users;
+    bool   can_restrict_members;
+    bool   can_pin_messages;
+    bool   can_promote_members;
+}
+
+struct exportChatInviteLinkMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/exportChatInviteLink";
+
+    string chat_id;
+}
+
+struct setChatPhotoMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/setChatPhoto";
+
+    string    chat_id;
+    InputFile photo;
+
+}
+
+struct deleteChatPhotoMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/deleteChatPhoto";
+
+    string chat_id;
+}
+
+struct setChatTitleMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/setChatTitle";
+
+    string chat_id;
+    string title;
+}
+
+struct setChatDescriptionMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/setChatDescription";
+
+    string chat_id;
+    string description;
+}
+
+struct pinChatMessageMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/pinChatMessage";
+
+    string chat_id;
+    uint   message_id;
+    bool   disable_notification;
+}
+
+struct unpinChatMessageMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/unpinChatMessage";
+
+    string chat_id;
+}
+
+struct leaveChatMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/leaveChat";
+
+    string chat_id;
+}
+
+struct getChatMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getChat";
+
+    string chat_id;
+}
+
+struct getChatAdministratorsMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getChatAdministrators";
+
+    string chat_id;
+}
+
+struct getChatMembersCountMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getChatMembersCount";
+
+    string chat_id;
+}
+
+struct getChatMemberMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getChatMember";
+
+    string chat_id;
+    uint   user_id;
+}
+
+struct setChatStickerSetMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/setChatStickerSet";
+
+    string chat_id;
+    string sticker_set_name;
+}
+
+struct deleteChatStickerSetMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/deleteChatStickerSet";
+
+    string chat_id;
+}
+
+struct answerCallbackQueryMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/answerCallbackQuery";
+
+    string callback_query_id;
+    string text;
+    bool   show_alert;
+    string url;
+    uint   cache_time;
 }
 
 /******************************************************************/
@@ -1046,29 +1500,34 @@ class BotApi
 
             logDiagnostic("[%d] Requesting %s", requestCounter, method.name);
 
-            requestHTTP(apiUrl ~ method.name,
-                (scope req) {
-                    req.method = method.httpMethod;
-                    if (method.httpMethod == HTTPMethod.POST) {
-                        logDebugV("[%d] Sending body:\n  %s", requestCounter, method.serializeToJsonString());
-                        req.headers["Content-Type"] = "application/json";
-                        req.writeBody( cast(const(ubyte[])) serializeToJsonString(method) );
+            version(unittest)
+            {
+
+            } else {
+                requestHTTP(apiUrl ~ method.name,
+                    (scope req) {
+                        req.method = method.httpMethod;
+                        if (method.httpMethod == HTTPMethod.POST) {
+                            logDebugV("[%d] Sending body:\n  %s", requestCounter, method.serializeToJsonString());
+                            req.headers["Content-Type"] = "application/json";
+                            req.writeBody( cast(const(ubyte[])) serializeToJsonString(method) );
+                        }
+                    },
+                    (scope res) {
+                        string answer = res.bodyReader.readAllUTF8(true);
+                        logDebug("[%d] Response headers:\n  %s\n  %s", requestCounter, res, res.headers);
+                        logDiagnostic("[%d] Response body:\n  %s", requestCounter, answer);
+
+                        auto json = answer.deserialize!(MethodResult!T);
+
+                        enforce(json.ok == true, new TelegramBotApiException(json.error_code, json.description));
+
+                        result = json.result;
+
+                        requestCounter++;
                     }
-                },
-                (scope res) {
-                    string answer = res.bodyReader.readAllUTF8(true);
-                    logDebug("[%d] Response headers:\n  %s\n  %s", requestCounter, res, res.headers);
-                    logDiagnostic("[%d] Response body:\n  %s", requestCounter, answer);
-
-                    auto json = answer.deserialize!(MethodResult!T);
-
-                    enforce(json.ok == true, new TelegramBotApiException(json.error_code, json.description));
-
-                    result = json.result;
-
-                    requestCounter++;
-                }
-            );
+                );
+            }
 
             return result;
         }
@@ -1139,5 +1598,212 @@ class BotApi
         Message forwardMessage(ref ForwardMessageMethod m)
         {
             return callMethod!(Message, ForwardMessageMethod)(m);
+        }
+
+        Message sendPhoto(ref SendPhotoMethod m)
+        {
+            return callMethod!(Message, SendPhotoMethod)(m);
+        }
+
+        Message sendPhoto(T1)(T1 chatId, string photo)
+            if (isTelegramId!T1)
+        {
+            SendPhotoMethod m = {
+                photo : photo
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendPhoto(m);
+        }
+
+        Message sendAudio(ref SendAudioMethod m)
+        {
+            return callMethod!(Message, SendAudioMethod)(m);
+        }
+
+        Message sendAudio(T1)(T1 chatId, string audio)
+            if (isTelegramId!T1)
+        {
+            SendAudioMethod m = {
+                audio : audio
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendAudio(m);
+        }
+
+        Message sendDocument(ref SendDocumentMethod m)
+        {
+            return callMethod!(Message, SendDocumentMethod)(m);
+        }
+
+        Message sendDocument(T1)(T1 chatId, string document)
+            if (isTelegramId!T1)
+        {
+            SendDocumentMethod m = {
+                document : document
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendDocument(m);
+        }
+
+        Message sendVideo(ref SendVideoMethod m)
+        {
+            return callMethod!(Message, SendVideoMethod)(m);
+        }
+
+        Message sendVideo(T1)(T1 chatId, string video)
+            if (isTelegramId!T1)
+        {
+            SendVideoMethod m = {
+                video : video
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendVideo(m);
+        }
+
+        Message sendVoice(ref SendVoiceMethod m)
+        {
+            return callMethod!(Message, SendVoiceMethod)(m);
+        }
+
+        Message sendVoice(T1)(T1 chatId, string voice)
+            if (isTelegramId!T1)
+        {
+            SendVoiceMethod m = {
+                voice : voice
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendVoice(m);
+        }
+
+        Message sendVideoNote(ref SendVideoNoteMethod m)
+        {
+            return callMethod!(Message, SendVideoNoteMethod)(m);
+        }
+
+        Message sendVideoNote(T1)(T1 chatId, string videoNote)
+            if (isTelegramId!T1)
+        {
+            SendVideoNoteMethod m = {
+                video_note : videoNote
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendVideoNote(m);
+        }
+
+        Message sendMediaGroup(ref SendMediaGroupMethod m)
+        {
+            return callMethod!(Message, SendMediaGroupMethod)(m);
+        }
+
+        Message sendMediaGroup(T1)(T1 chatId, InputMedia[] media)
+            if (isTelegramId!T1)
+        {
+            SendMediaGroupMethod m = {
+                media : media
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendMediaGroup(m);
+        }
+
+        Message sendLocation(ref SendLocationMethod m)
+        {
+            return callMethod!(Message, SendLocationMethod)(m);
+        }
+
+        Message sendLocation(T1)(T1 chatId, float latitude, float longitude)
+            if (isTelegramId!T1)
+        {
+            SendLocationMethod m = {
+                latitude : latitude,
+                longitude : longitude,
+            };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            return sendLocation(m);
+        }
+
+        // sendVenue
+        // sendContact
+        // sendChatAction
+
+        unittest
+        {
+            class BotApiMock : BotApi
+            {
+                this(string token)
+                {
+                    super(token);
+                }
+
+                T callMethod(T, M)(M method)
+                {
+                    T result;
+
+                    logDiagnostic("[%d] Requesting %s", requestCounter, method.name);
+
+                    return result;
+                }
+            }
+
+            auto api = new BotApiMock(null);
+
+            api.getMe();
+            api.sendMessage("chat-id", "hello");
+            api.forwardMessage("chat-id", "from-chat-id", 123);
+            api.sendPhoto("chat-id", "photo-url");
+            api.sendAudio("chat-id", "audio-url");
+            api.sendDocument("chat-id", "document-url");
+            api.sendVideo("chat-id", "video-url");
+            api.sendVoice("chat-id", "voice-url");
+            api.sendVideoNote("chat-id", "video-note-url");
+            api.sendMediaGroup("chat-id", []);
+            api.sendLocation("chat-id", 123, 123);
         }
 }
