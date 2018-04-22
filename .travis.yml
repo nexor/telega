@@ -1,21 +1,14 @@
-language: d
+sudo: required
 
-dist: trusty
+services:
+  - docker
 
-addons:
-  apt:
-    packages:
-      - pkg-config
-      - zlib1g-dev
-      - libevent-dev
-      - libssl-dev
-
-d:
-  - dmd
-  - ldc
+before_install:
+  - docker build -t nexor/telega .
+  - docker images
 
 script:
-  - dub test
+  - docker run -it --rm nexor/telega
 
 notifications:
   email: false
