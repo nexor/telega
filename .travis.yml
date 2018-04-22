@@ -1,5 +1,15 @@
 language: d
 
+dist: trusty
+
+addons:
+  apt:
+    packages:
+      - pkg-config
+      - zlib1g-dev
+      - libevent-dev
+      - libssl-dev
+
 d:
   - dmd
   - ldc
