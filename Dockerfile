@@ -1,6 +1,6 @@
 FROM debian:buster-slim
 
-RUN apt-get update && apt-get install -y curl libcurl3 build-essential zlib1g-dev libssl-dev \
+RUN apt-get update && apt-get install -y curl dub libcurl3 build-essential zlib1g-dev libssl-dev \
  && curl -fsS -o /tmp/install.sh https://dlang.org/install.sh \
  && bash /tmp/install.sh -p /dlang install dmd \
  && bash /tmp/install.sh -p /dlang install ldc \
