@@ -24,23 +24,14 @@ setChatStickerSet, deleteChatStickerSet, answerCallbackQuery.
 
 ### Types
 
-Update, User, Chat, Message(partially), PhotoSize
-
-**TBD:** Message, MessageEntity, Audio, Document, Video, Voice,
+Update, User, Chat, Message, PhotoSize, MessageEntity, Audio,
+Document, Video, Voice,
 VideoNote, Contact, Location, Venue, UserProfilePhotos, File,
 ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove,
 InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery,
 ForceReply, ChatPhoto, ChatMember, ResponseParameters, InputMedia,
-InputMediaPhoto, InputMediaVideo, InputFile
+InputMediaPhoto, InputMediaVideo, InputFile, ChosenInlineResult
+InlineQuery, all InlineQueryResult* types,
+all InputMessageContent types
 
-**TBD inline types:** InlineQuery, InlineQueryResult, InlineQueryResultArticle,
-InlineQueryResultPhoto, InlineQueryResultGif, InlineQueryResultMpeg4Gif,
-InlineQueryResultVideo, InlineQueryResultAudio, InlineQueryResultVoice,
-InlineQueryResultDocument, InlineQueryResultLocation, InlineQueryResultVenue,
-InlineQueryResultContact, InlineQueryResultGame, InlineQueryResultCachedPhoto,
-InlineQueryResultCachedGif, InlineQueryResultCachedMpeg4Gif,
-InlineQueryResultCachedSticker, InlineQueryResultCachedDocument,
-InlineQueryResultCachedVideo, InlineQueryResultCachedVoice,
-InlineQueryResultCachedAudio, InputMessageContent, InputTextMessageContent,
-InputLocationMessageContent, InputVenueMessageContent, InputContactMessageContent,
-ChosenInlineResult
+**TBD:** Message
