@@ -965,6 +965,35 @@ struct GetUpdatesMethod
     uint  timeout;
 }
 
+struct SetWebhookMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/setWebhook";
+
+    string             url;
+    Nullable!InputFile certificate;
+    uint               max_connections;
+    string[]           allowed_updates;
+}
+
+struct DeleteWebhookMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/deleteWebhook";
+}
+
+struct GetWebhookInfoMethod
+{
+    mixin TelegramMethod;
+
+    package
+    string name = "/getWebhookInfo";
+}
+
 struct GetMeMethod
 {
     mixin TelegramMethod;
@@ -1543,6 +1572,34 @@ class BotApi
             return callMethod!(Update[], GetUpdatesMethod)(m);
         }
 
+        bool setWebhook(string url)
+        {
+            SetWebhookMethod m = {
+                url : url
+            };
+
+            return setWebhook(m);
+        }
+
+        bool setWebhook(ref SetWebhookMethod m)
+        {
+            return callMethod!(bool, SetWebhookMethod)(m);
+        }
+
+        bool deleteWebhook()
+        {
+            DeleteWebhookMethod m = DeleteWebhookMethod();
+
+            return callMethod!(bool, DeleteWebhookMethod)(m);
+        }
+
+        WebhookInfo getWebhookInfo()
+        {
+            GetWebhookInfoMethod m = GetWebhookInfoMethod();
+
+            return callMethod!(WebhookInfo, GetWebhookInfoMethod)(m);
+        }
+
         User getMe()
         {
             GetMeMethod m = {
@@ -1794,6 +1851,10 @@ class BotApi
 
             auto api = new BotApiMock(null);
 
+            api.getUpdates(5,30);
+            api.setWebhook("https://webhook.url");
+            api.deleteWebhook();
+            api.getWebhookInfo();
             api.getMe();
             api.sendMessage("chat-id", "hello");
             api.forwardMessage("chat-id", "from-chat-id", 123);
