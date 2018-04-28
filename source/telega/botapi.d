@@ -32,6 +32,8 @@ struct JsonableAlgebraic(Typelist ...)
 
     private Algebraic!Typelist types;
 
+    // TODO implement copy constructor from Typelist types
+
     void opAssign(T)(T value)
         if (staticIndexOf!(T, Typelist) >= 0)
     {
@@ -98,6 +100,10 @@ unittest
 
     jsonable = S2("s2 value");
     assert(`{"s2":"s2 value"}` == jsonable.serializeToJsonString());
+
+    JsonableAggregate jaggr;
+    jaggr.aggr = jsonable;
+    assert(`{"aggr":{"s2":"s2 value"}}` == jaggr.serializeToJsonString());
 }
 
 /******************************************************************/
@@ -372,7 +378,7 @@ struct KeyboardButton
 
 struct ReplyKeyboardRemove
 {
-    immutable bool remove_keyboard = true;
+    bool remove_keyboard = true;
     bool           selective;
 }
 
@@ -405,8 +411,8 @@ struct CallbackQuery
 
 struct ForceReply
 {
-    const bool     force_reply = true;
-    bool           selective;
+    bool     force_reply = true;
+    bool     selective;
 }
 
 struct ChatPhoto
@@ -529,7 +535,7 @@ mixin template InlineQueryFields()
 
 struct InlineQueryResultArticle
 {
-    immutable string type = "article";
+    string type = "article";
     string id;
     string title;
     string url;
@@ -544,7 +550,7 @@ struct InlineQueryResultArticle
 
 struct InlineQueryResultPhoto
 {
-    immutable string type = "photo";
+    string type = "photo";
     string id;
     string photo_url;
     string thumb_url;
@@ -560,7 +566,7 @@ struct InlineQueryResultPhoto
 
 struct InlineQueryResultGif
 {
-    immutable string type = "gif";
+    string type = "gif";
     string id;
     string gif_url;
     uint gif_width;
@@ -576,7 +582,7 @@ struct InlineQueryResultGif
 
 struct InlineQueryResultMpeg4Gif
 {
-    immutable string type ="mpeg4_gif";
+    string type ="mpeg4_gif";
     string id;
     string mpeg4_url;
     uint mpeg4_width;
@@ -592,7 +598,7 @@ struct InlineQueryResultMpeg4Gif
 
 struct InlineQueryResultVideo
 {
-    immutable string type ="video";
+    string type ="video";
     string id;
     string video_url;
     string mime_type;
@@ -610,7 +616,7 @@ struct InlineQueryResultVideo
 
 struct InlineQueryResultAudio
 {
-    const string type = "audio";
+    string type = "audio";
     string    id;
     string    audio_url;
     string    title;
@@ -624,7 +630,7 @@ struct InlineQueryResultAudio
 
 struct InlineQueryResultVoice
 {
-    const string type = "voice";
+    string type = "voice";
     string    id;
     string    voice_url;
     string    title;
@@ -637,7 +643,7 @@ struct InlineQueryResultVoice
 
 struct InlineQueryResultDocument
 {
-    const string type = "document";
+    string type = "document";
     string    id;
     string    title;
     string    caption;
@@ -654,7 +660,7 @@ struct InlineQueryResultDocument
 
 struct InlineQueryResultLocation
 {
-    const string type = "location";
+    string type = "location";
     string id;
     float latitude;
     float longitude;
@@ -669,7 +675,7 @@ struct InlineQueryResultLocation
 
 struct InlineQueryResultVenue
 {
-    const string type = "venue";
+    string type = "venue";
     string id;
     float latitude;
     float longitude;
@@ -685,7 +691,7 @@ struct InlineQueryResultVenue
 
 struct InlineQueryResultContact
 {
-    const string type = "contact";
+    string type = "contact";
     string id;
     string phone_number;
     string first_name;
@@ -699,7 +705,7 @@ struct InlineQueryResultContact
 
 struct InlineQueryResultGame
 {
-    const string type = "game";
+    string type = "game";
     string id;
     string game_short_name;
     Nullable!InlineKeyboardMarkup reply_markup;
@@ -708,7 +714,7 @@ struct InlineQueryResultGame
 
 struct InlineQueryResultCachedPhoto
 {
-    const string type = "photo";
+    string type = "photo";
     string id;
     string photo_file_id;
     string title;
@@ -721,7 +727,7 @@ struct InlineQueryResultCachedPhoto
 
 struct InlineQueryResultCachedGif
 {
-    const string type = "gif";
+    string type = "gif";
     string id;
     string gif_file_id;
     string title;
@@ -733,7 +739,7 @@ struct InlineQueryResultCachedGif
 
 struct InlineQueryResultCachedMpeg4Gif
 {
-    const string type = "mpeg4_gif";
+    string type = "mpeg4_gif";
     string id;
     string mpeg4_file_id;
     string title;
@@ -745,7 +751,7 @@ struct InlineQueryResultCachedMpeg4Gif
 
 struct InlineQueryResultCachedSticker
 {
-    const string type = "sticker";
+    string type = "sticker";
     string id;
     string sticker_file_id;
 
@@ -754,7 +760,7 @@ struct InlineQueryResultCachedSticker
 
 struct InlineQueryResultCachedDocument
 {
-    const string type = "document";
+    string type = "document";
     string    id;
     string    title;
     string    document_file_id;
@@ -767,7 +773,7 @@ struct InlineQueryResultCachedDocument
 
 struct InlineQueryResultCachedVideo
 {
-    const string type = "video";
+    string type = "video";
     string    id;
     string    video_file_id;
     string    title;
@@ -780,7 +786,7 @@ struct InlineQueryResultCachedVideo
 
 struct InlineQueryResultCachedVoice
 {
-    const string type = "voice";
+    string type = "voice";
     string    id;
     string    voice_file_id;
     string    title;
@@ -793,7 +799,7 @@ struct InlineQueryResultCachedVoice
 
 struct InlineQueryResultCachedAudio
 {
-    const string type = "audio";
+    string type = "audio";
     string    id;
     string    audio_file_id;
     string    caption;
@@ -1481,6 +1487,19 @@ struct DeleteStickerFromSetMethod
     string sticker;
 }
 
+struct AnswerInlineQueryMethod
+{
+    mixin TelegramMethod!"/answerInlineQuery";
+
+    string              inline_query_id;
+    InlineQueryResult[] results;
+    uint                cache_time;
+    bool                is_personal;
+    string              next_offset;
+    string              switch_pm_text;
+    string              switch_pm_parameter;
+}
+
 /******************************************************************/
 /*                          Telegram API                          */
 /******************************************************************/
@@ -1530,7 +1549,8 @@ class BotApi
 
             version(unittest)
             {
-                serializeToJsonString(method);
+                import std.stdio;
+                serializeToJsonString(method).writeln();
             } else {
                 requestHTTP(apiUrl ~ method._path,
                     (scope req) {
@@ -2593,6 +2613,21 @@ class BotApi
             return setStickerPositionInSet(m);
         }
 
+        bool answerInlineQuery(ref AnswerInlineQueryMethod m)
+        {
+            return callMethod!bool(m);
+        }
+
+        bool answerInlineQuery(string inlineQueryId, InlineQueryResult[] results)
+        {
+            AnswerInlineQueryMethod m = {
+                inline_query_id : inlineQueryId,
+                results : results
+            };
+
+            return answerInlineQuery(m);
+        }
+
         unittest
         {
             class BotApiMock : BotApi
@@ -2664,9 +2699,11 @@ class BotApi
             api.editMessageCaption("inline-message-id", "new caption");
             api.editMessageCaption("inline-message-id", null);
 
-            // TODO
-            //api.editMessageReplyMarkup("chat-id", 123, ForceReply());
-            //api.editMessageReplyMarkup("chat-id", 123, ReplyMarkup());
+            api.editMessageReplyMarkup("chat-id", 123, ForceReply());
+            api.editMessageReplyMarkup("chat-id", 123, ReplyKeyboardMarkup());
+            api.editMessageReplyMarkup("chat-id", 123, ReplyKeyboardRemove());
+            api.editMessageReplyMarkup("chat-id", 123, InlineKeyboardMarkup());
+            api.editMessageReplyMarkup("chat-id", 123, ReplyMarkup());
 
             api.deleteMessage("chat-id", 123);
             api.sendSticker("chat-id", "sticker");
@@ -2676,5 +2713,30 @@ class BotApi
             api.addStickerToSet(1, "name", "png-sticker", "emojis");
             api.setStickerPositionInSet("sticker", 42);
             api.deleteStickerFromSet("sticker");
+
+            InlineQueryResult[] iqr = new InlineQueryResult[20];
+
+            iqr[0] = InlineQueryResultArticle();
+            iqr[1] = InlineQueryResultPhoto();
+            iqr[2] = InlineQueryResultGif();
+            iqr[3] = InlineQueryResultMpeg4Gif();
+            iqr[4] = InlineQueryResultVideo();
+            iqr[5] = InlineQueryResultAudio();
+            iqr[6] = InlineQueryResultVoice();
+            iqr[7] = InlineQueryResultDocument();
+            iqr[8] = InlineQueryResultLocation();
+            iqr[9] = InlineQueryResultVenue();
+            iqr[10] = InlineQueryResultContact();
+            iqr[11] = InlineQueryResultGame();
+            iqr[12] = InlineQueryResultCachedPhoto();
+            iqr[13] = InlineQueryResultCachedGif();
+            iqr[14] = InlineQueryResultCachedMpeg4Gif();
+            iqr[15] = InlineQueryResultCachedSticker();
+            iqr[16] = InlineQueryResultCachedDocument();
+            iqr[17] = InlineQueryResultCachedVideo();
+            iqr[18] = InlineQueryResultCachedVoice();
+            iqr[19] = InlineQueryResultCachedAudio();
+
+            api.answerInlineQuery("answer-inline-query", iqr);
         }
 }
