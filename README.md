@@ -16,11 +16,9 @@ setChatPhoto, deleteChatPhoto, setChatTitle, setChatDescription,
 pinChatMessage, unpinChatMessage, leaveChat, getChat,
 getChatAdministrators, getChatMembersCount, getChatMember,
 setChatStickerSet, deleteChatStickerSet, answerCallbackQuery,
-editMessageText, editMessageCaption, deleteMessage, sendSticker
-getStickerSet, uploadStickerFile, createNewStickerSet, addStickerToSet
-setStickerPositionInSet, deleteStickerFromSet
-
-**TBD:** editMessageReplyMarkup
+editMessageText, editMessageCaption, editMessageReplyMarkup,
+deleteMessage, sendSticker, getStickerSet, uploadStickerFile,
+createNewStickerSet, addStickerToSet, setStickerPositionInSet, deleteStickerFromSet
 
 **TBD additional:** sending files, inline mode, payments, games, webhook mode
 
@@ -33,6 +31,5 @@ ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove,
 InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery,
 ForceReply, ChatPhoto, ChatMember, ResponseParameters, InputMedia,
 InputMediaPhoto, InputMediaVideo, InputFile, ChosenInlineResult
-Sticker, StickerSet, MaskPosition
-InlineQuery, all InlineQueryResult* types,
-all InputMessageContent types
+Sticker, StickerSet, MaskPosition InlineQuery,
+all InlineQueryResult* types, all InputMessageContent types
