@@ -14,3 +14,7 @@ configuration "default" {
 
     targetType "library"
 }
+
+configuration "unittest" {
+    versions "VibeNoSSL"
+}
