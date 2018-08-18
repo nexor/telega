@@ -138,7 +138,7 @@ struct Chat
 	string username;
 }
 
-struct MessageBase
+struct Message
 {
     uint                 message_id;
     uint                 date;
@@ -163,6 +163,8 @@ struct MessageBase
     Nullable!Video           video;
     Nullable!Voice           voice;
     Nullable!VideoNote       video_note;
+    // TODO Nullable!Message reply_to_message;
+    // TODO Nullable!Message pinned_message;
     string              caption;
     Nullable!Contact         contact;
     Nullable!Location        location;
@@ -188,15 +190,6 @@ struct MessageBase
     }
 }
 
-struct Message
-{
-    MessageBase          baseMessage;
-    Nullable!MessageBase reply_to_message;
-    Nullable!MessageBase pinned_message;
-
-    alias baseMessage this;
-}
-
 struct Update
 {
     uint             update_id;
@@ -216,6 +209,23 @@ struct Update
     {
         return update_id;
     }
+}
+
+unittest
+{
+    string json = `{
+        "update_id": 143,
+        "message": {
+            "message_id": 243,
+            "text": "message text"
+        }
+    }`;
+
+    Update u = deserialize!Update(json);
+
+    assert(u.id == 143);
+    assert(u.message.message_id == 243);
+    assert(u.message.text == "message text");
 }
 
 struct WebhookInfo
