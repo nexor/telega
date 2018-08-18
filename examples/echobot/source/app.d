@@ -11,6 +11,8 @@ int main(string[] args)
         botToken = args[1];
     }
 
+    setLogLevel(LogLevel.diagnostic);
+
     runTask(&listenUpdates);
 
     return runApplication();
