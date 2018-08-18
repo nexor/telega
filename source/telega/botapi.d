@@ -1504,10 +1504,12 @@ struct AnswerInlineQueryMethod
 /*                          Telegram API                          */
 /******************************************************************/
 
+enum BaseApiUrl = "https://api.telegram.org/bot";
+
 class BotApi
 {
     private:
-        string baseUrl = "https://api.telegram.org/bot";
+        string baseUrl;
         string apiUrl;
 
         ulong requestCounter = 1;
@@ -1522,8 +1524,9 @@ class BotApi
         }
 
     public:
-        this(string token)
+        this(string token, string baseUrl = BaseApiUrl)
         {
+            this.baseUrl = baseUrl;
             this.apiUrl = baseUrl ~ token;
         }
 
