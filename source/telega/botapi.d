@@ -44,7 +44,7 @@ struct JsonableAlgebraic(Typelist ...)
     Json toJson() const
     {
         if (!types.hasValue) {
-            return Json(null);
+            return Json.emptyObject;
         }
 
         return getJson();
