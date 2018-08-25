@@ -2619,11 +2619,11 @@ class BotApi
 
         bool deleteStickerFromSet(string sticker)
         {
-            SetStickerPositionInSetMethod m = {
+            DeleteStickerFromSetMethod m = {
                 sticker : sticker
             };
 
-            return setStickerPositionInSet(m);
+            return deleteStickerFromSet(m);
         }
 
         bool answerInlineQuery(ref AnswerInlineQueryMethod m)
