@@ -19,6 +19,7 @@ int main(string[] args)
 void listenUpdates()
 {
     import telega.botapi;
+    import telega.methods : getUpdates, sendMessage;
 
     try {
         auto api = new BotApi(botToken);

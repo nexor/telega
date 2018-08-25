@@ -2,6 +2,7 @@ module telega.methods;
 
 import std.traits;
 import std.typecons;
+import std.conv : to;
 import vibe.http.client : HTTPMethod;
 import telega.botapi;
 
@@ -1611,6 +1612,7 @@ unittest
     api.getWebhookInfo();
     api.getMe();
     api.sendMessage("chat-id", "hello");
+    api.sendMessage(42, "hello");
     api.forwardMessage("chat-id", "from-chat-id", 123);
     api.sendPhoto("chat-id", "photo-url");
     api.sendAudio("chat-id", "audio-url");
