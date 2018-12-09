@@ -18,7 +18,8 @@ configuration "default" {
 }
 
 configuration "requests-driver" {
-    dependency "requests" version="~>1.0.4"
+    dependency "requests" version="~>1.0.4" # path="./dlang-requests"
+    dependency "socks-client" version="~>0.0.1" # path="./socks-client"
 
     versions "TelegaRequestsDriver"
     versions "VibeUseOpenSSL11"
