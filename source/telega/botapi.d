@@ -1,7 +1,6 @@
 module telega.botapi;
 
-import vibe.http.client;
-import vibe.stream.operations;
+import vibe.http.client : HTTPMethod;
 import vibe.core.core;
 import vibe.core.log;
 import asdf;
@@ -9,6 +8,7 @@ import std.conv;
 import std.typecons;
 import std.exception;
 import std.traits;
+import telega.http;
 
 class TelegramBotApiException : Exception
 {
@@ -1533,11 +1533,29 @@ class BotApi
             string description;
         }
 
+    protected:
+        HttpClient httpClient;
+
     public:
-        this(string token, string baseUrl = BaseApiUrl)
+        this(string token, string baseUrl = BaseApiUrl, HttpClient httpClient = null)
         {
             this.baseUrl = baseUrl;
             this.apiUrl = baseUrl ~ token;
+
+            if (httpClient is null) {
+                version(TelegaVibedDriver) {
+                    import telega.drivers.vibe;
+
+                    httpClient = new VibedHttpClient();
+                } else version(TelegaRequestsDriver) {
+                    import telega.drivers.requests;
+
+                    httpClient = new RequestsHttpClient();
+                } else {
+                    assert(false, `No HTTP client is set, maybe you should enable "default" configuration?`);
+                }
+            }
+            this.httpClient = httpClient;
         }
 
         void updateProcessed(int updateId)
@@ -1565,29 +1583,23 @@ class BotApi
                 import std.stdio;
                 serializeToJsonString(method).writeln();
             } else {
-                requestHTTP(apiUrl ~ method._path,
-                    (scope req) {
-                        req.method = method._httpMethod;
-                        if (method._httpMethod == HTTPMethod.POST) {
-                            logDebugV("[%d] Sending body:\n  %s", requestCounter, method.serializeToJsonString());
-                            req.headers["Content-Type"] = "application/json";
-                            req.writeBody( cast(const(ubyte[])) serializeToJsonString(method) );
-                        }
-                    },
-                    (scope res) {
-                        string answer = res.bodyReader.readAllUTF8(true);
-                        logDebug("[%d] Response headers:\n  %s\n  %s", requestCounter, res, res.headers);
-                        logDiagnostic("[%d] Response body:\n  %s", requestCounter, answer);
+                string answer;
 
-                        auto json = answer.deserialize!(MethodResult!T);
+                if (method._httpMethod == HTTPMethod.POST) {
+                    string bodyJson = serializeToJsonString(method);
+                    logDebugV("[%d] Sending body:\n  %s", requestCounter, bodyJson);
 
-                        enforce(json.ok == true, new TelegramBotApiException(json.error_code, json.description));
+                    answer = httpClient.sendPostRequestJson(apiUrl ~ method._path, bodyJson);
+                } else {
+                    answer = httpClient.sendGetRequest(apiUrl ~ method._path);
+                }
 
-                        result = json.result;
+                auto json = answer.deserialize!(MethodResult!T);
 
-                        requestCounter++;
-                    }
-                );
+                enforce(json.ok == true, new TelegramBotApiException(json.error_code, json.description));
+
+                result = json.result;
+                requestCounter++;
             }
 
             return result;

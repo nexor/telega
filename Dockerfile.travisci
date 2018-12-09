@@ -1,17 +1,14 @@
 FROM debian:buster-slim
 
-RUN apt-get update && apt-get install -y curl dub libcurl4 build-essential zlib1g-dev libssl-dev \
- && curl -fsS -o /tmp/install.sh https://dlang.org/install.sh \
- && apt-get install -y gcc cmake
+RUN apt-get update && apt-get install -y curl zlib1g-dev libssl-dev
+RUN curl -fsS -o /etc/apt/sources.list.d/d-apt.list http://master.dl.sourceforge.net/project/d-apt/files/d-apt.list
+RUN apt-get update --allow-insecure-repositories && apt-get -y --allow-unauthenticated install --reinstall d-apt-keyring
+
+RUN apt-get update && apt-get -y --allow-unauthenticated install dmd-compiler ldc dub
+
 
 WORKDIR /src
 
 COPY . .
 
-RUN bash /tmp/install.sh -p /dlang install ldc
-RUN dub build --compiler=ldc2
-
-#RUN bash /tmp/install.sh -p /dlang install dmd
-#RUN dub build
-
-CMD ["dub", "test"]
+RUN dub upgrade

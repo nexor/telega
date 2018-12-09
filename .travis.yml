@@ -1,5 +1,12 @@
 sudo: required
 
+env:
+  - COMPILER=dmd   CONFIG=default
+  - COMPILER=dmd   CONFIG=requests-driver
+
+  - COMPILER=ldc2  CONFIG=default
+  - COMPILER=ldc2  CONFIG=requests-driver
+
 services:
   - docker
 
@@ -8,7 +15,9 @@ before_install:
   - docker images
 
 script:
-  - docker run -it --rm nexor/telega
+  - docker run -it --rm nexor/telega $COMPILER --version
+  - docker run -it --rm nexor/telega dub test --config=$CONFIG --compiler=$COMPILER
+  - docker run -it --rm nexor/telega dub build -b release --config=$CONFIG --compiler=$COMPILER
 
 notifications:
   email: false
