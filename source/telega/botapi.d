@@ -131,7 +131,7 @@ enum ChatType : string
 struct Chat
 {
 	long            id;
-	string          type;
+	ChatType        type;
     string title;
     string first_name;
 	string last_name;
@@ -466,7 +466,7 @@ struct InputMediaPhoto
     string type;
     string media;
     string caption;
-    string parse_mode;
+    ParseMode parse_mode;
 }
 
 struct InputMediaVideo
@@ -474,7 +474,7 @@ struct InputMediaVideo
     string type;
     string media;
     string caption;
-    string parse_mode;
+    ParseMode parse_mode;
     uint   width;
     uint   height;
     uint   duration;
@@ -827,7 +827,7 @@ alias InputMessageContent = JsonableAlgebraic!InputMessageContentStructs;
 struct InputTextMessageContent
 {
     string message_text;
-    string parse_mode;
+    ParseMode parse_mode;
     bool   disable_web_page_preview;
 }
 
