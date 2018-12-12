@@ -1540,7 +1540,7 @@ class BotApi
         this(string token, string baseUrl = BaseApiUrl, HttpClient httpClient = null)
         {
             this.baseUrl = baseUrl;
-            this.apiUrl = baseUrl ~ token;
+            this.apiUrl = baseUrl ~ '/' ~ token;
 
             if (httpClient is null) {
                 version(TelegaVibedDriver) {
