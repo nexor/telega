@@ -120,6 +120,7 @@ struct User
     string language_code;
 }
 
+@serializedAs!ChatTypeProxy
 enum ChatType : string
 {
     Private    = "private",
@@ -128,14 +129,48 @@ enum ChatType : string
     Channel    = "channel"
 }
 
+struct ChatTypeProxy
+{
+    ChatType t;
+
+    this(ChatType type)
+    {
+        t = type;
+    }
+
+    ChatType opCast(T : ChatType)()
+    {
+        return t;
+    }
+
+    static ChatTypeProxy deserialize(Asdf v)
+    {
+        return ChatTypeProxy(ChatType.Private);
+    }
+}
+
 struct Chat
 {
-	long            id;
-	ChatType        type;
+    long id;
+    ChatType type;
     string title;
     string first_name;
 	string last_name;
 	string username;
+}
+
+unittest
+{
+    string json = `{
+        "id": 42,
+        "type": "private",
+        "title": "chat title"
+    }`;
+
+    Chat c = deserialize!Chat(json);
+
+    assert(c.id == 42);
+    assert(c.type == ChatType.Private);
 }
 
 struct Message
