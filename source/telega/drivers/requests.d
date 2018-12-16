@@ -99,9 +99,6 @@ class RequestsHttpClient: HttpClient
             };
 
             Socks5 proxy = Socks5(connector, reader, writer);
-            if (!proxy.connect(options, host, port))
-            {
-                // TODO throw error?
-            }
+            proxy.connect(options, host, port);
         }
 }
