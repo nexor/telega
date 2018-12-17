@@ -9,6 +9,7 @@ import std.typecons;
 import std.exception;
 import std.traits;
 import telega.http;
+import telega.updates;
 
 class TelegramBotApiException : Exception
 {
@@ -1022,7 +1023,7 @@ struct GetUpdatesMethod
 {
     mixin TelegramMethod!"/getUpdates";
 
-    int   offset;
+    long   offset;
     ubyte limit;
     uint  timeout;
 }
@@ -1557,8 +1558,10 @@ class BotApi
         string baseUrl;
         string apiUrl;
 
+        void delegate(long) saveProcessedMessageId;
+
         ulong requestCounter = 1;
-        uint maxUpdateId = 1;
+        long maxUpdateId = 0;
 
         struct MethodResult(T)
         {
@@ -1571,11 +1574,16 @@ class BotApi
     protected:
         HttpClient httpClient;
 
+    package:
+        bool updatesProcessingInProgress; /// to prevent multiple Updates objects
+
     public:
-        this(string token, string baseUrl = BaseApiUrl, HttpClient httpClient = null)
+        this(string token, long latestMessageId, void delegate(long) saveProcessedMessageId, HttpClient httpClient = null, string baseUrl = BaseApiUrl)
         {
             this.baseUrl = baseUrl;
             this.apiUrl = baseUrl ~ token;
+            maxUpdateId = latestMessageId;
+            this.saveProcessedMessageId = saveProcessedMessageId;
 
             if (httpClient is null) {
                 version(TelegaVibedDriver) {
@@ -1593,14 +1601,16 @@ class BotApi
             this.httpClient = httpClient;
         }
 
-        void updateProcessed(int updateId)
+        package void updateProcessed(int updateId)
         {
-            if (updateId >= maxUpdateId) {
-                maxUpdateId = updateId + 1;
-            }
+            assert(updateId > maxUpdateId);
+
+            maxUpdateId = updateId;
+
+            saveProcessedMessageId(maxUpdateId);
         }
 
-        void updateProcessed(ref Update update)
+        package void updateProcessed(ref Update update)
         {
             updateProcessed(update.id);
         }
@@ -1640,15 +1650,21 @@ class BotApi
             return result;
         }
 
-        Update[] getUpdates(ubyte limit = 5, uint timeout = 30)
+        Updates getUpdates(ubyte limit = 5, uint timeout = 30)
         {
+            enforce(!updatesProcessingInProgress, "Previous Updates object still not processed properly");
+
             GetUpdatesMethod m = {
-                offset:  maxUpdateId,
+                offset:  maxUpdateId + 1,
                 limit:   limit,
                 timeout: timeout,
             };
 
-            return callMethod!(Update[], GetUpdatesMethod)(m);
+            auto arr = callMethod!(Update[], GetUpdatesMethod)(m);
+
+            updatesProcessingInProgress = true;
+
+            return new Updates(arr, this);
         }
 
         bool setWebhook(string url)
@@ -2690,11 +2706,18 @@ class BotApi
 
         unittest
         {
+            void saveProcessedMsgId(long msgId)
+            {
+                static long currId;
+
+                currId = msgId;
+            }
+
             class BotApiMock : BotApi
             {
                 this(string token)
                 {
-                    super(token);
+                    super(token, 0, &saveProcessedMsgId);
                 }
 
                 T callMethod(T, M)(M method)
