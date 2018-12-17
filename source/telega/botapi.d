@@ -1610,7 +1610,6 @@ class BotApi
             saveProcessedMessageId(maxUpdateId);
         }
 
-        //TODO: mark as package
         package void updateProcessed(ref Update update)
         {
             updateProcessed(update.id);
