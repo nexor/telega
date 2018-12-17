@@ -13,9 +13,10 @@
 		"mir-linux-kernel": "1.0.1",
 		"openssl": "1.1.6+1.0.1g",
 		"requests": "1.0.4+commit.2.g71937a2",
-		"socks-client": "0.0.2",
+		"socks-client": "0.0.1",
 		"stdx-allocator": "2.77.4",
 		"taggedalgebraic": "0.10.12",
+		"telega": {"path":"../../"},
 		"vibe-core": "1.4.5",
 		"vibe-d": "0.8.4"
 	}

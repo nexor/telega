@@ -8,7 +8,6 @@ dependency "vibe-d:http" version="~>0.8.3"
 dependency "vibe-d:data" version="~>0.8.3"
 dependency "asdf" version="~>0.4.0"
 
-
 configuration "default" {
     versions   "VibeDisableCommandLineParsing"
     versions   "VibeUseOpenSSL11"
@@ -19,6 +18,7 @@ configuration "default" {
 
 configuration "requests-driver" {
     dependency "requests" version="~>1.0.4"
+    dependency "socks-client" version="~>0.0.2"
 
     versions "TelegaRequestsDriver"
     versions "VibeUseOpenSSL11"
