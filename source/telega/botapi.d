@@ -9,6 +9,7 @@ import std.typecons;
 import std.exception;
 import std.traits;
 import telega.http;
+import telega.updates;
 
 class TelegramBotApiException : Exception
 {
@@ -1645,15 +1646,21 @@ class BotApi
             return result;
         }
 
-        Update[] getUpdates(ubyte limit = 5, uint timeout = 30)
+        Updates getUpdates(ubyte limit = 5, uint timeout = 30)
         {
+            enforce(!inUse, "Previous Updates object still not processed properly");
+
             GetUpdatesMethod m = {
                 offset:  maxUpdateId,
                 limit:   limit,
                 timeout: timeout,
             };
 
-            return callMethod!(Update[], GetUpdatesMethod)(m);
+            auto arr = callMethod!(Update[], GetUpdatesMethod)(m);
+
+            inUse = true;
+
+            return new Updates(arr, this);
         }
 
         bool setWebhook(string url)
