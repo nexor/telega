@@ -19,7 +19,7 @@ class Updates : InputRange!Update
 
     ~this()
     {
-        botConn.inUse = false;
+        botConn.updatesProcessingInProgress = false;
     }
 
     Update front() @property

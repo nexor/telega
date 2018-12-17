@@ -1575,7 +1575,7 @@ class BotApi
         HttpClient httpClient;
 
     package:
-        bool inUse; /// to prevent multiple Updates objects
+        bool updatesProcessingInProgress; /// to prevent multiple Updates objects
 
     public:
         this(string token, long latestMessageId, void delegate(long) saveProcessedMessageId, HttpClient httpClient = null, string baseUrl = BaseApiUrl)
@@ -1654,7 +1654,7 @@ class BotApi
 
         Updates getUpdates(ubyte limit = 5, uint timeout = 30)
         {
-            enforce(!inUse, "Previous Updates object still not processed properly");
+            enforce(!updatesProcessingInProgress, "Previous Updates object still not processed properly");
 
             GetUpdatesMethod m = {
                 offset:  maxUpdateId,
@@ -1664,7 +1664,7 @@ class BotApi
 
             auto arr = callMethod!(Update[], GetUpdatesMethod)(m);
 
-            inUse = true;
+            updatesProcessingInProgress = true;
 
             return new Updates(arr, this);
         }
