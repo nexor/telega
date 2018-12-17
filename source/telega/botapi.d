@@ -394,6 +394,9 @@ alias ReplyMarkup = JsonableAlgebraic!ReplyMarkupStructs;
 enum isReplyMarkup(T) =
     is(T == ReplyMarkup) || staticIndexOf!(T, ReplyMarkupStructs) >= 0;
 
+import std.algorithm.iteration;
+import std.array;
+
 struct ReplyKeyboardMarkup
 {
     KeyboardButton[][] keyboard;
@@ -403,22 +406,26 @@ struct ReplyKeyboardMarkup
 
     this (string[][] keyboard)
     {
-        foreach (ref row; keyboard) {
-            KeyboardButton[] buttonRow;
+        this.keyboard = keyboard.map!toKeyboardButtonRow.array;
+    }
 
-            foreach (ref item; row) {
-                buttonRow ~= KeyboardButton(item);
-            }
-            this.keyboard ~= buttonRow;
-        }
+    void opOpAssign(string op : "~")(KeyboardButton[] buttons)
+    {
+        keyboard ~= buttons;
     }
 }
 
 struct KeyboardButton
 {
     string text;
+
     bool   request_contact;
     bool   request_location;
+}
+
+KeyboardButton[] toKeyboardButtonRow(string[] row)
+{
+    return row.map!(b => KeyboardButton(b)).array;
 }
 
 struct ReplyKeyboardRemove
