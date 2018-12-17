@@ -1571,6 +1571,9 @@ class BotApi
     protected:
         HttpClient httpClient;
 
+    package:
+        bool inUse; /// to prevent multiple Updates objects
+
     public:
         this(string token, string baseUrl = BaseApiUrl, HttpClient httpClient = null)
         {
@@ -1593,6 +1596,7 @@ class BotApi
             this.httpClient = httpClient;
         }
 
+        //TODO: mark as package
         void updateProcessed(int updateId)
         {
             if (updateId >= maxUpdateId) {
@@ -1600,6 +1604,7 @@ class BotApi
             }
         }
 
+        //TODO: mark as package
         void updateProcessed(ref Update update)
         {
             updateProcessed(update.id);

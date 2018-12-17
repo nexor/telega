@@ -8,24 +8,35 @@ import std.range.interfaces;
 class Updates : InputRange!Update
 {
     private BotApi botConn;
-    private alias UpdatesRange = InputRangeObject!(Update[]);
-    private UpdatesRange incoming;
+    private Update[] incoming;
+    private size_t index;
 
     package this(Update[] upd, BotApi conn)
     {
-        incoming = inputRangeObject(upd);
+        incoming = upd;
         botConn = conn;
+    }
+
+    ~this()
+    {
+        botConn.inUse = false;
     }
 
     Update front() @property
     {
-        return incoming.front;
+        return incoming[index];
     }
 
-    bool empty() @property { return incoming.empty; }
-    void popFront() { incoming.popFront; }
+    bool empty() @property { return index >= incoming.length; }
+    void popFront() { index++; }
 
     int opApply(scope int delegate(Update)){ assert(false, "Not implemented"); }
     int opApply(scope int delegate(size_t, Update)){ assert(false, "Not implemented"); }
     Update moveFront() { assert(false, "Not implemented"); }
+
+    ///
+    void markLatestUpdateAsProcessed()
+    {
+        botConn.updateProcessed(front.id);
+    }
 }
