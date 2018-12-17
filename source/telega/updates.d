@@ -28,15 +28,13 @@ class Updates : InputRange!Update
     }
 
     bool empty() @property { return index >= incoming.length; }
-    void popFront() { index++; }
+    void popFront()
+    {
+        botConn.updateProcessed(front.id);
+        index++;
+    }
 
     int opApply(scope int delegate(Update)){ assert(false, "Not implemented"); }
     int opApply(scope int delegate(size_t, Update)){ assert(false, "Not implemented"); }
     Update moveFront() { assert(false, "Not implemented"); }
-
-    ///
-    void markLatestUpdateAsProcessed()
-    {
-        botConn.updateProcessed(front.id);
-    }
 }
