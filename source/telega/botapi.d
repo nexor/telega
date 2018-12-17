@@ -1561,7 +1561,7 @@ class BotApi
         void delegate(long) saveProcessedMessageId;
 
         ulong requestCounter = 1;
-        long maxUpdateId = 1;
+        long maxUpdateId = 0;
 
         struct MethodResult(T)
         {
