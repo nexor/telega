@@ -1023,7 +1023,7 @@ struct GetUpdatesMethod
 {
     mixin TelegramMethod!"/getUpdates";
 
-    int   offset;
+    long   offset;
     ubyte limit;
     uint  timeout;
 }
@@ -1558,8 +1558,10 @@ class BotApi
         string baseUrl;
         string apiUrl;
 
+        void delegate(long) saveProcessedMessageId;
+
         ulong requestCounter = 1;
-        uint maxUpdateId = 1;
+        long maxUpdateId = 1;
 
         struct MethodResult(T)
         {
@@ -1576,10 +1578,12 @@ class BotApi
         bool inUse; /// to prevent multiple Updates objects
 
     public:
-        this(string token, string baseUrl = BaseApiUrl, HttpClient httpClient = null)
+        this(string token, long latestMessageId, void delegate(long) saveProcessedMessageId, HttpClient httpClient = null, string baseUrl = BaseApiUrl)
         {
             this.baseUrl = baseUrl;
             this.apiUrl = baseUrl ~ token;
+            maxUpdateId = latestMessageId;
+            saveProcessedMessageId = saveProcessedMessageId;
 
             if (httpClient is null) {
                 version(TelegaVibedDriver) {
@@ -1600,9 +1604,11 @@ class BotApi
         //TODO: mark as package
         void updateProcessed(int updateId)
         {
-            if (updateId >= maxUpdateId) {
-                maxUpdateId = updateId + 1;
-            }
+            assert(updateId < maxUpdateId);
+
+            maxUpdateId = updateId + 1;
+
+            saveProcessedMessageId(maxUpdateId);
         }
 
         //TODO: mark as package
@@ -2702,11 +2708,18 @@ class BotApi
 
         unittest
         {
+            void saveProcessedMsgId(long msgId)
+            {
+                static long currId;
+
+                currId = msgId;
+            }
+
             class BotApiMock : BotApi
             {
                 this(string token)
                 {
-                    super(token);
+                    super(token, 1, &saveProcessedMsgId);
                 }
 
                 T callMethod(T, M)(M method)
