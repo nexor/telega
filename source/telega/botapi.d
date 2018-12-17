@@ -1604,7 +1604,7 @@ class BotApi
         //TODO: mark as package
         void updateProcessed(int updateId)
         {
-            assert(updateId < maxUpdateId);
+            assert(updateId > maxUpdateId);
 
             maxUpdateId = updateId + 1;
 
