@@ -1,0 +1,6 @@
+name "keyboard"
+description "Keyboard usage example"
+
+dependency "telega" version="~master" path="../../"
+
+subConfiguration "telega" "requests-driver"
