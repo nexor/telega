@@ -2717,7 +2717,7 @@ class BotApi
             {
                 this(string token)
                 {
-                    super(token, 1, &saveProcessedMsgId);
+                    super(token, 0, &saveProcessedMsgId);
                 }
 
                 T callMethod(T, M)(M method)
