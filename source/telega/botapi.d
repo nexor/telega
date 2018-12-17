@@ -1601,8 +1601,7 @@ class BotApi
             this.httpClient = httpClient;
         }
 
-        //TODO: mark as package
-        void updateProcessed(int updateId)
+        package void updateProcessed(int updateId)
         {
             assert(updateId > maxUpdateId);
 
@@ -1612,7 +1611,7 @@ class BotApi
         }
 
         //TODO: mark as package
-        void updateProcessed(ref Update update)
+        package void updateProcessed(ref Update update)
         {
             updateProcessed(update.id);
         }
