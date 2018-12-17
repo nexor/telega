@@ -1583,7 +1583,7 @@ class BotApi
             this.baseUrl = baseUrl;
             this.apiUrl = baseUrl ~ token;
             maxUpdateId = latestMessageId;
-            saveProcessedMessageId = saveProcessedMessageId;
+            this.saveProcessedMessageId = saveProcessedMessageId;
 
             if (httpClient is null) {
                 version(TelegaVibedDriver) {
@@ -1605,7 +1605,7 @@ class BotApi
         {
             assert(updateId > maxUpdateId);
 
-            maxUpdateId = updateId + 1;
+            maxUpdateId = updateId;
 
             saveProcessedMessageId(maxUpdateId);
         }
@@ -1656,7 +1656,7 @@ class BotApi
             enforce(!updatesProcessingInProgress, "Previous Updates object still not processed properly");
 
             GetUpdatesMethod m = {
-                offset:  maxUpdateId,
+                offset:  maxUpdateId + 1,
                 limit:   limit,
                 timeout: timeout,
             };

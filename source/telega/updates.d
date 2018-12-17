@@ -5,7 +5,7 @@ import telega.botapi;
 import std.range.interfaces;
 
 /// Incoming messages
-class Updates : InputRange!Update
+class Updates //: InputRange!Update
 {
     private BotApi botConn;
     private Update[] incoming;
@@ -33,8 +33,4 @@ class Updates : InputRange!Update
         botConn.updateProcessed(front.id);
         index++;
     }
-
-    int opApply(scope int delegate(Update)){ assert(false, "Not implemented"); }
-    int opApply(scope int delegate(size_t, Update)){ assert(false, "Not implemented"); }
-    Update moveFront() { assert(false, "Not implemented"); }
 }
