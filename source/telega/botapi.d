@@ -9,6 +9,7 @@ import std.typecons;
 import std.exception;
 import std.traits;
 import telega.http;
+import telega.serialization;
 
 class TelegramBotApiException : Exception
 {
@@ -23,88 +24,6 @@ class TelegramBotApiException : Exception
 }
 
 enum isTelegramId(T) = isSomeString!T || isIntegral!T;
-
-struct JsonableAlgebraic(Typelist ...)
-{
-    import std.meta;
-    import std.variant;
-    import vibe.data.json : Json;
-
-    private Algebraic!Typelist types;
-
-    // TODO implement copy constructor from Typelist types
-
-    void opAssign(T)(T value)
-        if (staticIndexOf!(T, Typelist) >= 0)
-    {
-        types = value;
-    }
-
-    @safe
-    Json toJson() const
-    {
-        if (!types.hasValue) {
-            return Json.emptyObject;
-        }
-
-        return getJson();
-    }
-
-    // this method should not be used
-    @safe
-    typeof(this) fromJson(Json src)
-    {
-        return typeof(this).init;
-    }
-
-    @trusted
-    protected Json getJson() const
-    {
-        import vibe.data.json : serializeToJson;
-
-        static foreach (T; Typelist) {
-            if (types.type == typeid(T)) {
-                T reply = cast(T)types.get!T;
-
-                return reply.serializeToJson();
-            }
-        }
-
-        return Json(null);
-    }
-}
-
-unittest
-{
-    import vibe.data.json;
-
-    struct S1
-    {
-        int s1;
-    }
-
-    struct S2
-    {
-        string s2;
-    }
-
-    JsonableAlgebraic!(S1, S2) jsonable;
-
-    struct JsonableAggregate
-    {
-        JsonableAlgebraic!(S1, S2) aggr;
-    }
-
-    jsonable = S1(42);
-    assert(`{"s1":42}` == jsonable.serializeToJsonString());
-
-    jsonable = S2("s2 value");
-    assert(`{"s2":"s2 value"}` == jsonable.serializeToJsonString());
-
-    JsonableAggregate jaggr;
-    jaggr.aggr = jsonable;
-    assert(`{"aggr":{"s2":"s2 value"}}` == jaggr.serializeToJsonString());
-}
 
 /******************************************************************/
 /*                    Telegram types and enums                    */
@@ -390,7 +309,8 @@ alias ReplyMarkupStructs = AliasSeq!(ReplyKeyboardMarkup, ReplyKeyboardRemove, I
  Abstract structure for unioining ReplyKeyboardMarkup, ReplyKeyboardRemove,
  InlineKeyboardMarkup and ForceReply
 */
-alias ReplyMarkup = JsonableAlgebraic!ReplyMarkupStructs;
+
+alias ReplyMarkup = JsonableAlgebraicProxy!ReplyMarkupStructs;
 enum isReplyMarkup(T) =
     is(T == ReplyMarkup) || staticIndexOf!(T, ReplyMarkupStructs) >= 0;
 
@@ -494,7 +414,7 @@ struct ResponseParameters
 
 alias InputMediaStructs = AliasSeq!(InputMediaPhoto, InputMediaVideo);
 
-alias InputMedia = JsonableAlgebraic!InputMediaStructs;
+alias InputMedia = JsonableAlgebraicProxy!InputMediaStructs;
 
 struct InputMediaPhoto
 {
@@ -570,7 +490,7 @@ alias InlineQueryResultStructs = AliasSeq!(
     InlineQueryResultCachedVoice, InlineQueryResultCachedAudio
 );
 
-alias InlineQueryResult = JsonableAlgebraic!InlineQueryResultStructs;
+alias InlineQueryResult = JsonableAlgebraicProxy!InlineQueryResultStructs;
 
 mixin template InlineQueryFields()
 {
@@ -857,7 +777,7 @@ alias InputMessageContentStructs = AliasSeq!(
     InputTextMessageContent, InputLocationMessageContent, InputVenueMessageContent, InputContactMessageContent
 );
 
-alias InputMessageContent = JsonableAlgebraic!InputMessageContentStructs;
+alias InputMessageContent = JsonableAlgebraicProxy!InputMessageContentStructs;
 
 struct InputTextMessageContent
 {
@@ -1607,8 +1527,6 @@ class BotApi
 
         T callMethod(T, M)(M method)
         {
-            import vibe.data.json : serializeToJsonString;
-
             T result;
 
             logDiagnostic("[%d] Requesting %s", requestCounter, method._path);

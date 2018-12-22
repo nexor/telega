@@ -4,11 +4,11 @@ authors     "Pavel Chebotarev"
 
 license "MIT"
 
-dependency "vibe-d:http" version="~>0.8.3"
-dependency "vibe-d:data" version="~>0.8.3"
 dependency "asdf" version="~>0.4.0"
 
 configuration "default" {
+    dependency "vibe-d:http" version="~>0.8.3"
+
     versions   "VibeDisableCommandLineParsing"
     versions   "VibeUseOpenSSL11"
     versions   "TelegaVibedDriver"
@@ -29,6 +29,8 @@ configuration "requests-driver" {
 }
 
 configuration "unittest" {
+    dependency "vibe-d:http" version="~>0.8.3"
+
     versions "VibeNoSSL"
     versions "TelegaVibedDriver"
 }
