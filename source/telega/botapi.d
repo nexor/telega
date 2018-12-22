@@ -145,7 +145,7 @@ struct ChatTypeProxy
 
     static ChatTypeProxy deserialize(Asdf v)
     {
-        return ChatTypeProxy(ChatType.Private);
+        return ChatTypeProxy(cast(ChatType)cast(string)v);
     }
 }
 
@@ -163,14 +163,14 @@ unittest
 {
     string json = `{
         "id": 42,
-        "type": "private",
+        "type": "group",
         "title": "chat title"
     }`;
 
     Chat c = deserialize!Chat(json);
 
     assert(c.id == 42);
-    assert(c.type == ChatType.Private);
+    assert(c.type == ChatType.Group);
 }
 
 struct Message
