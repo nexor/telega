@@ -3,3 +3,5 @@ Dockerfile
 .dub/
 examples/
 !dub.*
+telega
+telega-test-*
