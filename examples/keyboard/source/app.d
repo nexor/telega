@@ -21,10 +21,9 @@ int main(string[] args)
 void listenUpdates()
 {
     import telega.botapi;
-    import telega.drivers.requests : RequestsHttpClient;
 
     try {
-        auto api = new BotApi(botToken, BaseApiUrl, httpClient);
+        auto api = new BotApi(botToken, BaseApiUrl);
 
         while(true) {
             logInfo("Waiting for updates...");
