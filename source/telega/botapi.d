@@ -10,6 +10,93 @@ import std.exception;
 import std.traits;
 import telega.http;
 
+struct ChatId
+{
+    import std.conv;
+
+    string id;
+
+    private bool _isString = true;
+
+    alias id this;
+
+    this(long id)
+    {
+        this.id = id.to!string;
+        _isString = false;
+    }
+
+    this(string id)
+    {
+        this.id = id;
+    }
+
+    void opAssign(long id)
+    {
+        this.id = id.to!string;
+        _isString = false;
+    }
+
+    void opAssign(string id)
+    {
+        this.id = id;
+        _isString = true;
+    }
+
+    @property
+    bool isString()
+    {
+        return _isString;
+    }
+
+    long opCast(T)()
+        if (is(T == long))
+    {
+        if (_isString) {
+            return 0;
+        }
+
+        return id.to!long;
+    }
+
+    import vibe.data.json : Json;
+
+    @safe
+    Json toJson() const
+    {
+        return Json(id);
+    }
+
+    @safe
+    typeof(this) fromJson(Json src)
+    {
+        return typeof(this).init;
+    }
+}
+
+unittest
+{
+    ChatId chatId;
+
+    chatId = 45;
+    assert(chatId.isString() == false);
+
+    chatId = "@chat";
+    assert(chatId.isString() == true);
+
+    string chatIdString = chatId;
+    assert(chatIdString == "@chat");
+
+    long chatIdNum = cast(long)chatId;
+    assert(chatIdNum == 0);
+
+    chatId = 42;
+
+    chatIdNum = cast(long)chatId;
+    assert(chatIdNum == 42);
+}
+
+
 class TelegramBotApiException : Exception
 {
     ushort code;
@@ -1063,7 +1150,7 @@ struct SendMessageMethod
 {
     mixin TelegramMethod!"/sendMessage";
 
-    string    chat_id;
+    ChatId    chat_id;
     string    text;
     ParseMode parse_mode;
     bool      disable_web_page_preview;
@@ -1077,8 +1164,8 @@ struct ForwardMessageMethod
 {
     mixin TelegramMethod!"/forwardMessage";
 
-    string chat_id;
-    string from_chat_id;
+    ChatId chat_id;
+    ChatId from_chat_id;
     bool   disable_notification;
     uint   message_id;
 }
@@ -1087,7 +1174,7 @@ struct SendPhotoMethod
 {
     mixin TelegramMethod!"/sendPhoto";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      photo;
     string      caption;
     ParseMode   parse_mode;
@@ -1100,7 +1187,7 @@ struct SendAudioMethod
 {
     mixin TelegramMethod!"/sendAudio";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      audio;
     string      caption;
     ParseMode   parse_mode;
@@ -1698,13 +1785,8 @@ class BotApi
         {
             SendMessageMethod m = {
                 text       : text,
+                chat_id    : chatId
             };
-
-            static if (isIntegral!T) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendMessage(m);
         }
@@ -1718,20 +1800,10 @@ class BotApi
             if (isTelegramId!T1 && isTelegramId!T2)
         {
             ForwardMessageMethod m = {
-                message_id : messageId
+                message_id : messageId,
+                chat_id : chatId,
+                from_chat_id : fromChatId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
-
-            static if (isIntegral!T2) {
-                m.from_chat_id = fromChatId.to!string;
-            } else {
-                m.from_chat_id = fromChatId;
-            }
 
             return callMethod!(Message, ForwardMessageMethod)(m);
         }
@@ -1771,14 +1843,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendAudioMethod m = {
-                audio : audio
+                audio : audio,
+                chat_id : chatId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendAudio(m);
         }
@@ -2721,9 +2788,13 @@ class BotApi
             api.deleteWebhook();
             api.getWebhookInfo();
             api.getMe();
+            api.sendMessage(123, "hello");
             api.sendMessage("chat-id", "hello");
+            api.forwardMessage(123, "from-chat-id", 123);
+            api.forwardMessage("chat-id", 321, 123);
             api.forwardMessage("chat-id", "from-chat-id", 123);
             api.sendPhoto("chat-id", "photo-url");
+            api.sendAudio(123, "audio-url");
             api.sendAudio("chat-id", "audio-url");
             api.sendDocument("chat-id", "document-url");
             api.sendVideo("chat-id", "video-url");
