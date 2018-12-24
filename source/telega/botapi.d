@@ -445,12 +445,36 @@ enum isReplyMarkup(T) =
 import std.algorithm.iteration;
 import std.array;
 
+static bool falseIfNull(Nullable!bool value)
+{
+    if (value.isNull) {
+        return false;
+    }
+
+    return cast(bool)value;
+}
+
+static bool trueIfNull(Nullable!bool value)
+{
+    if (value.isNull) {
+        return true;
+    }
+
+    return cast(bool)value;
+}
+
 struct ReplyKeyboardMarkup
 {
     KeyboardButton[][] keyboard;
-    Nullable!bool      resize_keyboard;
-    Nullable!bool      one_time_keyboard;
-    Nullable!bool      selective;
+
+ // TODO   @serializationTransformOut!falseIfNull
+    Nullable!bool      resize_keyboard = false;
+
+// TODO     @serializationTransformOut!falseIfNull
+    Nullable!bool      one_time_keyboard = false;
+
+// TODO    @serializationTransformOut!falseIfNull
+    Nullable!bool      selective = false;
 
     this (string[][] keyboard)
     {
@@ -469,6 +493,13 @@ struct KeyboardButton
 
     Nullable!bool   request_contact;
     Nullable!bool   request_location;
+
+    this(string text, bool requestContact = false, bool requestLocation = false)
+    {
+        this.text = text;
+        this.request_contact = requestContact;
+        this.request_location = requestLocation;
+    }
 }
 
 KeyboardButton[] toKeyboardButtonRow(string[] row)
@@ -479,7 +510,7 @@ KeyboardButton[] toKeyboardButtonRow(string[] row)
 struct ReplyKeyboardRemove
 {
     bool remove_keyboard = true;
-    Nullable!bool           selective;
+    Nullable!bool           selective = false;
 }
 
 struct InlineKeyboardMarkup
