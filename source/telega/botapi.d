@@ -175,7 +175,7 @@ struct ChatTypeProxy
 
     static ChatTypeProxy deserialize(Asdf v)
     {
-        return ChatTypeProxy(ChatType.Private);
+        return ChatTypeProxy(cast(ChatType)cast(string)v);
     }
 }
 
@@ -185,8 +185,8 @@ struct Chat
     ChatType type;
     Nullable!string title;
     Nullable!string first_name;
-	Nullable!string last_name;
-	Nullable!string username;
+    Nullable!string last_name;
+    Nullable!string username;
     Nullable!bool all_members_are_administrators;
     Nullable!ChatPhoto photo;
     Nullable!string description;
@@ -200,14 +200,14 @@ unittest
 {
     string json = `{
         "id": 42,
-        "type": "private",
+        "type": "group",
         "title": "chat title"
     }`;
 
     Chat c = deserialize!Chat(json);
 
     assert(c.id == 42);
-    assert(c.type == ChatType.Private);
+    assert(c.type == ChatType.Group);
 }
 
 struct Message
@@ -442,6 +442,9 @@ alias ReplyMarkup = JsonableAlgebraic!ReplyMarkupStructs;
 enum isReplyMarkup(T) =
     is(T == ReplyMarkup) || staticIndexOf!(T, ReplyMarkupStructs) >= 0;
 
+import std.algorithm.iteration;
+import std.array;
+
 struct ReplyKeyboardMarkup
 {
     KeyboardButton[][] keyboard;
@@ -451,22 +454,26 @@ struct ReplyKeyboardMarkup
 
     this (string[][] keyboard)
     {
-        foreach (ref row; keyboard) {
-            KeyboardButton[] buttonRow;
+        this.keyboard = keyboard.map!toKeyboardButtonRow.array;
+    }
 
-            foreach (ref item; row) {
-                buttonRow ~= KeyboardButton(item);
-            }
-            this.keyboard ~= buttonRow;
-        }
+    void opOpAssign(string op : "~")(KeyboardButton[] buttons)
+    {
+        keyboard ~= buttons;
     }
 }
 
 struct KeyboardButton
 {
     string text;
+
     Nullable!bool   request_contact;
     Nullable!bool   request_location;
+}
+
+KeyboardButton[] toKeyboardButtonRow(string[] row)
+{
+    return row.map!(b => KeyboardButton(b)).array;
 }
 
 struct ReplyKeyboardRemove
