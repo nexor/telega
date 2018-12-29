@@ -12,6 +12,7 @@ configuration "default" {
     versions   "VibeDisableCommandLineParsing"
     versions   "TelegaVibedDriver"
 
+
     targetType "library"
 }
 
