@@ -4,14 +4,14 @@ authors     "Pavel Chebotarev"
 
 license "MIT"
 
-dependency "vibe-d:http" version="~>0.8.3"
-dependency "vibe-d:data" version="~>0.8.3"
+dependency "vibe-d:http" version="~>0.8.4"
+dependency "vibe-d:data" version="~>0.8.4"
 dependency "asdf" version="~>0.4.0"
 
 configuration "default" {
     versions   "VibeDisableCommandLineParsing"
-    versions   "VibeUseOpenSSL11"
     versions   "TelegaVibedDriver"
+    versions   "VibeUseOpenSSL11"
 
     targetType "library"
 }
@@ -21,7 +21,6 @@ configuration "requests-driver" {
     dependency "socks-client" version="~>0.0.2"
 
     versions "TelegaRequestsDriver"
-    versions "VibeUseOpenSSL11"
 
     subConfiguration "requests" "vibed"
 
