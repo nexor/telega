@@ -1,0 +1,7 @@
+name "keyboard"
+description "Keyboard usage example"
+
+dependency "telega" version="~master" path="../../"
+dependency "vibe-d" version="0.8.5-alpha.2"
+
+subConfiguration "telega" "requests-driver"
