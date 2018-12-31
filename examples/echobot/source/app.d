@@ -31,7 +31,7 @@ void listenUpdates()
             logInfo("Got %d updates", updates.length);
 
             foreach (update; updates) {
-                if (!update.message.isNull) {
+                if (!update.message.isNull && !update.message.text.isNull) {
                     logInfo("Text from %s: %s", update.message.chat.id, update.message.text);
                     api.sendMessage(update.message.chat.id, update.message.text);
                 }
