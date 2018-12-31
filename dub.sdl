@@ -11,8 +11,8 @@ buildRequirements "disallowInlining"
 
 configuration "default" {
     versions   "VibeDisableCommandLineParsing"
-    versions   "VibeUseOpenSSL11"
     versions   "TelegaVibedDriver"
+    versions   "VibeUseOpenSSL11"
 
     targetType "library"
 }
