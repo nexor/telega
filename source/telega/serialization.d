@@ -30,48 +30,6 @@ unittest
     assert(`{"a":"123"}` == s.serializeToJson());
 }
 
-import std.traits;
-
-enum isNullable(T) = __traits(isSame, TemplateOf!T, Nullable);
-
-string serializeSkipNulls(T)(T value)
-{
-    import std.conv;
-    auto root = AsdfNode(`{}`.parseJson);
-
-    static foreach(ulong i, string member; __traits(allMembers, T)) {
-        static if ( !isNullable!(typeof(T.tupleof[i])) ) {
-            root[member] = AsdfNode(__traits(getMember, value, member).serializeToAsdf());
-        } else {
-            if (!__traits(getMember, value, member).isNull) {
-                root[member] = AsdfNode(__traits(getMember, value, member).serializeToAsdf());
-            }
-        }
-    }
-
-    return (cast(Asdf)root).to!string;
-}
-
-unittest
-{
-    struct S
-    {
-        int a;
-        Nullable!int b;
-        Nullable!string c;
-    }
-
-    S s;
-    s.a = 42;
-    s.c = "cvalue";
-
-    import std.stdio;
-    auto serialized = serializeSkipNulls(s);
-    writeln(serialized);
-
-    assert(serialized == `{"c":"cvalue","a":42}`);
-}
-
 struct JsonableAlgebraicProxy(Typelist ...)
 {
     import std.variant;
