@@ -21,10 +21,16 @@ int main(string[] args)
 void listenUpdates()
 {
     import telega.botapi;
-    import telega.methods : getUpdates, sendMessage;
+    import telega.drivers.requests : RequestsHttpClient;
 
     try {
-        auto api = new BotApi(botToken);
+        auto httpClient = new RequestsHttpClient();
+
+        /+ here you can use your SOCKS5 proxy server accepting unauthorized requests +/
+        // SOCKS 5 proxy host and port, no authentication
+        httpClient.setProxy("10.0.3.1", 1080);
+
+        auto api = new BotApi(botToken, BaseApiUrl, httpClient);
 
         while(true) {
             logInfo("Waiting for updates...");

@@ -1,0 +1,6 @@
+name "socks-proxy"
+description "A simple telegram echo bot connecting to a telegram API through SOCKS5 proxy"
+
+dependency "telega" version="~master" path="../../"
+
+subConfiguration "telega" "requests-driver"

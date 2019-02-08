@@ -1,7 +1,6 @@
 module telega.botapi;
 
-import vibe.http.client;
-import vibe.stream.operations;
+import vibe.http.client : HTTPMethod;
 import vibe.core.core;
 import vibe.core.log;
 import asdf;
@@ -9,6 +8,8 @@ import std.conv;
 import std.typecons;
 import std.exception;
 import std.traits;
+import telega.http;
+import telega.serialization;
 
 class TelegramBotApiException : Exception
 {
@@ -24,88 +25,6 @@ class TelegramBotApiException : Exception
 
 enum isTelegramId(T) = isSomeString!T || isIntegral!T;
 
-struct JsonableAlgebraic(Typelist ...)
-{
-    import std.meta;
-    import std.variant;
-    import vibe.data.json : Json;
-
-    private Algebraic!Typelist types;
-
-    // TODO implement copy constructor from Typelist types
-
-    void opAssign(T)(T value)
-        if (staticIndexOf!(T, Typelist) >= 0)
-    {
-        types = value;
-    }
-
-    @safe
-    Json toJson() const
-    {
-        if (!types.hasValue) {
-            return Json.emptyObject;
-        }
-
-        return getJson();
-    }
-
-    // this method should not be used
-    @safe
-    typeof(this) fromJson(Json src)
-    {
-        return typeof(this).init;
-    }
-
-    @trusted
-    protected Json getJson() const
-    {
-        import vibe.data.json : serializeToJson;
-
-        static foreach (T; Typelist) {
-            if (types.type == typeid(T)) {
-                T reply = cast(T)types.get!T;
-
-                return reply.serializeToJson();
-            }
-        }
-
-        return Json(null);
-    }
-}
-
-unittest
-{
-    import vibe.data.json;
-
-    struct S1
-    {
-        int s1;
-    }
-
-    struct S2
-    {
-        string s2;
-    }
-
-    JsonableAlgebraic!(S1, S2) jsonable;
-
-    struct JsonableAggregate
-    {
-        JsonableAlgebraic!(S1, S2) aggr;
-    }
-
-    jsonable = S1(42);
-    assert(`{"s1":42}` == jsonable.serializeToJsonString());
-
-    jsonable = S2("s2 value");
-    assert(`{"s2":"s2 value"}` == jsonable.serializeToJsonString());
-
-    JsonableAggregate jaggr;
-    jaggr.aggr = jsonable;
-    assert(`{"aggr":{"s2":"s2 value"}}` == jaggr.serializeToJsonString());
-}
-
 /******************************************************************/
 /*                    Telegram types and enums                    */
 /******************************************************************/
@@ -115,11 +34,42 @@ struct User
     int    id;
     bool   is_bot;
     string first_name;
-    string last_name;
-    string username;
-    string language_code;
+
+    Nullable!string last_name;
+    Nullable!string username;
+    Nullable!string language_code;
 }
 
+unittest
+{
+    string json = `{
+        "id": 42,
+        "is_bot": false,
+        "first_name": "FirstName"
+    }`;
+
+    User u = deserialize!User(json);
+
+    assert(u.last_name.isNull);
+}
+
+unittest
+{
+    string json = `{
+        "id": 42,
+        "is_bot": false,
+        "first_name": "FirstName",
+        "last_name": "LastName"
+    }`;
+
+    User u = deserialize!User(json);
+
+    assert(false == u.last_name.isNull);
+}
+
+
+
+@serializedAs!ChatTypeProxy
 enum ChatType : string
 {
     Private    = "private",
@@ -128,14 +78,55 @@ enum ChatType : string
     Channel    = "channel"
 }
 
+struct ChatTypeProxy
+{
+    ChatType t;
+
+    this(ChatType type)
+    {
+        t = type;
+    }
+
+    ChatType opCast(T : ChatType)()
+    {
+        return t;
+    }
+
+    static ChatTypeProxy deserialize(Asdf v)
+    {
+        return ChatTypeProxy(cast(ChatType)cast(string)v);
+    }
+}
+
 struct Chat
 {
-	long            id;
-	string          type;
-    string title;
-    string first_name;
-	string last_name;
-	string username;
+    long id;
+    ChatType type;
+    Nullable!string title;
+    Nullable!string first_name;
+    Nullable!string last_name;
+    Nullable!string username;
+    Nullable!bool all_members_are_administrators;
+    Nullable!ChatPhoto photo;
+    Nullable!string description;
+    Nullable!string invite_link;
+    // TODO Nullable!Message pinned_message;
+    Nullable!string sticker_set_name;
+    Nullable!bool can_set_sticker_set;
+}
+
+unittest
+{
+    string json = `{
+        "id": 42,
+        "type": "group",
+        "title": "chat title"
+    }`;
+
+    Chat c = deserialize!Chat(json);
+
+    assert(c.id == 42);
+    assert(c.type == ChatType.Group);
 }
 
 struct Message
@@ -146,17 +137,18 @@ struct Message
     Nullable!User        from;
     Nullable!User        forward_from;
     Nullable!Chat        forward_from_chat;
-    uint                 forward_from_message_id;
-    string               forward_signature;
-    uint                 forward_date;
-    uint                 edit_date;
-    string               media_group_id;
-    string               author_signature;
-    string               text;
+    Nullable!uint        forward_from_message_id;
+    Nullable!string      forward_signature;
+    Nullable!uint        forward_date;
+    Nullable!uint        edit_date;
+    Nullable!string      media_group_id;
+    Nullable!string      author_signature;
+    Nullable!string      text;
     Nullable!MessageEntity[] entities;
     Nullable!MessageEntity[] caption_entities;
     Nullable!Audio           audio;
     Nullable!Document        document;
+    Nullable!Animation       animation;
     Nullable!Game            game;
     Nullable!PhotoSize[]     photo;
     Nullable!Sticker         sticker;
@@ -165,23 +157,23 @@ struct Message
     Nullable!VideoNote       video_note;
     // TODO Nullable!Message reply_to_message;
     // TODO Nullable!Message pinned_message;
-    string              caption;
+    Nullable!string          caption;
     Nullable!Contact         contact;
     Nullable!Location        location;
     Nullable!Venue           venue;
     Nullable!User[]          new_chat_members;
     Nullable!User            left_chat_member;
-    string              new_chat_title;
+    Nullable!string          new_chat_title;
     Nullable!PhotoSize[]     new_chat_photo;
-    bool                delete_chat_photo;
-    bool                group_chat_created;
-    bool                supergroup_chat_created;
-    bool                channel_chat_created;
-    long                migrate_to_chat_id;
-    long                migrate_from_chat_id;
+    Nullable!bool            delete_chat_photo;
+    Nullable!bool            group_chat_created;
+    Nullable!bool            supergroup_chat_created;
+    Nullable!bool            channel_chat_created;
+    Nullable!long            migrate_to_chat_id;
+    Nullable!long            migrate_from_chat_id;
     Nullable!Invoice         invoice;
     Nullable!SuccessfulPayment successful_payment;
-    string              connected_website;
+    Nullable!string              connected_website;
 
     @property
     uint id()
@@ -233,10 +225,10 @@ struct WebhookInfo
     string   url;
     bool     has_custom_certificate;
     uint     pending_update_count;
-    uint     last_error_date;
-    string   last_error_message;
-    uint     max_connections;
-    string[] allowed_updates;
+    Nullable!uint     last_error_date;
+    Nullable!string   last_error_message;
+    Nullable!uint     max_connections;
+    Nullable!string[] allowed_updates;
 }
 
 enum ParseMode
@@ -251,8 +243,8 @@ struct MessageEntity
     string        type;
     uint          offset;
     uint          length;
-    string        url;
-    Nullable!User user;
+    Nullable!string  url;
+    Nullable!User    user;
 }
 
 struct PhotoSize
@@ -268,12 +260,14 @@ struct Audio
 {
     string file_id;
     uint   duration;
-    string performer;
-    string title;
-    string mime_type;
-    uint   file_size;
+    Nullable!string performer;
+    Nullable!string title;
+    Nullable!string mime_type;
+    Nullable!uint   file_size;
+    Nullable!PhotoSize thumb;
 }
 
+// TODO Add Nullable fields
 struct Document
 {
     string    file_id;
@@ -283,6 +277,7 @@ struct Document
     uint      file_size;
 }
 
+// TODO Add Nullable fields
 struct Video
 {
     string file_id;
@@ -294,6 +289,7 @@ struct Video
     uint file_size;
 }
 
+// TODO Add Nullable fields
 struct Voice
 {
     string file_id;
@@ -302,6 +298,7 @@ struct Voice
     uint   file_size;
 }
 
+// TODO Add Nullable fields
 struct VideoNote
 {
     string    file_id;
@@ -311,6 +308,7 @@ struct VideoNote
     uint      file_size;
 }
 
+// TODO Add Nullable fields
 struct Contact
 {
     string phone_number;
@@ -319,12 +317,14 @@ struct Contact
     string user_id;
 }
 
+// TODO Add Nullable fields
 struct Location
 {
     float longitude;
     float latitude;
 }
 
+// TODO Add Nullable fields
 struct Venue
 {
     Location location;
@@ -333,12 +333,14 @@ struct Venue
     string   foursquare_id;
 }
 
+// TODO Add Nullable fields
 struct UserProfilePhotos
 {
     uint          total_count;
     PhotoSize[][] photos;
 }
 
+// TODO Add Nullable fields
 struct File
 {
     string file_id;
@@ -355,41 +357,80 @@ alias ReplyMarkupStructs = AliasSeq!(ReplyKeyboardMarkup, ReplyKeyboardRemove, I
  Abstract structure for unioining ReplyKeyboardMarkup, ReplyKeyboardRemove,
  InlineKeyboardMarkup and ForceReply
 */
-alias ReplyMarkup = JsonableAlgebraic!ReplyMarkupStructs;
+
+alias ReplyMarkup = JsonableAlgebraicProxy!ReplyMarkupStructs;
 enum isReplyMarkup(T) =
     is(T == ReplyMarkup) || staticIndexOf!(T, ReplyMarkupStructs) >= 0;
+
+import std.algorithm.iteration;
+import std.array;
+
+static bool falseIfNull(Nullable!bool value)
+{
+    if (value.isNull) {
+        return false;
+    }
+
+    return cast(bool)value;
+}
+
+static bool trueIfNull(Nullable!bool value)
+{
+    if (value.isNull) {
+        return true;
+    }
+
+    return cast(bool)value;
+}
 
 struct ReplyKeyboardMarkup
 {
     KeyboardButton[][] keyboard;
-    bool               resize_keyboard;
-    bool               one_time_keyboard;
-    bool               selective;
+
+ // TODO   @serializationTransformOut!falseIfNull
+    Nullable!bool      resize_keyboard = false;
+
+// TODO     @serializationTransformOut!falseIfNull
+    Nullable!bool      one_time_keyboard = false;
+
+// TODO    @serializationTransformOut!falseIfNull
+    Nullable!bool      selective = false;
 
     this (string[][] keyboard)
     {
-        foreach (ref row; keyboard) {
-            KeyboardButton[] buttonRow;
+        this.keyboard = keyboard.map!toKeyboardButtonRow.array;
+    }
 
-            foreach (ref item; row) {
-                buttonRow ~= KeyboardButton(item);
-            }
-            this.keyboard ~= buttonRow;
-        }
+    void opOpAssign(string op : "~")(KeyboardButton[] buttons)
+    {
+        keyboard ~= buttons;
     }
 }
 
 struct KeyboardButton
 {
     string text;
-    bool   request_contact;
-    bool   request_location;
+
+    Nullable!bool   request_contact;
+    Nullable!bool   request_location;
+
+    this(string text, bool requestContact = false, bool requestLocation = false)
+    {
+        this.text = text;
+        this.request_contact = requestContact;
+        this.request_location = requestLocation;
+    }
+}
+
+KeyboardButton[] toKeyboardButtonRow(string[] row)
+{
+    return row.map!(b => KeyboardButton(b)).array;
 }
 
 struct ReplyKeyboardRemove
 {
     bool remove_keyboard = true;
-    bool           selective;
+    Nullable!bool           selective = false;
 }
 
 struct InlineKeyboardMarkup
@@ -400,14 +441,15 @@ struct InlineKeyboardMarkup
 struct InlineKeyboardButton
 {
     string       text;
-    string       url;
-    string       callback_data;
-    string       switch_inline_query;
-    string       switch_inline_query_current_chat;
-    CallbackGame callback_game;
-    bool         pay;
+    Nullable!string       url;
+    Nullable!string       callback_data;
+    Nullable!string       switch_inline_query;
+    Nullable!string       switch_inline_query_current_chat;
+    Nullable!CallbackGame callback_game;
+    Nullable!bool         pay;
 }
 
+// TODO Add Nullable fields
 struct CallbackQuery
 {
     string           id;
@@ -422,7 +464,7 @@ struct CallbackQuery
 struct ForceReply
 {
     bool     force_reply = true;
-    bool     selective;
+    Nullable!bool     selective;
 }
 
 struct ChatPhoto
@@ -431,6 +473,7 @@ struct ChatPhoto
     string big_file_id;
 }
 
+// TODO Add Nullable fields
 struct ChatMember
 {
     User   user;
@@ -451,6 +494,7 @@ struct ChatMember
     bool   can_add_web_page_previews;
 }
 
+// TODO Add Nullable fields
 struct ResponseParameters
 {
     long migrate_to_chat_id;
@@ -459,27 +503,31 @@ struct ResponseParameters
 
 alias InputMediaStructs = AliasSeq!(InputMediaPhoto, InputMediaVideo);
 
-alias InputMedia = JsonableAlgebraic!InputMediaStructs;
+alias InputMedia = JsonableAlgebraicProxy!InputMediaStructs;
 
 struct InputMediaPhoto
 {
     string type;
     string media;
-    string caption;
-    string parse_mode;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 }
 
 struct InputMediaVideo
 {
     string type;
     string media;
-    string caption;
-    string parse_mode;
-    uint   width;
-    uint   height;
-    uint   duration;
-    bool   supports_streaming;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint   width;
+    Nullable!uint   height;
+    Nullable!uint   duration;
+    Nullable!bool   supports_streaming;
 }
+
+// TODO InputMediaAnimation
+// TODO InputMediaAudio
+// TODO InputMediaDocument
 
 struct InputFile
 {
@@ -535,7 +583,7 @@ alias InlineQueryResultStructs = AliasSeq!(
     InlineQueryResultCachedVoice, InlineQueryResultCachedAudio
 );
 
-alias InlineQueryResult = JsonableAlgebraic!InlineQueryResultStructs;
+alias InlineQueryResult = JsonableAlgebraicProxy!InlineQueryResultStructs;
 
 mixin template InlineQueryFields()
 {
@@ -548,14 +596,15 @@ struct InlineQueryResultArticle
     string type = "article";
     string id;
     string title;
-    string url;
-    bool hide_url;
-    string description;
-    string thumb_url;
-    uint thumb_width;
-    uint thumb_height;
+    Nullable!string url;
+    Nullable!bool hide_url;
+    Nullable!string description;
+    Nullable!string thumb_url;
+    Nullable!uint thumb_width;
+    Nullable!uint thumb_height;
 
-    mixin InlineQueryFields;
+    Nullable!InlineKeyboardMarkup reply_markup;
+    InputMessageContent  input_message_content; // can't be nullable
 }
 
 struct InlineQueryResultPhoto
@@ -564,12 +613,12 @@ struct InlineQueryResultPhoto
     string id;
     string photo_url;
     string thumb_url;
-    uint photo_width;
-    uint photo_height;
-    string title;
-    string description;
-    string caption;
-    ParseMode parse_mode;
+    Nullable!uint photo_width;
+    Nullable!uint photo_height;
+    Nullable!string title;
+    Nullable!string description;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -579,13 +628,13 @@ struct InlineQueryResultGif
     string type = "gif";
     string id;
     string gif_url;
-    uint gif_width;
-    uint gif_height;
-    uint gif_duration;
-    string thumb_url;
-    string title;
-    string caption;
-    ParseMode parse_mode;
+    Nullable!uint gif_width;
+    Nullable!uint gif_height;
+    Nullable!uint gif_duration;
+    Nullable!string thumb_url;
+    Nullable!string title;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -595,13 +644,13 @@ struct InlineQueryResultMpeg4Gif
     string type ="mpeg4_gif";
     string id;
     string mpeg4_url;
-    uint mpeg4_width;
-    uint mpeg4_height;
-    uint mpeg4_duration;
-    string thumb_url;
-    string title;
-    string caption;
-    ParseMode parse_mode;
+    Nullable!uint mpeg4_width;
+    Nullable!uint mpeg4_height;
+    Nullable!uint mpeg4_duration;
+    Nullable!string thumb_url;
+    Nullable!string title;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -614,56 +663,56 @@ struct InlineQueryResultVideo
     string mime_type;
     string thumb_url;
     string title;
-    string caption;
-    ParseMode parse_mode;
-    uint video_width;
-    uint video_height;
-    uint video_duration;
-    string description;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint video_width;
+    Nullable!uint video_height;
+    Nullable!uint video_duration;
+    Nullable!string description;
 
     mixin InlineQueryFields;
 }
 
 struct InlineQueryResultAudio
 {
-    string type = "audio";
+    string    type = "audio";
     string    id;
     string    audio_url;
     string    title;
-    string    caption;
-    ParseMode parse_mode;
-    string    performer;
-    uint      audio_duration;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!string    performer;
+    Nullable!uint      audio_duration;
 
     mixin InlineQueryFields;
 }
 
 struct InlineQueryResultVoice
 {
-    string type = "voice";
+    string    type = "voice";
     string    id;
     string    voice_url;
     string    title;
-    string    caption;
-    ParseMode parse_mode;
-    uint      voice_duration;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint      voice_duration;
 
     mixin InlineQueryFields;
 }
 
 struct InlineQueryResultDocument
 {
-    string type = "document";
+    string    type = "document";
     string    id;
     string    title;
-    string    caption;
-    ParseMode parse_mode;
-    string    document_url;
-    string    mime_type;
-    string    description;
-    string    thumb_url;
-    uint      thumb_width;
-    uint      thumb_height;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!string    document_url;
+    Nullable!string    mime_type;
+    Nullable!string    description;
+    Nullable!string    thumb_url;
+    Nullable!uint      thumb_width;
+    Nullable!uint      thumb_height;
 
     mixin InlineQueryFields;
 }
@@ -675,10 +724,10 @@ struct InlineQueryResultLocation
     float latitude;
     float longitude;
     string title;
-    uint live_period;
-    string thumb_url;
-    uint thumb_width;
-    uint thumb_height;
+    Nullable!uint live_period;
+    Nullable!string thumb_url;
+    Nullable!uint thumb_width;
+    Nullable!uint thumb_height;
 
     mixin InlineQueryFields;
 }
@@ -691,10 +740,10 @@ struct InlineQueryResultVenue
     float longitude;
     string title;
     string address;
-    string foursquare_id;
-    string thumb_url;
-    uint thumb_width;
-    uint thumb_height;
+    Nullable!string foursquare_id;
+    Nullable!string thumb_url;
+    Nullable!uint thumb_width;
+    Nullable!uint thumb_height;
 
     mixin InlineQueryFields;
 }
@@ -705,10 +754,10 @@ struct InlineQueryResultContact
     string id;
     string phone_number;
     string first_name;
-    string last_name;
-    string thumb_url;
-    uint thumb_width;
-    uint thumb_height;
+    Nullable!string last_name;
+    Nullable!string thumb_url;
+    Nullable!uint thumb_width;
+    Nullable!uint thumb_height;
 
     mixin InlineQueryFields;
 }
@@ -727,10 +776,10 @@ struct InlineQueryResultCachedPhoto
     string type = "photo";
     string id;
     string photo_file_id;
-    string title;
-    string description;
-    string caption;
-    ParseMode parse_mode;
+    Nullable!string title;
+    Nullable!string description;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -740,9 +789,9 @@ struct InlineQueryResultCachedGif
     string type = "gif";
     string id;
     string gif_file_id;
-    string title;
-    string caption;
-    ParseMode parse_mode;
+    Nullable!string title;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -752,9 +801,9 @@ struct InlineQueryResultCachedMpeg4Gif
     string type = "mpeg4_gif";
     string id;
     string mpeg4_file_id;
-    string title;
-    string caption;
-    ParseMode parse_mode;
+    Nullable!string title;
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -774,9 +823,9 @@ struct InlineQueryResultCachedDocument
     string    id;
     string    title;
     string    document_file_id;
-    string    description;
-    string    caption;
-    ParseMode parse_mode;
+    Nullable!string    description;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -787,9 +836,9 @@ struct InlineQueryResultCachedVideo
     string    id;
     string    video_file_id;
     string    title;
-    string    description;
-    string    caption;
-    ParseMode parse_mode;
+    Nullable!string    description;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -800,8 +849,8 @@ struct InlineQueryResultCachedVoice
     string    id;
     string    voice_file_id;
     string    title;
-    string    caption;
-    ParseMode parse_mode;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -812,8 +861,8 @@ struct InlineQueryResultCachedAudio
     string type = "audio";
     string    id;
     string    audio_file_id;
-    string    caption;
-    ParseMode parse_mode;
+    Nullable!string    caption;
+    Nullable!ParseMode parse_mode;
 
     mixin InlineQueryFields;
 }
@@ -822,20 +871,20 @@ alias InputMessageContentStructs = AliasSeq!(
     InputTextMessageContent, InputLocationMessageContent, InputVenueMessageContent, InputContactMessageContent
 );
 
-alias InputMessageContent = JsonableAlgebraic!InputMessageContentStructs;
+alias InputMessageContent = JsonableAlgebraicProxy!InputMessageContentStructs;
 
 struct InputTextMessageContent
 {
     string message_text;
-    string parse_mode;
-    bool   disable_web_page_preview;
+    Nullable!ParseMode parse_mode;
+    Nullable!bool   disable_web_page_preview;
 }
 
 struct InputLocationMessageContent
 {
     float latitude;
     float longitude;
-    uint  live_period;
+    Nullable!uint  live_period;
 }
 
 struct InputVenueMessageContent
@@ -844,14 +893,16 @@ struct InputVenueMessageContent
     float  longitude;
     string title;
     string address;
-    string foursquare_id;
+    Nullable!string foursquare_id;
+    // TODO new field Nullable!string foursquare_type;
 }
 
 struct InputContactMessageContent
 {
     string phone_number;
     string first_name;
-    string last_name;
+    Nullable!string last_name;
+    // TODO new field Nullable!string vcard;
 }
 
 struct ChosenInlineResult
@@ -859,7 +910,7 @@ struct ChosenInlineResult
     string   result_id;
     User     from;
     Nullable!Location location;
-    string   inline_message_id;
+    Nullable!string   inline_message_id;
     string   query;
 }
 
@@ -889,6 +940,7 @@ struct ShippingAddress
     string post_code;
 }
 
+// TODO add nullable fields
 struct OrderInfo
 {
     string name;
@@ -903,6 +955,8 @@ struct ShippingOption
     string title;
     LabeledPrice[] prices;
 }
+
+// TODO add nullable fields
 struct SuccessfulPayment
 {
     string currency;
@@ -922,6 +976,7 @@ struct ShippingQuery
     ShippingAddress shipping_address;
 }
 
+// TODO add nullable fields
 struct PreCheckoutQuery
 {
     string             id;
@@ -933,8 +988,12 @@ struct PreCheckoutQuery
     Nullable!OrderInfo order_info;
 }
 
+/*** Telegram Passport ***/
+// TODO
+
 /*** Games types ***/
 
+// TODO add nullable fields
 struct Game
 {
     string        title;
@@ -945,6 +1004,7 @@ struct Game
     Animation     animation;
 }
 
+// TODO add nullable fields and a new fields
 struct Animation
 {
     string    file_id;
@@ -989,11 +1049,29 @@ class BotApi
             string description;
         }
 
+    protected:
+        HttpClient httpClient;
+
     public:
-        this(string token, string baseUrl = BaseApiUrl)
+        this(string token, string baseUrl = BaseApiUrl, HttpClient httpClient = null)
         {
             this.baseUrl = baseUrl;
             this.apiUrl = baseUrl ~ token;
+
+            if (httpClient is null) {
+                version(TelegaVibedDriver) {
+                    import telega.drivers.vibe;
+
+                    httpClient = new VibedHttpClient();
+                } else version(TelegaRequestsDriver) {
+                    import telega.drivers.requests;
+
+                    httpClient = new RequestsHttpClient();
+                } else {
+                    assert(false, `No HTTP client is set, maybe you should enable "default" configuration?`);
+                }
+            }
+            this.httpClient = httpClient;
         }
 
         @property
@@ -1016,8 +1094,6 @@ class BotApi
 
         T callMethod(T, M)(ref M method)
         {
-            import vibe.data.json : serializeToJsonString;
-
             T result;
 
             logDiagnostic("[%d] Requesting %s", requestCounter, method._path);
@@ -1027,29 +1103,25 @@ class BotApi
                 import std.stdio;
                 serializeToJsonString(method).writeln();
             } else {
-                requestHTTP(apiUrl ~ method._path,
-                    (scope req) {
-                        req.method = method._httpMethod;
-                        if (method._httpMethod == HTTPMethod.POST) {
-                            logDebugV("[%d] Sending body:\n  %s", requestCounter, method.serializeToJsonString());
-                            req.headers["Content-Type"] = "application/json";
-                            req.writeBody( cast(const(ubyte[])) serializeToJsonString(method) );
-                        }
-                    },
-                    (scope res) {
-                        string answer = res.bodyReader.readAllUTF8(true);
-                        logDebug("[%d] Response headers:\n  %s\n  %s", requestCounter, res, res.headers);
-                        logDiagnostic("[%d] Response body:\n  %s", requestCounter, answer);
+                string answer;
 
-                        auto json = answer.deserialize!(MethodResult!T);
+                if (method._httpMethod == HTTPMethod.POST) {
+                    string bodyJson = serializeToJsonString(method);
+                    logDebugV("[%d] Sending body:\n  %s", requestCounter, bodyJson);
 
-                        enforce(json.ok == true, new TelegramBotApiException(json.error_code, json.description));
+                    answer = httpClient.sendPostRequestJson(apiUrl ~ method._path, bodyJson);
+                } else {
+                    answer = httpClient.sendGetRequest(apiUrl ~ method._path);
+                }
 
-                        result = json.result;
+                logDebugV("[%d] Data received:\n %s", requestCounter, answer);
 
-                        requestCounter++;
-                    }
-                );
+                auto json = answer.deserialize!(MethodResult!T);
+
+                enforce(json.ok == true, new TelegramBotApiException(json.error_code, json.description));
+
+                result = json.result;
+                requestCounter++;
             }
 
             return result;

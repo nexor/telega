@@ -11,6 +11,8 @@
 		"memutils": "0.4.11",
 		"mir-linux-kernel": "1.0.0",
 		"openssl": "1.1.6+1.0.1g",
+		"requests": {"path":"../../dlang-requests"},
+		"socks-client": {"path":"../../socks-client"},
 		"stdx-allocator": "2.77.2",
 		"taggedalgebraic": "0.10.11",
 		"telega": {"path":"../../"},
