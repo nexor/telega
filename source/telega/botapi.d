@@ -1050,6 +1050,7 @@ struct GetUpdatesMethod
     int   offset;
     ubyte limit;
     uint  timeout;
+    string[] allowed_updates;
 }
 
 struct SetWebhookMethod
@@ -1665,12 +1666,13 @@ class BotApi
             return result;
         }
 
-        Update[] getUpdates(ubyte limit = 5, uint timeout = 30)
+        Update[] getUpdates(ubyte limit = 5, uint timeout = 30, int offset = 1, string[] allowedUpdates = [])
         {
             GetUpdatesMethod m = {
-                offset:  maxUpdateId,
+                offset:  offset,
                 limit:   limit,
                 timeout: timeout,
+                allowed_updates: allowedUpdates
             };
 
             return callMethod!(Update[], GetUpdatesMethod)(m);
