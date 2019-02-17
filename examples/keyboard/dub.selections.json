@@ -1,7 +1,7 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"asdf": "0.4.4",
+		"asdf": "0.4.5",
 		"botan": "1.12.10",
 		"botan-math": "1.0.3",
 		"cachetools": "0.1.2",
