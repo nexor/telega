@@ -196,11 +196,17 @@ struct Update
     Nullable!ShippingQuery      shipping_query;
     Nullable!PreCheckoutQuery   pre_checkout_query;
 
-    @property
+    @property @safe @nogc nothrow pure
     uint id()
     {
         return update_id;
     }
+}
+
+@safe @nogc nothrow pure
+bool isMessageType(in Update update)
+{
+    return !update.message.isNull;
 }
 
 unittest
@@ -1584,7 +1590,6 @@ class BotApi
         string apiUrl;
 
         ulong requestCounter = 1;
-        uint maxUpdateId = 1;
 
         struct MethodResult(T)
         {
@@ -1617,18 +1622,6 @@ class BotApi
                 }
             }
             this.httpClient = httpClient;
-        }
-
-        void updateProcessed(int updateId)
-        {
-            if (updateId >= maxUpdateId) {
-                maxUpdateId = updateId + 1;
-            }
-        }
-
-        void updateProcessed(ref Update update)
-        {
-            updateProcessed(update.id);
         }
 
         T callMethod(T, M)(M method)
@@ -1666,7 +1659,7 @@ class BotApi
             return result;
         }
 
-        Update[] getUpdates(ubyte limit = 5, uint timeout = 30, int offset = 1, string[] allowedUpdates = [])
+        Update[] getUpdates(int offset, ubyte limit = 5, uint timeout = 30, string[] allowedUpdates = [])
         {
             GetUpdatesMethod m = {
                 offset:  offset,
@@ -2825,5 +2818,70 @@ class BotApi
             iqr[19] = InlineQueryResultCachedAudio();
 
             api.answerInlineQuery("answer-inline-query", iqr);
+        }
+}
+
+struct UpdatesRange
+{
+    enum bool empty = false;
+
+    protected:
+        BotApi _api;
+        int _maxUpdateId;
+
+        string[] _allowedUpdates = [];
+        ubyte _updatesLimit = 5;
+        uint _timeout = 30;
+
+    private:
+        bool _isEmpty;
+        Update[] _updates;
+        ushort _index;
+
+    public: @safe:
+        this(BotApi api, int maxUpdateId = 0, ubyte limit = 5, uint timeout = 30)
+        {
+            _api = api;
+            _maxUpdateId = maxUpdateId;
+            _updatesLimit = limit;
+            _timeout = timeout;
+
+            _updates.reserve(_updatesLimit);
+        }
+
+        auto front()
+        {
+            if (_updates.length == 0) {
+                getUpdates();
+                _index = 0;
+            }
+
+            return _updates[_index];
+        }
+
+        void popFront()
+        {
+            import std.algorithm.comparison : max;
+
+            _maxUpdateId = max(_maxUpdateId, _updates[_index].id);
+
+            if (++_index >= _updates.length) {
+                getUpdates();
+                _index = 0;
+            }
+        }
+
+    protected:
+        @trusted
+        void getUpdates()
+        {
+            do {
+                _updates = _api.getUpdates(
+                    _maxUpdateId+1,
+                    _updatesLimit,
+                    _timeout,
+                    _allowedUpdates
+                );
+            } while (_updates.length == 0);
         }
 }

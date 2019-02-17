@@ -10,6 +10,7 @@ dependency "asdf" version="~>0.4.0"
 buildRequirements "disallowInlining"
 
 configuration "default" {
+
     versions   "VibeDisableCommandLineParsing"
     versions   "TelegaVibedDriver"
     versions   "VibeUseOpenSSL11"
@@ -24,7 +25,8 @@ configuration "requests-driver" {
     versions "TelegaRequestsDriver"
     versions "VibeUseOpenSSL11"
 
-    subConfiguration "requests" "vibed"
+    subConfiguration "requests" "std"
+    subConfiguration "socks-client" "std"
 
     targetType "library"
 }
