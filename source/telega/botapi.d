@@ -1,7 +1,5 @@
 module telega.botapi;
 
-import vibe.http.client : HTTPMethod;
-import vibe.core.core;
 import vibe.core.log;
 import asdf;
 import std.conv;
@@ -10,6 +8,12 @@ import std.exception;
 import std.traits;
 import telega.http;
 import telega.serialization;
+
+enum HTTPMethod
+{
+	GET,
+	POST
+}
 
 class TelegramBotApiException : Exception
 {
