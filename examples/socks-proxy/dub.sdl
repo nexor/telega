@@ -2,5 +2,10 @@ name "socks-proxy"
 description "A simple telegram echo bot connecting to a telegram API through SOCKS5 proxy"
 
 dependency "telega" version="~master" path="../../"
+dependency "vibe-d:tls" version=">=0.0.0"
 
 subConfiguration "telega" "requests-driver"
+subConfiguration "requests" "vibed"
+subConfiguration "vibe-d:tls" "openssl-1.1"
+
+versions   "VibeDisableCommandLineParsing"

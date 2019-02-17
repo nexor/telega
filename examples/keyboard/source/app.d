@@ -21,6 +21,7 @@ int main(string[] args)
 void listenUpdates()
 {
     import telega.botapi;
+    import std.algorithm.iteration : filter;
 
     try {
         import telega.drivers.requests : RequestsHttpClient;
@@ -28,37 +29,27 @@ void listenUpdates()
 
         /+ here you can use your SOCKS5 proxy server accepting unauthorized requests +/
         // SOCKS 5 proxy host and port, no authentication
-        httpClient.setProxy("10.0.3.1", 1080);
+        httpClient.setProxy("127.0.0.1", 1080);
 
         auto api = new BotApi(botToken, BaseApiUrl, httpClient);
+        auto messageUpdatesRange = (new UpdatesRange(api, 0)).filter!isMessageType;
 
-        while(true) {
-            logInfo("Waiting for updates...");
-            auto updates = api.getUpdates();
-            logInfo("Got %d updates", updates.length);
+        foreach (Update update; messageUpdatesRange) {
+            logInfo("Text from %s: %s", update.message.chat.id, update.message.text);
 
-            foreach (update; updates) {
-                if (!update.message.isNull && !update.message.text.isNull) {
-                    logInfo("Text from %s: %s", update.message.chat.id, update.message.text);
+            import std.conv;
+            auto message = SendMessageMethod();
 
-                    import std.conv;
-                    auto message = SendMessageMethod();
+            message.chat_id = update.message.chat.id.to!string;
+            message.text = update.message.text;
 
-                    message.chat_id = update.message.chat.id.to!string;
-                    message.text = update.message.text;
-
-                    if (message.text == "Remove Keyboard") {
-                        message.reply_markup = ReplyKeyboardRemove();
-                    } else {
-                        message.reply_markup = createReplyKeyboardMarkup();
-                    }
-
-                    api.sendMessage(message);
-                }
-                api.updateProcessed(update);
+            if (message.text == "Remove Keyboard") {
+                message.reply_markup = ReplyKeyboardRemove();
+            } else {
+                message.reply_markup = createReplyKeyboardMarkup();
             }
 
-            yield();
+            api.sendMessage(message);
         }
     } catch (Exception e) {
         logError(e.toString());
@@ -82,5 +73,3 @@ auto createReplyKeyboardMarkup()
 
     return markup;
 }
-
-

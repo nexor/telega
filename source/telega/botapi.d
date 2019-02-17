@@ -2821,13 +2821,15 @@ class BotApi
         }
 }
 
-struct UpdatesRange
+class UpdatesRange
 {
+    import std.algorithm.comparison : max;
+
     enum bool empty = false;
 
     protected:
         BotApi _api;
-        int _maxUpdateId;
+        uint _maxUpdateId;
 
         string[] _allowedUpdates = [];
         ubyte _updatesLimit = 5;
@@ -2839,7 +2841,7 @@ struct UpdatesRange
         ushort _index;
 
     public: @safe:
-        this(BotApi api, int maxUpdateId = 0, ubyte limit = 5, uint timeout = 30)
+        this(BotApi api, uint maxUpdateId = 0, ubyte limit = 5, uint timeout = 30)
         {
             _api = api;
             _maxUpdateId = maxUpdateId;
@@ -2849,11 +2851,17 @@ struct UpdatesRange
             _updates.reserve(_updatesLimit);
         }
 
+        @property
+        uint maxUpdateId()
+        {
+            return _maxUpdateId;
+        }
+
         auto front()
         {
             if (_updates.length == 0) {
                 getUpdates();
-                _index = 0;
+                _maxUpdateId = max(_maxUpdateId, _updates[_index].id);
             }
 
             return _updates[_index];
@@ -2861,13 +2869,10 @@ struct UpdatesRange
 
         void popFront()
         {
-            import std.algorithm.comparison : max;
-
             _maxUpdateId = max(_maxUpdateId, _updates[_index].id);
 
             if (++_index >= _updates.length) {
                 getUpdates();
-                _index = 0;
             }
         }
 
@@ -2883,5 +2888,6 @@ struct UpdatesRange
                     _allowedUpdates
                 );
             } while (_updates.length == 0);
+            _index = 0;
         }
 }
