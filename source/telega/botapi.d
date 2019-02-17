@@ -1,7 +1,5 @@
 module telega.botapi;
 
-import vibe.http.client : HTTPMethod;
-import vibe.core.core;
 import vibe.core.log;
 import asdf;
 import std.conv;
@@ -10,6 +8,12 @@ import std.exception;
 import std.traits;
 import telega.http;
 import telega.serialization;
+
+enum HTTPMethod
+{
+	GET,
+	POST
+}
 
 struct ChatId
 {
@@ -1168,7 +1172,7 @@ struct SendMessageMethod
 {
     mixin TelegramMethod!"/sendMessage";
 
-    ChatId    chat_id;
+    string    chat_id;
     string    text;
     ParseMode parse_mode;
     bool      disable_web_page_preview;
@@ -1182,8 +1186,8 @@ struct ForwardMessageMethod
 {
     mixin TelegramMethod!"/forwardMessage";
 
-    ChatId chat_id;
-    ChatId from_chat_id;
+    string chat_id;
+    string from_chat_id;
     bool   disable_notification;
     uint   message_id;
 }
@@ -1192,7 +1196,7 @@ struct SendPhotoMethod
 {
     mixin TelegramMethod!"/sendPhoto";
 
-    ChatId      chat_id;
+    string      chat_id;
     string      photo;
     string      caption;
     ParseMode   parse_mode;
@@ -1205,7 +1209,7 @@ struct SendAudioMethod
 {
     mixin TelegramMethod!"/sendAudio";
 
-    ChatId      chat_id;
+    string      chat_id;
     string      audio;
     string      caption;
     ParseMode   parse_mode;
@@ -1803,8 +1807,13 @@ class BotApi
         {
             SendMessageMethod m = {
                 text       : text,
-                chat_id    : chatId
             };
+
+            static if (isIntegral!T) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
 
             return sendMessage(m);
         }
@@ -1818,10 +1827,20 @@ class BotApi
             if (isTelegramId!T1 && isTelegramId!T2)
         {
             ForwardMessageMethod m = {
-                message_id : messageId,
-                chat_id : chatId,
-                from_chat_id : fromChatId
+                message_id : messageId
             };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
+
+            static if (isIntegral!T2) {
+                m.from_chat_id = fromChatId.to!string;
+            } else {
+                m.from_chat_id = fromChatId;
+            }
 
             return callMethod!(Message, ForwardMessageMethod)(m);
         }
@@ -1861,9 +1880,14 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendAudioMethod m = {
-                audio : audio,
-                chat_id : chatId
+                audio : audio
             };
+
+            static if (isIntegral!T1) {
+                m.chat_id = chatId.to!string;
+            } else {
+                m.chat_id = chatId;
+            }
 
             return sendAudio(m);
         }
@@ -2806,94 +2830,57 @@ class BotApi
             api.deleteWebhook();
             api.getWebhookInfo();
             api.getMe();
-            api.sendMessage(123, "hello");
             api.sendMessage("chat-id", "hello");
-            api.forwardMessage(123, "from-chat-id", 123);
-            api.forwardMessage("chat-id", 321, 123);
             api.forwardMessage("chat-id", "from-chat-id", 123);
             api.sendPhoto("chat-id", "photo-url");
-            api.sendAudio(123, "audio-url");
             api.sendAudio("chat-id", "audio-url");
-            api.sendDocument(123, "document-url");
             api.sendDocument("chat-id", "document-url");
-            api.sendVideo(123, "video-url");
             api.sendVideo("chat-id", "video-url");
-            api.sendVoice(123, "voice-url");
             api.sendVoice("chat-id", "voice-url");
-            api.sendVideoNote(123, "video-note-url");
             api.sendVideoNote("chat-id", "video-note-url");
-            api.sendMediaGroup(123, []);
             api.sendMediaGroup("chat-id", []);
-            api.sendLocation(123, 123, 123);
             api.sendLocation("chat-id", 123, 123);
-            api.editMessageLiveLocation(123, 1, 1.23, 4.56);
             api.editMessageLiveLocation("chat-id", 1, 1.23, 4.56);
             api.editMessageLiveLocation("inline-message-id", 1.23, 4.56);
-            api.stopMessageLiveLocation(123, 1);
             api.stopMessageLiveLocation("chat-id", 1);
             api.stopMessageLiveLocation("inline-message-id");
-            api.sendVenue(123, 123, 123, "title", "address");
             api.sendVenue("chat-id", 123, 123, "title", "address");
-            api.sendContact(123, "+123", "First Name");
             api.sendContact("chat-id", "+123", "First Name");
-            api.sendChatAction(123, "typing");
             api.sendChatAction("chat-id", "typing");
             api.getUserProfilePhotos(1);
             api.getFile("file-id");
-            api.kickChatMember(123, 1);
             api.kickChatMember("chat-id", 1);
-            api.unbanChatMember(123, 1);
             api.unbanChatMember("chat-id", 1);
-            api.restrictChatMember(123, 1);
             api.restrictChatMember("chat-id", 1);
-            api.promoteChatMember(123, 1);
             api.promoteChatMember("chat-id", 1);
-            api.exportChatInviteLink(123);
             api.exportChatInviteLink("chat-id");
-            api.setChatPhoto(123, InputFile());
             api.setChatPhoto("chat-id", InputFile());
-            api.deleteChatPhoto(123);
             api.deleteChatPhoto("chat-id");
-            api.setChatTitle(123, "chat-title");
             api.setChatTitle("chat-id", "chat-title");
-            api.setChatDescription(123, "chat-description");
             api.setChatDescription("chat-id", "chat-description");
-            api.pinChatMessage(123, 1);
             api.pinChatMessage("chat-id", 1);
-            api.unpinChatMessage(123);
             api.unpinChatMessage("chat-id");
-            api.leaveChat(123);
             api.leaveChat("chat-id");
-            api.getChat(123);
             api.getChat("chat-id");
-            api.getChatAdministrators(123);
             api.getChatAdministrators("chat-id");
-            api.getChatMembersCount(123);
             api.getChatMembersCount("chat-id");
-            api.getChatMember(123, 1);
             api.getChatMember("chat-id", 1);
-            api.setChatStickerSet(123, "sticker-set");
             api.setChatStickerSet("chat-id", "sticker-set");
-            api.deleteChatStickerSet(123);
             api.deleteChatStickerSet("chat-id");
             api.answerCallbackQuery("callback-query-id");
-            api.editMessageText(123, 123, "new text");
             api.editMessageText("chat-id", 123, "new text");
             api.editMessageText("inline-message-id", "new text");
-            api.editMessageCaption(123, 123, "new caption");
             api.editMessageCaption("chat-id", 123, "new caption");
             api.editMessageCaption("chat-id", 123, null);
             api.editMessageCaption("inline-message-id", "new caption");
             api.editMessageCaption("inline-message-id", null);
 
-            api.editMessageReplyMarkup(123, 123, ForceReply());
             api.editMessageReplyMarkup("chat-id", 123, ForceReply());
             api.editMessageReplyMarkup("chat-id", 123, ReplyKeyboardMarkup());
             api.editMessageReplyMarkup("chat-id", 123, ReplyKeyboardRemove());
             api.editMessageReplyMarkup("chat-id", 123, InlineKeyboardMarkup());
             api.editMessageReplyMarkup("chat-id", 123, ReplyMarkup());
 
-            api.deleteMessage(123, 123);
             api.deleteMessage("chat-id", 123);
             api.sendSticker("chat-id", "sticker");
             api.getStickerSet("sticker-set");
