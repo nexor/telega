@@ -22,13 +22,9 @@ configuration "requests-driver" {
     dependency "socks-client" version="~>0.1.0"
 
     versions "TelegaRequestsDriver"
+    versions "VibeUseOpenSSL11"
 
     subConfiguration "requests" "vibed"
 
     targetType "library"
-}
-
-configuration "unittest" {
-    versions "VibeNoSSL"
-    versions "TelegaVibedDriver"
 }
