@@ -8,7 +8,6 @@ static if(HaveRequestsDriver):
 import telega.http;
 import requests;
 import socks.socks5;
-import vibe.core.log;
 
 class RequestsHttpClient: HttpClient
 {
@@ -57,11 +56,13 @@ class RequestsHttpClient: HttpClient
 
             if (proxyHost !is null) {
                 proxyConnect(stream, host, port);
+            } else {
+                stream.connect(host, port);
             }
 
             final switch (scheme) {
                 case "http":
-                    stream.connect(host, port);
+                    // do nothing
                     break;
 
                 case "https":
@@ -98,7 +99,7 @@ class RequestsHttpClient: HttpClient
                 stream.send(data);
             };
 
-            Socks5 proxy = Socks5(connector, reader, writer);
+            Socks5 proxy = Socks5(reader, writer, connector);
             proxy.connect(options, host, port);
         }
 }
