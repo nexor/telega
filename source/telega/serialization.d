@@ -53,7 +53,7 @@ struct JsonableAlgebraicProxy(Typelist ...)
     void serialize(S)(ref S serializer)
     {
         if (!value.hasValue) {
-            serializer.putValue(null);
+            serializer.putValue("{}");
 
             return;
         }
