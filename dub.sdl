@@ -26,7 +26,8 @@ configuration "requests-driver" {
     versions "TelegaRequestsDriver"
     versions "VibeUseOpenSSL11"
 
-    subConfiguration "requests" "vibed"
+    subConfiguration "requests" "std"
+    subConfiguration "socks-client" "std"
 
     targetType "library"
 }

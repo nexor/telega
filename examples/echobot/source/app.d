@@ -25,20 +25,11 @@ void listenUpdates()
     try {
         auto api = new BotApi(botToken);
 
-        while(true) {
-            logInfo("Waiting for updates...");
-            auto updates = api.getUpdates();
-            logInfo("Got %d updates", updates.length);
-
-            foreach (update; updates) {
-                if (!update.message.isNull && !update.message.text.isNull) {
-                    logInfo("Text from %s: %s", update.message.chat.id, update.message.text);
-                    api.sendMessage(update.message.chat.id, update.message.text);
-                }
-                api.updateProcessed(update);
+        foreach (Update update; new UpdatesRange(api, 0)) {
+            if (!update.message.isNull && !update.message.text.isNull) {
+                logInfo("Text from %s: %s", update.message.chat.id, update.message.text);
+                api.sendMessage(update.message.chat.id, update.message.text);
             }
-
-            yield();
         }
     } catch (Exception e) {
         logError(e.toString());
