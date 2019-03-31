@@ -6,18 +6,18 @@
 		"botan-math": "1.0.3",
 		"cachetools": "0.1.2",
 		"diet-ng": "1.5.0",
-		"eventcore": "0.8.40",
-		"libasync": "0.8.3",
+		"eventcore": "0.8.41",
+		"libasync": "0.8.4",
 		"libevent": "2.0.2+2.0.16",
 		"memutils": "0.4.13",
 		"mir-linux-kernel": "1.0.1",
 		"openssl": "1.1.6+1.0.1g",
-		"requests": "1.0.5",
+		"requests": "1.0.6",
 		"socks-client": "0.1.0",
 		"stdx-allocator": "2.77.5",
-		"taggedalgebraic": "0.10.12",
+		"taggedalgebraic": "0.11.3",
 		"telega": {"path":"../../"},
-		"vibe-core": "1.6.0",
-		"vibe-d": "0.8.5-alpha.2"
+		"vibe-core": "1.6.2",
+		"vibe-d": "0.8.5"
 	}
 }
