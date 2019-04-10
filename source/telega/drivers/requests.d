@@ -7,11 +7,15 @@ static if(HaveRequestsDriver):
 
 import telega.http;
 import requests;
-import vibe.core.log;
+import socks.socks5;
 
 class RequestsHttpClient: HttpClient
 {
     import core.time;
+
+    protected:
+        string proxyHost;
+        ushort proxyPort;
 
     private:
         Request rq;
@@ -38,15 +42,27 @@ class RequestsHttpClient: HttpClient
             return rs.responseBody.toString();
         }
 
+        void setProxy(string host, ushort port)
+        {
+            proxyHost = host;
+            proxyPort = port;
+        }
+
     private:
         NetworkStream createNetworkStream(string scheme, string host, ushort port)
         {
             NetworkStream stream = new TCPStream();
             stream.readTimeout = 0.seconds;
 
+            if (proxyHost !is null) {
+                proxyConnect(stream, host, port);
+            } else {
+                stream.connect(host, port);
+            }
+
             final switch (scheme) {
                 case "http":
-                    stream.connect(host, port);
+                    // do nothing
                     break;
 
                 case "https":
@@ -58,5 +74,32 @@ class RequestsHttpClient: HttpClient
             }
 
             return stream;
+        }
+
+        void proxyConnect(NetworkStream stream, string host, ushort port)
+        {
+            const Socks5Options options = {
+                host: proxyHost,
+                port: proxyPort,
+                resolveHost: true
+            };
+
+            SocksTCPConnector connector = (in string host, in ushort port)
+            {
+                stream.connect(host, port);
+
+                return true;
+            };
+            SocksDataReader reader = (ubyte[] data)
+            {
+                stream.receive(data);
+            };
+            SocksDataWriter writer = (in ubyte[] data)
+            {
+                stream.send(data);
+            };
+
+            Socks5 proxy = Socks5(reader, writer, connector);
+            proxy.connect(options, host, port);
         }
 }
