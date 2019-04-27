@@ -14,6 +14,7 @@ int main(string[] args)
     setLogLevel(LogLevel.debugV);
 
     runTask(&listenUpdates);
+    disableDefaultSignalHandlers();
 
     return runApplication();
 }
