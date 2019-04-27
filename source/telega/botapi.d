@@ -15,6 +15,108 @@ enum HTTPMethod
 	POST
 }
 
+@serializedAs!ChatIdProxy
+struct ChatId
+{
+    import std.conv;
+
+    string id;
+
+    private bool _isString = true;
+
+    alias id this;
+
+    this(long id)
+    {
+        this.id = id.to!string;
+        _isString = false;
+    }
+
+    this(string id)
+    {
+        this.id = id;
+    }
+
+    void opAssign(long id)
+    {
+        this.id = id.to!string;
+        _isString = false;
+    }
+
+    void opAssign(string id)
+    {
+        this.id = id;
+        _isString = true;
+    }
+
+    @property
+    bool isString()
+    {
+        return _isString;
+    }
+
+    long opCast(T)()
+        if (is(T == long))
+    {
+        if (_isString) {
+            return 0;
+        }
+
+        return id.to!long;
+    }
+}
+
+struct ChatIdProxy
+{
+    ChatId id;
+
+    this(ChatId id)
+    {
+        this.id = id;
+    }
+
+    ChatId opCast(T : ChatId)()
+    {
+        return id;
+    }
+
+    static ChatIdProxy deserialize(Asdf v)
+    {
+        return ChatIdProxy(ChatId(cast(string)v));
+    }
+}
+
+unittest
+{
+    ChatId chatId;
+
+    chatId = 45;
+    assert(chatId.isString() == false);
+
+    chatId = "@chat";
+    assert(chatId.isString() == true);
+
+    string chatIdString = chatId;
+    assert(chatIdString == "@chat");
+
+    long chatIdNum = cast(long)chatId;
+    assert(chatIdNum == 0);
+
+    chatId = 42;
+
+    chatIdNum = cast(long)chatId;
+    assert(chatIdNum == 42);
+
+    string chatIdFunc(ChatId id)
+    {
+        return id;
+    }
+
+    assert(chatIdFunc(cast(ChatId)"abc") == "abc");
+    assert(chatIdFunc(cast(ChatId)45) == "45");
+}
+
+
 class TelegramBotApiException : Exception
 {
     ushort code;
@@ -27,7 +129,7 @@ class TelegramBotApiException : Exception
     }
 }
 
-enum isTelegramId(T) = isSomeString!T || isIntegral!T;
+enum isTelegramId(T) = isSomeString!T || isIntegral!T || is(T == ChatId);
 
 /******************************************************************/
 /*                    Telegram types and enums                    */
@@ -1092,7 +1194,7 @@ struct SendMessageMethod
 {
     mixin TelegramMethod!"/sendMessage";
 
-    string    chat_id;
+    ChatId    chat_id;
     string    text;
     ParseMode parse_mode;
     bool      disable_web_page_preview;
@@ -1106,7 +1208,7 @@ struct ForwardMessageMethod
 {
     mixin TelegramMethod!"/forwardMessage";
 
-    string chat_id;
+    ChatId chat_id;
     string from_chat_id;
     bool   disable_notification;
     uint   message_id;
@@ -1277,7 +1379,7 @@ struct SendChatActionMethod
 {
     mixin TelegramMethod!"/sendChatAction";
 
-    string chat_id;
+    ChatId chat_id;
     string action; // TODO enum
 }
 
@@ -1301,7 +1403,7 @@ struct KickChatMemberMethod
 {
     mixin TelegramMethod!"/kickChatMember";
 
-    string chat_id;
+    ChatId chat_id;
     uint   user_id;
     uint   until_date;
 }
@@ -1310,7 +1412,7 @@ struct UnbanChatMemberMethod
 {
     mixin TelegramMethod!"/unbanChatMember";
 
-    string chat_id;
+    ChatId chat_id;
     uint   user_id;
 }
 
@@ -1318,7 +1420,7 @@ struct RestrictChatMemberMethod
 {
     mixin TelegramMethod!"/restrictChatMember";
 
-    string chat_id;
+    ChatId chat_id;
     uint   user_id;
     uint   until_date;
     bool   can_send_messages;
@@ -1331,7 +1433,7 @@ struct PromoteChatMemberMethod
 {
     mixin TelegramMethod!"/promoteChatMember";
 
-    string chat_id;
+    ChatId chat_id;
     uint   user_id;
     bool   can_change_info;
     bool   can_post_messages;
@@ -1347,7 +1449,7 @@ struct ExportChatInviteLinkMethod
 {
     mixin TelegramMethod!"/exportChatInviteLink";
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct SetChatPhotoMethod
@@ -1363,14 +1465,14 @@ struct DeleteChatPhotoMethod
 {
     mixin TelegramMethod!"/deleteChatPhoto";
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct SetChatTitleMethod
 {
     mixin TelegramMethod!"/setChatTitle";
 
-    string chat_id;
+    ChatId chat_id;
     string title;
 }
 
@@ -1378,7 +1480,7 @@ struct SetChatDescriptionMethod
 {
     mixin TelegramMethod!"/setChatDescription";
 
-    string chat_id;
+    ChatId chat_id;
     string description;
 }
 
@@ -1386,7 +1488,7 @@ struct PinChatMessageMethod
 {
     mixin TelegramMethod!"/pinChatMessage";
 
-    string chat_id;
+    ChatId chat_id;
     uint   message_id;
     bool   disable_notification;
 }
@@ -1395,42 +1497,42 @@ struct UnpinChatMessageMethod
 {
     mixin TelegramMethod!"/unpinChatMessage";
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct LeaveChatMethod
 {
     mixin TelegramMethod!"/leaveChat";
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct GetChatMethod
 {
     mixin TelegramMethod!("/getChat", HTTPMethod.GET);
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct GetChatAdministratorsMethod
 {
     mixin TelegramMethod!("/getChatAdministrators", HTTPMethod.GET);
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct GetChatMembersCountMethod
 {
     mixin TelegramMethod!("/getChatMembersCount", HTTPMethod.GET);
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct GetChatMemberMethod
 {
     mixin TelegramMethod!("/getChatMember", HTTPMethod.GET);
 
-    string chat_id;
+    ChatId chat_id;
     uint   user_id;
 }
 
@@ -1438,7 +1540,7 @@ struct SetChatStickerSetMethod
 {
     mixin TelegramMethod!"/setChatStickerSet";
 
-    string chat_id;
+    ChatId chat_id;
     string sticker_set_name;
 }
 
@@ -1446,7 +1548,7 @@ struct DeleteChatStickerSetMethod
 {
     mixin TelegramMethod!"/deleteChatStickerSet";
 
-    string chat_id;
+    ChatId chat_id;
 }
 
 struct AnswerCallbackQueryMethod
@@ -1499,7 +1601,7 @@ struct DeleteMessageMethod
 {
     mixin TelegramMethod!"/deleteMessageMethod";
 
-    string chat_id;
+    ChatId chat_id;
     uint   message_id;
 }
 
@@ -1714,14 +1816,9 @@ class BotApi
             if (isTelegramId!T)
         {
             SendMessageMethod m = {
+                chat_id    : chatId,
                 text       : text,
             };
-
-            static if (isIntegral!T) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendMessage(m);
         }
@@ -1735,20 +1832,10 @@ class BotApi
             if (isTelegramId!T1 && isTelegramId!T2)
         {
             ForwardMessageMethod m = {
-                message_id : messageId
+                message_id : messageId,
+                chat_id : chatId,
+                from_chat_id: fromChatId,
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
-
-            static if (isIntegral!T2) {
-                m.from_chat_id = fromChatId.to!string;
-            } else {
-                m.from_chat_id = fromChatId;
-            }
 
             return callMethod!(Message, ForwardMessageMethod)(m);
         }
@@ -1767,14 +1854,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendPhotoMethod m = {
-                photo : photo
+                chat_id : chatId,
+                photo : photo,
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendPhoto(m);
         }
@@ -1788,14 +1870,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendAudioMethod m = {
+                chat_id : chatId,
                 audio : audio
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendAudio(m);
         }
@@ -1809,14 +1886,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendDocumentMethod m = {
+                chat_id : chatId,
                 document : document
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendDocument(m);
         }
@@ -1830,14 +1902,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendVideoMethod m = {
+                chat_id : chatId,
                 video : video
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendVideo(m);
         }
@@ -1851,14 +1918,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendVoiceMethod m = {
+                chat_id : chatId,
                 voice : voice
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendVoice(m);
         }
@@ -1872,14 +1934,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendVideoNoteMethod m = {
+                chat_id : chatId,
                 video_note : videoNote
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendVideoNote(m);
         }
@@ -1893,14 +1950,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendMediaGroupMethod m = {
+                chat_id : chatId,
                 media : media
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendMediaGroup(m);
         }
@@ -1914,15 +1966,10 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendLocationMethod m = {
+                chat_id : chatId,
                 latitude : latitude,
                 longitude : longitude,
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendLocation(m);
         }
@@ -1947,16 +1994,11 @@ class BotApi
             if (isTelegramId!T1)
         {
             EditMessageLiveLocationMethod m = {
+                chat_id : chatId,
                 message_id : messageId,
                 latitude : latitude,
                 longitude : longitude
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return editMessageLiveLocation(m);
         }
@@ -1979,14 +2021,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             StopMessageLiveLocationMethod m = {
+                chat_id : chatId,
                 message_id : messageId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return stopMessageLiveLocation(m);
         }
@@ -2001,17 +2038,12 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendVenueMethod m = {
+                chat_id : chatId,
                 latitude : latitude,
                 longitude : longitude,
                 title : title,
                 address : address
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendVenue(m);
         }
@@ -2025,15 +2057,10 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendContactMethod m = {
+                chat_id : chatId,
                 phone_number : phone_number,
                 first_name : first_name
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendContact(m);
         }
@@ -2047,14 +2074,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendChatActionMethod m = {
+                chat_id : chatId,
                 action : action
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendChatAction(m);
         }
@@ -2096,14 +2118,9 @@ class BotApi
             if(isTelegramId!T1)
         {
             KickChatMemberMethod m = {
+                chat_id : chatId,
                 user_id : userId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return kickChatMember(m);
         }
@@ -2117,14 +2134,9 @@ class BotApi
             if(isTelegramId!T1)
         {
             UnbanChatMemberMethod m = {
+                chat_id : chatId,
                 user_id : userId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return unbanChatMember(m);
         }
@@ -2138,14 +2150,9 @@ class BotApi
             if(isTelegramId!T1)
         {
             RestrictChatMemberMethod m = {
+                chat_id : chatId,
                 user_id : userId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return restrictChatMember(m);
         }
@@ -2159,14 +2166,9 @@ class BotApi
             if(isTelegramId!T1)
         {
             PromoteChatMemberMethod m = {
+                chat_id : chatId,
                 user_id : userId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return promoteChatMember(m);
         }
@@ -2179,13 +2181,9 @@ class BotApi
         string exportChatInviteLink(T1)(T1 chatId)
             if(isTelegramId!T1)
         {
-            ExportChatInviteLinkMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            ExportChatInviteLinkMethod m = {
+                chat_id : chatId,
+            };
 
             return exportChatInviteLink(m);
         }
@@ -2199,14 +2197,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SetChatPhotoMethod m = {
+                chat_id : chatId,
                 photo : photo
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return setChatPhoto(m);
         }
@@ -2219,13 +2212,9 @@ class BotApi
         bool deleteChatPhoto(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            DeleteChatPhotoMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            DeleteChatPhotoMethod m = {
+                chat_id : chatId,
+            };
 
             return deleteChatPhoto(m);
         }
@@ -2239,14 +2228,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SetChatTitleMethod m = {
+                chat_id : chatId,
                 title : title
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return setChatTitle(m);
         }
@@ -2260,14 +2244,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SetChatDescriptionMethod m = {
+                chat_id : chatId,
                 description : description
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return setChatDescription(m);
         }
@@ -2281,14 +2260,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             PinChatMessageMethod m = {
+                chat_id : chatId,
                 message_id : messageId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return pinChatMessage(m);
         }
@@ -2301,13 +2275,9 @@ class BotApi
         bool unpinChatMessage(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            UnpinChatMessageMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            UnpinChatMessageMethod m = {
+                chat_id : chatId,
+            };
 
             return unpinChatMessage(m);
         }
@@ -2320,13 +2290,9 @@ class BotApi
         bool leaveChat(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            LeaveChatMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            LeaveChatMethod m = {
+                chat_id : chatId,
+            };
 
             return leaveChat(m);
         }
@@ -2339,13 +2305,9 @@ class BotApi
         Chat getChat(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            GetChatMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            GetChatMethod m = {
+                chat_id : chatId,
+            };
 
             return getChat(m);
         }
@@ -2358,13 +2320,9 @@ class BotApi
         ChatMember getChatAdministrators(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            GetChatAdministratorsMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            GetChatAdministratorsMethod m = {
+                chat_id : chatId,
+            };
 
             return getChatAdministrators(m);
         }
@@ -2377,13 +2335,9 @@ class BotApi
         uint getChatMembersCount(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            GetChatMembersCountMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            GetChatMembersCountMethod m = {
+                chat_id : chatId,
+            };
 
             return getChatMembersCount(m);
         }
@@ -2397,14 +2351,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             GetChatMemberMethod m = {
+                chat_id : chatId,
                 user_id : userId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return getChatMember(m);
         }
@@ -2418,14 +2367,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SetChatStickerSetMethod m = {
+                chat_id : chatId,
                 sticker_set_name : stickerSetName
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return setChatStickerSet(m);
         }
@@ -2438,13 +2382,9 @@ class BotApi
         bool deleteChatStickerSet(T1)(T1 chatId)
             if (isTelegramId!T1)
         {
-            DeleteChatStickerSetMethod m;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
+            DeleteChatStickerSetMethod m = {
+                chat_id : chatId,
+            };
 
             return deleteChatStickerSet(m);
         }
@@ -2472,15 +2412,10 @@ class BotApi
             if (isTelegramId!T1)
         {
             EditMessageTextMethod m = {
+                chat_id : chatId,
                 message_id : messageId,
                 text : text
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return editMessageText(m);
         }
@@ -2504,15 +2439,10 @@ class BotApi
             if (isTelegramId!T1)
         {
             EditMessageCaptionMethod m = {
+                chat_id : chatId,
                 message_id : messageId,
                 caption : caption
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return editMessageCaption(m);
         }
@@ -2536,16 +2466,11 @@ class BotApi
             if (isTelegramId!T1 && isReplyMarkup!T2)
         {
             EditMessageReplyMarkupMethod m = {
+                chat_id : chatId,
                 message_id : messageId
             };
 
             m.reply_markup = replyMarkup;
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return editMessageReplyMarkup(m);
         }
@@ -2569,14 +2494,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             DeleteMessageMethod m = {
+                chat_id : chatId,
                 message_id : messageId
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return deleteMessage(m);
         }
@@ -2591,14 +2511,9 @@ class BotApi
             if (isTelegramId!T1)
         {
             SendStickerMethod m = {
+                chat_id : chatId,
                 sticker : sticker
             };
-
-            static if (isIntegral!T1) {
-                m.chat_id = chatId.to!string;
-            } else {
-                m.chat_id = chatId;
-            }
 
             return sendSticker(m);
         }
