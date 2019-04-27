@@ -7,7 +7,12 @@ import asdf;
 
 string serializeToJsonString(T)(T value)
 {
-    return serializeToJson(value);
+    import std.conv : to;
+
+    AsdfNode asdfNode = serializeToAsdf(value);
+    removeNulledNodes(asdfNode);
+
+    return  asdfNode.serializeToAsdf.to!string;
 }
 
 unittest
@@ -28,6 +33,52 @@ unittest
 
     s.a = "123";
     assert(`{"a":"123"}` == s.serializeToJson());
+}
+
+void removeNulledNodes(ref AsdfNode an)
+{
+    foreach (ref v; an.children) {
+        if (!v.isLeaf) {
+            removeNulledNodes(v);
+        } else if (v.data.kind == Asdf.Kind.null_) {
+            v.data.remove();
+        }
+    }
+}
+
+unittest
+{
+    import std.conv: to;
+
+    struct Payload
+    {
+        bool val;
+        Nullable!bool nullablePayloadItem;
+    }
+
+    struct Message
+    {
+        string stringText;
+
+        Nullable!Payload nullablePayload;
+        Payload notNullablePayload;
+
+        Nullable!int nullableInt;
+        int notNullableInt;
+    }
+
+    Message m;
+    AsdfNode an = AsdfNode(m.serializeToAsdf());
+
+    assert(an.serializeToAsdf.to!string ==
+        `{"nullablePayload":null,"notNullablePayload":{"val":false,"nullablePayloadItem":null},"notNullableInt":0,"stringText":null,"nullableInt":null}`
+    );
+
+    removeNulledNodes(an);
+
+    assert(an.serializeToAsdf.to!string ==
+        `{"notNullablePayload":{"val":false},"notNullableInt":0}`
+    );
 }
 
 struct JsonableAlgebraicProxy(Typelist ...)
