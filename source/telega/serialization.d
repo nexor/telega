@@ -9,10 +9,10 @@ string serializeToJsonString(T)(T value)
 {
     import std.conv : to;
 
-    AsdfNode asdfNode = serializeToAsdf(value);
-    removeNulledNodes(asdfNode);
+    Asdf asdf = serializeToAsdf(value);
+    removeNulledNodes(asdf);
 
-    return  asdfNode.serializeToAsdf.to!string;
+    return  asdf.to!string;
 }
 
 unittest
@@ -35,13 +35,17 @@ unittest
     assert(`{"a":"123"}` == s.serializeToJson());
 }
 
-void removeNulledNodes(ref AsdfNode an)
+void removeNulledNodes(ref Asdf a)
 {
-    foreach (ref v; an.children) {
-        if (!v.isLeaf) {
+    if (a.kind == Asdf.Kind.null_) {
+        a.remove();
+    } else if (a.kind == Asdf.Kind.array) {
+        foreach (v; a.byElement) {
             removeNulledNodes(v);
-        } else if (v.data.kind == Asdf.Kind.null_) {
-            v.data.remove();
+        }
+    } else if (a.kind == Asdf.Kind.object) {
+        foreach (kv; a.byKeyValue) {
+            removeNulledNodes(kv.value);
         }
     }
 }
@@ -50,35 +54,54 @@ unittest
 {
     import std.conv: to;
 
-    struct Payload
-    {
-        bool val;
-        Nullable!bool nullablePayloadItem;
-    }
+    string jsonWithNulls = `{
+        "chat_id":"100000001",
+        "text":"o",
+        "reply_markup":{
+            "keyboard":[
+                [
+                    {"text":"First Button","request_contact":null,"request_location":null},
+                    {"text":"Second Button","request_contact":null,"request_location":null}
+                ],
+                [
+                    {"text":"Ask location","request_contact":false,"request_location":true}
+                ],
+                [
+                    {"text":"Remove Keyboard","request_contact":null,"request_location":null}
+                ]
+            ],
+            "resize_keyboard":false,
+            "selective":false,
+            "one_time_keyboard":false
+        }
+    }`;
+    string cleanJson = `{
+        "chat_id":"100000001",
+        "text":"o",
+        "reply_markup":{
+            "keyboard":[
+                [
+                    {"text":"First Button"},
+                    {"text":"Second Button"}
+                ],
+                [
+                    {"text":"Ask location","request_contact":false,"request_location":true}
+                ],
+                [
+                    {"text":"Remove Keyboard"}
+                ]
+            ],
+            "resize_keyboard":false,
+            "selective":false,
+            "one_time_keyboard":false
+        }
+    }`;
 
-    struct Message
-    {
-        string stringText;
+    Asdf asdf = jsonWithNulls.parseJson();
 
-        Nullable!Payload nullablePayload;
-        Payload notNullablePayload;
+    removeNulledNodes(asdf);
 
-        Nullable!int nullableInt;
-        int notNullableInt;
-    }
-
-    Message m;
-    AsdfNode an = AsdfNode(m.serializeToAsdf());
-
-    assert(an.serializeToAsdf.to!string ==
-        `{"nullablePayload":null,"notNullablePayload":{"val":false,"nullablePayloadItem":null},"notNullableInt":0,"stringText":null,"nullableInt":null}`
-    );
-
-    removeNulledNodes(an);
-
-    assert(an.serializeToAsdf.to!string ==
-        `{"notNullablePayload":{"val":false},"notNullableInt":0}`
-    );
+    assert(asdf.to!string == cleanJson.parseJson.to!string);
 }
 
 struct JsonableAlgebraicProxy(Typelist ...)
