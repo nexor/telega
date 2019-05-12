@@ -1375,12 +1375,26 @@ struct SendContactMethod
     ReplyMarkup reply_markup;
 }
 
+enum ChatAction : string
+{
+    Typing = "typing",
+    UploadPhoto = "upload_photo",
+    RecordVideo = "record_video",
+    UploadVideo = "upload_video",
+    RecordAudio = "record_audio",
+    UploadAudio = "upload_audio",
+    UploadDocument = "upload_document",
+    FindLocation = "find_location",
+    RecordVideoNote = "record_video_note",
+    UploadVideoNote = "upload_video_note"
+}
+
 struct SendChatActionMethod
 {
     mixin TelegramMethod!"/sendChatAction";
 
     ChatId chat_id;
-    string action; // TODO enum
+    string action;
 }
 
 struct GetUserProfilePhotosMethod
