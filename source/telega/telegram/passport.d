@@ -59,6 +59,8 @@ struct EncryptedCredentials
     string secret;
 }
 
+import std.meta : AliasSeq;
+
 alias PassportElementErrorStructs = AliasSeq!(
     PassportElementErrorDataField,
     PassportElementErrorFrontSide,
