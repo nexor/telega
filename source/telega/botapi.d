@@ -1207,7 +1207,7 @@ struct SendMessageMethod
     Nullable!bool      disable_notification;
     Nullable!uint      reply_to_message_id;
 
-    ReplyMarkup reply_markup;
+    Nullable!ReplyMarkup reply_markup;
 }
 
 unittest
@@ -1218,7 +1218,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","text":"Message text","reply_markup":"{}"}`);
+        `{"chat_id":"111","text":"Message text"}`);
 }
 
 struct ForwardMessageMethod
@@ -1252,7 +1252,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","photo":"Photo url","disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
+        `{"chat_id":"111","photo":"Photo url","disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendAudioMethod
@@ -1280,7 +1280,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","audio":"data","duration":0,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
+        `{"chat_id":"111","audio":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendDocumentMethod
@@ -1304,7 +1304,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","document":"data","disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
+        `{"chat_id":"111","document":"data","disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendVideoMethod
@@ -1332,7 +1332,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","video":"data","duration":0,"width":0,"height":0,"supports_streaming":false,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`
+        `{"chat_id":"111","video":"data","duration":0,"width":0,"height":0,"supports_streaming":false,"disable_notification":false,"reply_to_message_id":0}`
     );
 }
 
@@ -1358,7 +1358,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","voice":"data","duration":0,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
+        `{"chat_id":"111","voice":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendVideoNoteMethod
