@@ -1210,6 +1210,17 @@ struct SendMessageMethod
     ReplyMarkup reply_markup;
 }
 
+unittest
+{
+    SendMessageMethod m = {
+        chat_id: 111,
+        text: "Message text"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","text":"Message text","reply_markup":"{}"}`);
+}
+
 struct ForwardMessageMethod
 {
     mixin TelegramMethod!"/forwardMessage";
@@ -1227,10 +1238,21 @@ struct SendPhotoMethod
     string      chat_id;
     string      photo;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendPhotoMethod m = {
+        chat_id: "111",
+        photo: "Photo url"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","photo":"Photo url","disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
 }
 
 struct SendAudioMethod
@@ -1240,7 +1262,7 @@ struct SendAudioMethod
     string      chat_id;
     string      audio;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     uint        duration;
     string      performer;
     string      title;
@@ -1250,6 +1272,17 @@ struct SendAudioMethod
 
 }
 
+unittest
+{
+    SendAudioMethod m = {
+        chat_id: "111",
+        audio: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","audio":"data","duration":0,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
+}
+
 struct SendDocumentMethod
 {
     mixin TelegramMethod!"/sendDocument";
@@ -1257,10 +1290,21 @@ struct SendDocumentMethod
     string      chat_id;
     string      document;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendDocumentMethod m = {
+        chat_id: "111",
+        document: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","document":"data","disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
 }
 
 struct SendVideoMethod
@@ -1273,11 +1317,23 @@ struct SendVideoMethod
     uint        width;
     uint        height;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        supports_streaming;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendVideoMethod m = {
+        chat_id: "111",
+        video: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","video":"data","duration":0,"width":0,"height":0,"supports_streaming":false,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`
+    );
 }
 
 struct SendVoiceMethod
@@ -1287,11 +1343,22 @@ struct SendVoiceMethod
     string      chat_id;
     string      voice;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     uint        duration;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendVoiceMethod m = {
+        chat_id: "111",
+        voice: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","voice":"data","duration":0,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
 }
 
 struct SendVideoNoteMethod
@@ -1305,7 +1372,6 @@ struct SendVideoNoteMethod
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
-
 }
 
 struct SendMediaGroupMethod
@@ -1590,7 +1656,7 @@ struct EditMessageTextMethod
     uint        message_id;
     string      inline_message_id;
     string      text;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        disable_web_page_preview;
     ReplyMarkup reply_markup;
 }
@@ -1603,7 +1669,7 @@ struct EditMessageCaptionMethod
     uint        message_id;
     string      inline_message_id;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     ReplyMarkup reply_markup;
 }
 
