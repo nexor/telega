@@ -1207,7 +1207,7 @@ struct SendMessageMethod
     Nullable!bool      disable_notification;
     Nullable!uint      reply_to_message_id;
 
-    Nullable!ReplyMarkup reply_markup;
+    ReplyMarkup reply_markup;
 }
 
 unittest
