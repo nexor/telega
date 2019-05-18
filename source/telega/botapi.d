@@ -1144,9 +1144,9 @@ struct GameHighScore
 
 mixin template TelegramMethod(string path, HTTPMethod method = HTTPMethod.POST)
 {
-    package:
-        immutable string _path       = path;
-        HTTPMethod       _httpMethod = method;
+    public:
+        immutable string      _path       = path;
+        immutable HTTPMethod  _httpMethod = method;
 }
 
 /// UDA for telegram methods
