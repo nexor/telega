@@ -5,6 +5,7 @@ else enum HaveVibedDriver = false;
 
 static if(HaveVibedDriver):
 
+import std.exception : enforce;
 import vibe.http.client;
 import vibe.stream.operations : readAllUTF8;
 import vibe.core.log;
