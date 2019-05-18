@@ -463,7 +463,12 @@ struct File
 import std.meta : AliasSeq, staticIndexOf;
 import std.variant : Algebraic;
 
-alias ReplyMarkupStructs = AliasSeq!(ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, ForceReply);
+alias ReplyMarkupStructs = AliasSeq!(
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    InlineKeyboardMarkup,
+    ForceReply
+    );
 
 /**
  Abstract structure for unioining ReplyKeyboardMarkup, ReplyKeyboardRemove,
@@ -477,36 +482,13 @@ enum isReplyMarkup(T) =
 import std.algorithm.iteration;
 import std.array;
 
-static bool falseIfNull(Nullable!bool value)
-{
-    if (value.isNull) {
-        return false;
-    }
-
-    return cast(bool)value;
-}
-
-static bool trueIfNull(Nullable!bool value)
-{
-    if (value.isNull) {
-        return true;
-    }
-
-    return cast(bool)value;
-}
-
 struct ReplyKeyboardMarkup
 {
     KeyboardButton[][] keyboard;
 
- // TODO   @serializationTransformOut!falseIfNull
-    Nullable!bool      resize_keyboard = false;
-
-// TODO     @serializationTransformOut!falseIfNull
-    Nullable!bool      one_time_keyboard = false;
-
-// TODO    @serializationTransformOut!falseIfNull
-    Nullable!bool      selective = false;
+    Nullable!bool      resize_keyboard;
+    Nullable!bool      one_time_keyboard;
+    Nullable!bool      selective;
 
     this (string[][] keyboard)
     {
@@ -526,11 +508,35 @@ struct KeyboardButton
     Nullable!bool   request_contact;
     Nullable!bool   request_location;
 
-    this(string text, bool requestContact = false, bool requestLocation = false)
+    this(string text)
     {
         this.text = text;
+    }
+
+    this(string text, bool requestContact)
+    {
+        this(text);
         this.request_contact = requestContact;
+    }
+
+    this(string text, bool requestContact, bool requestLocation)
+    {
+        this(text, requestContact);
         this.request_location = requestLocation;
+    }
+
+    typeof(this) requestContact(bool value = true)
+    {
+        request_contact = value;
+
+        return this;
+    }
+
+    typeof(this) requestLocation(bool value = true)
+    {
+        request_location = value;
+
+        return this;
     }
 }
 
@@ -542,7 +548,7 @@ KeyboardButton[] toKeyboardButtonRow(string[] row)
 struct ReplyKeyboardRemove
 {
     bool remove_keyboard = true;
-    Nullable!bool           selective = false;
+    Nullable!bool           selective;
 }
 
 struct InlineKeyboardMarkup
@@ -1197,9 +1203,9 @@ struct SendMessageMethod
     ChatId    chat_id;
     string    text;
     Nullable!ParseMode parse_mode;
-    bool      disable_web_page_preview;
-    bool      disable_notification;
-    uint      reply_to_message_id;
+    Nullable!bool      disable_web_page_preview;
+    Nullable!bool      disable_notification;
+    Nullable!uint      reply_to_message_id;
 
     ReplyMarkup reply_markup;
 }
@@ -1212,7 +1218,7 @@ unittest
     };
 
     assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","text":"Message text","disable_web_page_preview":false,"disable_notification":false,"reply_to_message_id":0,"reply_markup":"{}"}`);
+        `{"chat_id":"111","text":"Message text","reply_markup":"{}"}`);
 }
 
 struct ForwardMessageMethod
@@ -1221,7 +1227,7 @@ struct ForwardMessageMethod
 
     ChatId chat_id;
     string from_chat_id;
-    bool   disable_notification;
+    Nullable!bool   disable_notification;
     uint   message_id;
 }
 
@@ -1441,12 +1447,26 @@ struct SendContactMethod
     ReplyMarkup reply_markup;
 }
 
+enum ChatAction : string
+{
+    Typing = "typing",
+    UploadPhoto = "upload_photo",
+    RecordVideo = "record_video",
+    UploadVideo = "upload_video",
+    RecordAudio = "record_audio",
+    UploadAudio = "upload_audio",
+    UploadDocument = "upload_document",
+    FindLocation = "find_location",
+    RecordVideoNote = "record_video_note",
+    UploadVideoNote = "upload_video_note"
+}
+
 struct SendChatActionMethod
 {
     mixin TelegramMethod!"/sendChatAction";
 
     ChatId chat_id;
-    string action; // TODO enum
+    string action;
 }
 
 struct GetUserProfilePhotosMethod
