@@ -1235,7 +1235,7 @@ struct SendPhotoMethod
 {
     mixin TelegramMethod!"/sendPhoto";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      photo;
     string      caption;
     Nullable!ParseMode   parse_mode;
@@ -1259,7 +1259,7 @@ struct SendAudioMethod
 {
     mixin TelegramMethod!"/sendAudio";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      audio;
     string      caption;
     Nullable!ParseMode   parse_mode;
@@ -1287,7 +1287,7 @@ struct SendDocumentMethod
 {
     mixin TelegramMethod!"/sendDocument";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      document;
     string      caption;
     Nullable!ParseMode   parse_mode;
@@ -1340,7 +1340,7 @@ struct SendVoiceMethod
 {
     mixin TelegramMethod!"/sendVoice";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      voice;
     string      caption;
     Nullable!ParseMode   parse_mode;
@@ -1365,7 +1365,7 @@ struct SendVideoNoteMethod
 {
     mixin TelegramMethod!"/sendVideoNote";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      video_note;
     uint        duration;
     uint        length;
@@ -1378,7 +1378,7 @@ struct SendMediaGroupMethod
 {
     mixin TelegramMethod!"/sendMediaGroup";
 
-    string       chat_id;
+    ChatId       chat_id;
     InputMedia[] media;
     bool         disable_notification;
     uint         reply_to_message_id;
@@ -1388,7 +1388,7 @@ struct SendLocationMethod
 {
     mixin TelegramMethod!"/sendLocation";
 
-    string      chat_id;
+    ChatId      chat_id;
     float       latitude;
     float       longitude;
     uint        live_period;
@@ -1401,7 +1401,7 @@ struct EditMessageLiveLocationMethod
 {
     mixin TelegramMethod!"/editMessageLiveLocation";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     float       latitude;
@@ -1413,7 +1413,7 @@ struct StopMessageLiveLocationMethod
 {
     mixin TelegramMethod!"/stopMessageLiveLocation";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     ReplyMarkup reply_markup;
@@ -1423,7 +1423,7 @@ struct SendVenueMethod
 {
     mixin TelegramMethod!"/sendVenue";
 
-    string      chat_id;
+    ChatId      chat_id;
     float       latitude;
     float       longitude;
     string      title;
@@ -1438,7 +1438,7 @@ struct SendContactMethod
 {
     mixin TelegramMethod!"/sendContact";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      phone_number;
     string      first_name;
     string      last_name;
@@ -1542,7 +1542,7 @@ struct SetChatPhotoMethod
 {
     mixin TelegramMethod!"/setChatPhoto";
 
-    string    chat_id;
+    ChatId    chat_id;
     InputFile photo;
 
 }
@@ -1652,7 +1652,7 @@ struct EditMessageTextMethod
 {
     mixin TelegramMethod!"/editMessageTextMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     string      text;
@@ -1665,7 +1665,7 @@ struct EditMessageCaptionMethod
 {
     mixin TelegramMethod!"/editMessageCaptionMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     string      caption;
@@ -1677,7 +1677,7 @@ struct EditMessageReplyMarkupMethod
 {
     mixin TelegramMethod!"/editMessageReplyMarkupMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     ReplyMarkup reply_markup;
@@ -1695,7 +1695,7 @@ struct SendStickerMethod
 {
     mixin TelegramMethod!"/sendStickerMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      sticker; // TODO InputFile|string
     bool        disable_notification;
     uint        reply_to_message_id;
