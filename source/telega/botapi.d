@@ -226,7 +226,8 @@ unittest
     string json = `{
         "id": 42,
         "type": "group",
-        "title": "chat title"
+        "title": "chat title",
+        "all_members_are_administrators": false
     }`;
 
     Chat c = deserialize!Chat(json);
