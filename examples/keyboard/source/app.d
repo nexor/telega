@@ -14,6 +14,7 @@ int main(string[] args)
     setLogLevel(LogLevel.trace);
 
     runTask(&listenUpdates);
+    disableDefaultSignalHandlers();
 
     return runApplication();
 }
@@ -68,7 +69,7 @@ auto createReplyKeyboardMarkup()
     ]);
 
     // button rows can be appended to a keyboard
-    markup ~= [KeyboardButton("Ask location", false, true)];
+    markup ~= [KeyboardButton("Ask location").requestLocation()];
     markup ~= [KeyboardButton("Remove Keyboard")];
 
     return markup;
