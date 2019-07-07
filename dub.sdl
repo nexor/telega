@@ -31,3 +31,7 @@ configuration "requests-driver" {
 
     targetType "library"
 }
+
+configuration "unittest" {
+    versions "VibeNoSSL"
+}
