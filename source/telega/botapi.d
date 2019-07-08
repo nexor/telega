@@ -1152,7 +1152,10 @@ struct GameHighScore
 mixin template TelegramMethod(string path, HTTPMethod method = HTTPMethod.POST)
 {
     public:
+        @serializationIgnore
         immutable string      _path       = path;
+
+        @serializationIgnore
         immutable HTTPMethod  _httpMethod = method;
 }
 
