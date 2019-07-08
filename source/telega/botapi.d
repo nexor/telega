@@ -226,7 +226,8 @@ unittest
     string json = `{
         "id": 42,
         "type": "group",
-        "title": "chat title"
+        "title": "chat title",
+        "all_members_are_administrators": false
     }`;
 
     Chat c = deserialize!Chat(json);
@@ -1151,7 +1152,10 @@ struct GameHighScore
 mixin template TelegramMethod(string path, HTTPMethod method = HTTPMethod.POST)
 {
     public:
+        @serializationIgnore
         immutable string      _path       = path;
+
+        @serializationIgnore
         immutable HTTPMethod  _httpMethod = method;
 }
 
