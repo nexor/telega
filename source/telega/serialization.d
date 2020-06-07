@@ -1,9 +1,7 @@
 module telega.serialization;
 
-import std.traits;
-import std.typecons;
 import std.meta : AliasSeq, staticIndexOf;
-import asdf;
+import asdf : Asdf, serializeValue, serializeToAsdf, serializeToJson, parseJson;
 
 string serializeToJsonString(T)(T value)
 {
@@ -17,8 +15,6 @@ string serializeToJsonString(T)(T value)
 
 unittest
 {
-    import std.typecons;
-
     alias FewTypes = AliasSeq!(int, string);
 
     struct S
@@ -75,7 +71,7 @@ unittest
             "one_time_keyboard":false
         }
     }`;
-    string cleanJson = `{
+    const string cleanJson = `{
         "chat_id":"100000001",
         "text":"o",
         "reply_markup":{
@@ -106,8 +102,7 @@ unittest
 
 struct JsonableAlgebraicProxy(Typelist ...)
 {
-    import std.variant;
-    import asdf;
+    import std.variant : Algebraic;
 
     private Algebraic!Typelist value;
 

@@ -4,13 +4,14 @@ authors     "Pavel Chebotarev"
 
 license "MIT"
 
-dependency "vibe-core" version="~>1.6.0"
-dependency "asdf" version="~>0.4.9"
+dependency "vibe-core" version="~>1.9.2"
+dependency "asdf" version="~>0.5.7"
 
 buildRequirements "disallowInlining"
+excludedSourceFiles "source/telega/telegram/*.d"
 
 configuration "default" {
-    dependency "vibe-d:http" version="~>0.8.4"
+    dependency "vibe-d:http" version="~>0.8.6"
 
     versions   "VibeDisableCommandLineParsing"
     versions   "TelegaVibedDriver"

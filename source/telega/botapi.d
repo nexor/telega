@@ -330,7 +330,7 @@ unittest
 
     assert(u.id == 143);
     assert(u.message.message_id == 243);
-    assert(u.message.text == "message text");
+    assert(u.message.text.get == "message text");
 }
 
 struct WebhookInfo
