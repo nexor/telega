@@ -1,13 +1,14 @@
 module telega.botapi;
 
 import vibe.core.log;
-import asdf;
-import std.conv;
-import std.typecons;
-import std.exception;
-import std.traits;
-import telega.http;
-import telega.serialization;
+import asdf : Asdf, serializedAs;
+import asdf.serialization : deserialize;
+import std.typecons : Nullable;
+import std.exception : enforce;
+import std.traits : isSomeString, isIntegral;
+import telega.http : HttpClient;
+import telega.serialization : serializeToJsonString, JsonableAlgebraicProxy;
+import telega.telegram.games : Game, Animation, CallbackGame;
 
 enum HTTPMethod
 {
@@ -331,17 +332,6 @@ unittest
     assert(u.id == 143);
     assert(u.message.message_id == 243);
     assert(u.message.text.get == "message text");
-}
-
-struct WebhookInfo
-{
-    string   url;
-    bool     has_custom_certificate;
-    uint     pending_update_count;
-    Nullable!uint     last_error_date;
-    Nullable!string   last_error_message;
-    Nullable!uint     max_connections;
-    Nullable!string[] allowed_updates;
 }
 
 enum ParseMode
@@ -1110,47 +1100,14 @@ struct PreCheckoutQuery
 /*** Telegram Passport ***/
 // TODO
 
-/*** Games types ***/
-
-// TODO add nullable fields
-struct Game
-{
-    string        title;
-    string        description;
-    PhotoSize[]   photo;
-    string        text;
-    MessageEntity text_entities;
-    Animation     animation;
-}
-
-// TODO add nullable fields and a new fields
-struct Animation
-{
-    string    file_id;
-    PhotoSize thumb;
-    string    file_name;
-    string    mime_type;
-    uint      file_size;
-}
-
-struct CallbackGame
-{
-    // no fields
-}
-
-struct GameHighScore
-{
-    uint  position;
-    User  user;
-    uint  score;
-}
-
 /******************************************************************/
 /*                        Telegram methods                        */
 /******************************************************************/
 
 mixin template TelegramMethod(string path, HTTPMethod method = HTTPMethod.POST)
 {
+    import asdf.serialization : serializationIgnore;
+
     public:
         @serializationIgnore
         immutable string      _path       = path;
@@ -1173,26 +1130,6 @@ struct GetUpdatesMethod
     ubyte limit;
     uint  timeout;
     string[] allowed_updates;
-}
-
-struct SetWebhookMethod
-{
-    mixin TelegramMethod!"/setWebhook";
-
-    string             url;
-    Nullable!InputFile certificate;
-    uint               max_connections;
-    string[]           allowed_updates;
-}
-
-struct DeleteWebhookMethod
-{
-    mixin TelegramMethod!"/deleteWebhook";
-}
-
-struct GetWebhookInfoMethod
-{
-    mixin TelegramMethod!("/getWebhookInfo", HTTPMethod.GET);
 }
 
 struct GetMeMethod
@@ -1865,34 +1802,6 @@ class BotApi
             };
 
             return callMethod!(Update[], GetUpdatesMethod)(m);
-        }
-
-        bool setWebhook(string url)
-        {
-            SetWebhookMethod m = {
-                url : url
-            };
-
-            return setWebhook(m);
-        }
-
-        bool setWebhook(ref SetWebhookMethod m)
-        {
-            return callMethod!(bool, SetWebhookMethod)(m);
-        }
-
-        bool deleteWebhook()
-        {
-            DeleteWebhookMethod m = DeleteWebhookMethod();
-
-            return callMethod!(bool, DeleteWebhookMethod)(m);
-        }
-
-        WebhookInfo getWebhookInfo()
-        {
-            GetWebhookInfoMethod m = GetWebhookInfoMethod();
-
-            return callMethod!(WebhookInfo, GetWebhookInfoMethod)(m);
         }
 
         User getMe()
@@ -2739,9 +2648,6 @@ class BotApi
             auto api = new BotApiMock(null);
 
             api.getUpdates(5,30);
-            api.setWebhook("https://webhook.url");
-            api.deleteWebhook();
-            api.getWebhookInfo();
             api.getMe();
             api.sendMessage("chat-id", "hello");
             api.forwardMessage("chat-id", "from-chat-id", 123);

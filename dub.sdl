@@ -8,7 +8,6 @@ dependency "vibe-core" version="~>1.9.2"
 dependency "asdf" version="~>0.5.7"
 
 buildRequirements "disallowInlining"
-excludedSourceFiles "source/telega/telegram/*.d"
 
 configuration "default" {
     dependency "vibe-d:http" version="~>0.8.6"
