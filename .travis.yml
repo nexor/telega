@@ -13,8 +13,8 @@ before_install:
   - docker-compose run --rm ldc ldc2 --version
 
 script:
-  - docker-compose run --rm dmd dub --config=$CONFIG
-  - docker-compose run --rm ldc dub --config=$CONFIG
+  - docker-compose run --rm dmd dub test --config=$CONFIG
+  - docker-compose run --rm ldc dub build -b release --config=$CONFIG
 
 notifications:
   email: false
