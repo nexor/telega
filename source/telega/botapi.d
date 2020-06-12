@@ -226,7 +226,8 @@ unittest
     string json = `{
         "id": 42,
         "type": "group",
-        "title": "chat title"
+        "title": "chat title",
+        "all_members_are_administrators": false
     }`;
 
     Chat c = deserialize!Chat(json);
@@ -329,7 +330,7 @@ unittest
 
     assert(u.id == 143);
     assert(u.message.message_id == 243);
-    assert(u.message.text == "message text");
+    assert(u.message.text.get == "message text");
 }
 
 struct WebhookInfo
@@ -1151,7 +1152,10 @@ struct GameHighScore
 mixin template TelegramMethod(string path, HTTPMethod method = HTTPMethod.POST)
 {
     public:
+        @serializationIgnore
         immutable string      _path       = path;
+
+        @serializationIgnore
         immutable HTTPMethod  _httpMethod = method;
 }
 
@@ -2691,11 +2695,11 @@ class BotApi
 
         bool deleteStickerFromSet(string sticker)
         {
-            SetStickerPositionInSetMethod m = {
+            DeleteStickerFromSetMethod m = {
                 sticker : sticker
             };
 
-            return setStickerPositionInSet(m);
+            return deleteStickerFromSet(m);
         }
 
         bool answerInlineQuery(ref AnswerInlineQueryMethod m)

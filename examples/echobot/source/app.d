@@ -2,13 +2,17 @@ import vibe.core.core;
 import vibe.core.log;
 import std.typecons;
 
-string botToken = "123456789:BotTokenHerE";
+string botToken = "";
 
 int main(string[] args)
 {
     if (args.length > 1 && args[1] != null) {
         logInfo("Setting token from first argument");
         botToken = args[1];
+    } else {
+        logError("Please provide bot token as a first argument");
+
+        return 1;
     }
 
     setLogLevel(LogLevel.diagnostic);

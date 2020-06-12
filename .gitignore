@@ -20,6 +20,9 @@ docs.json
 __dummy.html
 docs/
 
+.env
+.devcontainer
+
 # Code coverage
 *.lst
 /telega-test-default
