@@ -463,7 +463,12 @@ struct File
 import std.meta : AliasSeq, staticIndexOf;
 import std.variant : Algebraic;
 
-alias ReplyMarkupStructs = AliasSeq!(ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, ForceReply);
+alias ReplyMarkupStructs = AliasSeq!(
+    ReplyKeyboardMarkup,
+    ReplyKeyboardRemove,
+    InlineKeyboardMarkup,
+    ForceReply
+    );
 
 /**
  Abstract structure for unioining ReplyKeyboardMarkup, ReplyKeyboardRemove,
@@ -477,36 +482,13 @@ enum isReplyMarkup(T) =
 import std.algorithm.iteration;
 import std.array;
 
-static bool falseIfNull(Nullable!bool value)
-{
-    if (value.isNull) {
-        return false;
-    }
-
-    return cast(bool)value;
-}
-
-static bool trueIfNull(Nullable!bool value)
-{
-    if (value.isNull) {
-        return true;
-    }
-
-    return cast(bool)value;
-}
-
 struct ReplyKeyboardMarkup
 {
     KeyboardButton[][] keyboard;
 
- // TODO   @serializationTransformOut!falseIfNull
-    Nullable!bool      resize_keyboard = false;
-
-// TODO     @serializationTransformOut!falseIfNull
-    Nullable!bool      one_time_keyboard = false;
-
-// TODO    @serializationTransformOut!falseIfNull
-    Nullable!bool      selective = false;
+    Nullable!bool      resize_keyboard;
+    Nullable!bool      one_time_keyboard;
+    Nullable!bool      selective;
 
     this (string[][] keyboard)
     {
@@ -526,11 +508,35 @@ struct KeyboardButton
     Nullable!bool   request_contact;
     Nullable!bool   request_location;
 
-    this(string text, bool requestContact = false, bool requestLocation = false)
+    this(string text)
     {
         this.text = text;
+    }
+
+    this(string text, bool requestContact)
+    {
+        this(text);
         this.request_contact = requestContact;
+    }
+
+    this(string text, bool requestContact, bool requestLocation)
+    {
+        this(text, requestContact);
         this.request_location = requestLocation;
+    }
+
+    typeof(this) requestContact(bool value = true)
+    {
+        request_contact = value;
+
+        return this;
+    }
+
+    typeof(this) requestLocation(bool value = true)
+    {
+        request_location = value;
+
+        return this;
     }
 }
 
@@ -542,7 +548,7 @@ KeyboardButton[] toKeyboardButtonRow(string[] row)
 struct ReplyKeyboardRemove
 {
     bool remove_keyboard = true;
-    Nullable!bool           selective = false;
+    Nullable!bool           selective;
 }
 
 struct InlineKeyboardMarkup
@@ -1196,12 +1202,23 @@ struct SendMessageMethod
 
     ChatId    chat_id;
     string    text;
-    ParseMode parse_mode;
-    bool      disable_web_page_preview;
-    bool      disable_notification;
-    uint      reply_to_message_id;
+    Nullable!ParseMode parse_mode;
+    Nullable!bool      disable_web_page_preview;
+    Nullable!bool      disable_notification;
+    Nullable!uint      reply_to_message_id;
 
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendMessageMethod m = {
+        chat_id: 111,
+        text: "Message text"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","text":"Message text"}`);
 }
 
 struct ForwardMessageMethod
@@ -1210,7 +1227,7 @@ struct ForwardMessageMethod
 
     ChatId chat_id;
     string from_chat_id;
-    bool   disable_notification;
+    Nullable!bool   disable_notification;
     uint   message_id;
 }
 
@@ -1218,23 +1235,34 @@ struct SendPhotoMethod
 {
     mixin TelegramMethod!"/sendPhoto";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      photo;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendPhotoMethod m = {
+        chat_id: "111",
+        photo: "Photo url"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","photo":"Photo url","disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendAudioMethod
 {
     mixin TelegramMethod!"/sendAudio";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      audio;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     uint        duration;
     string      performer;
     string      title;
@@ -1244,17 +1272,39 @@ struct SendAudioMethod
 
 }
 
+unittest
+{
+    SendAudioMethod m = {
+        chat_id: "111",
+        audio: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","audio":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`);
+}
+
 struct SendDocumentMethod
 {
     mixin TelegramMethod!"/sendDocument";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      document;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendDocumentMethod m = {
+        chat_id: "111",
+        document: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","document":"data","disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendVideoMethod
@@ -1267,46 +1317,68 @@ struct SendVideoMethod
     uint        width;
     uint        height;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        supports_streaming;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
 }
 
+unittest
+{
+    SendVideoMethod m = {
+        chat_id: "111",
+        video: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","video":"data","duration":0,"width":0,"height":0,"supports_streaming":false,"disable_notification":false,"reply_to_message_id":0}`
+    );
+}
+
 struct SendVoiceMethod
 {
     mixin TelegramMethod!"/sendVoice";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      voice;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     uint        duration;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendVoiceMethod m = {
+        chat_id: "111",
+        voice: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","voice":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendVideoNoteMethod
 {
     mixin TelegramMethod!"/sendVideoNote";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      video_note;
     uint        duration;
     uint        length;
     bool        disable_notification;
     uint        reply_to_message_id;
     ReplyMarkup reply_markup;
-
 }
 
 struct SendMediaGroupMethod
 {
     mixin TelegramMethod!"/sendMediaGroup";
 
-    string       chat_id;
+    ChatId       chat_id;
     InputMedia[] media;
     bool         disable_notification;
     uint         reply_to_message_id;
@@ -1316,7 +1388,7 @@ struct SendLocationMethod
 {
     mixin TelegramMethod!"/sendLocation";
 
-    string      chat_id;
+    ChatId      chat_id;
     float       latitude;
     float       longitude;
     uint        live_period;
@@ -1329,7 +1401,7 @@ struct EditMessageLiveLocationMethod
 {
     mixin TelegramMethod!"/editMessageLiveLocation";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     float       latitude;
@@ -1341,7 +1413,7 @@ struct StopMessageLiveLocationMethod
 {
     mixin TelegramMethod!"/stopMessageLiveLocation";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     ReplyMarkup reply_markup;
@@ -1351,7 +1423,7 @@ struct SendVenueMethod
 {
     mixin TelegramMethod!"/sendVenue";
 
-    string      chat_id;
+    ChatId      chat_id;
     float       latitude;
     float       longitude;
     string      title;
@@ -1366,7 +1438,7 @@ struct SendContactMethod
 {
     mixin TelegramMethod!"/sendContact";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      phone_number;
     string      first_name;
     string      last_name;
@@ -1375,12 +1447,26 @@ struct SendContactMethod
     ReplyMarkup reply_markup;
 }
 
+enum ChatAction : string
+{
+    Typing = "typing",
+    UploadPhoto = "upload_photo",
+    RecordVideo = "record_video",
+    UploadVideo = "upload_video",
+    RecordAudio = "record_audio",
+    UploadAudio = "upload_audio",
+    UploadDocument = "upload_document",
+    FindLocation = "find_location",
+    RecordVideoNote = "record_video_note",
+    UploadVideoNote = "upload_video_note"
+}
+
 struct SendChatActionMethod
 {
     mixin TelegramMethod!"/sendChatAction";
 
     ChatId chat_id;
-    string action; // TODO enum
+    string action;
 }
 
 struct GetUserProfilePhotosMethod
@@ -1456,7 +1542,7 @@ struct SetChatPhotoMethod
 {
     mixin TelegramMethod!"/setChatPhoto";
 
-    string    chat_id;
+    ChatId    chat_id;
     InputFile photo;
 
 }
@@ -1566,11 +1652,11 @@ struct EditMessageTextMethod
 {
     mixin TelegramMethod!"/editMessageTextMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     string      text;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     bool        disable_web_page_preview;
     ReplyMarkup reply_markup;
 }
@@ -1579,11 +1665,11 @@ struct EditMessageCaptionMethod
 {
     mixin TelegramMethod!"/editMessageCaptionMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     string      caption;
-    ParseMode   parse_mode;
+    Nullable!ParseMode   parse_mode;
     ReplyMarkup reply_markup;
 }
 
@@ -1591,7 +1677,7 @@ struct EditMessageReplyMarkupMethod
 {
     mixin TelegramMethod!"/editMessageReplyMarkupMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
     ReplyMarkup reply_markup;
@@ -1609,7 +1695,7 @@ struct SendStickerMethod
 {
     mixin TelegramMethod!"/sendStickerMethod";
 
-    string      chat_id;
+    ChatId      chat_id;
     string      sticker; // TODO InputFile|string
     bool        disable_notification;
     uint        reply_to_message_id;
