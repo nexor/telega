@@ -25,7 +25,9 @@ int main(string[] args)
 
 void listenUpdates()
 {
-    import telega.botapi;
+    import telega.botapi : BotApi, BaseApiUrl;
+    import telega.telegram.basic : Update, Message, sendMessage;
+    import telega.helpers : UpdatesRange, isMessageType;
     import telega.drivers.requests : RequestsHttpClient;
     import std.algorithm.iteration : filter, map;
 
