@@ -8,9 +8,9 @@ services:
   - docker
 
 before_install:
-  - docker-compose run --rm dmd dmd --version
-  - docker-compose run --rm ldc ldc --version
   - docker-compose build
+  - docker-compose run --rm dmd dmd --version
+  - docker-compose run --rm ldc ldc2 --version
 
 script:
   - docker-compose run --rm dmd dub --config=$CONFIG
