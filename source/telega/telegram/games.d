@@ -1,6 +1,6 @@
 module telega.telegram.games;
 
-import telega.botapi : MessageEntity, PhotoSize, User;
+import telega.telegram.basic : MessageEntity, PhotoSize, User;
 
 /*** Games types ***/
 

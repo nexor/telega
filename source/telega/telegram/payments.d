@@ -1,7 +1,7 @@
 module telega.telegram.payments;
 
 import std.typecons : Nullable;
-import telega.botapi : User;
+import telega.telegram.basic : User;
 
 
 /*** Payments types ***/

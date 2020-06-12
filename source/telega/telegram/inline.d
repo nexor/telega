@@ -2,7 +2,8 @@ module telega.telegram.inline;
 
 import std.typecons : Nullable;
 import std.meta : AliasSeq;
-import telega.botapi : BotApi, TelegramMethod, HTTPMethod,  ParseMode, InlineKeyboardMarkup, InputMessageContent, User, Location;
+import telega.botapi : BotApi, TelegramMethod, HTTPMethod;
+import telega.telegram.basic : ParseMode, InlineKeyboardMarkup, InputMessageContent, User, Location;
 import telega.serialization : JsonableAlgebraicProxy;
 
 struct InlineQuery

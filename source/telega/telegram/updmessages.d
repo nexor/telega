@@ -1,8 +1,9 @@
 module telega.telegram.updmessages;
 
 import std.typecons : Nullable;
-import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ParseMode, ReplyMarkup, ChatId, ForceReply,
-        ReplyKeyboardMarkup, ReplyKeyboardRemove, InlineKeyboardMarkup, isReplyMarkup, isTelegramId;
+import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
+import telega.telegram.basic : ParseMode, ReplyMarkup, ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove,
+        InlineKeyboardMarkup, isReplyMarkup;
 
 struct EditMessageTextMethod
 {

@@ -1,7 +1,7 @@
 module telega.telegram.stickers;
 
-import telega.botapi : BotApi, TelegramMethod, HTTPMethod, isTelegramId, ChatId,
-        PhotoSize, ReplyMarkup, InputFile, Message, File;
+import telega.botapi : BotApi, TelegramMethod, HTTPMethod, isTelegramId, ChatId;
+import telega.telegram.basic : PhotoSize, ReplyMarkup, InputFile, Message, File;
 
 struct Sticker
 {
@@ -230,9 +230,6 @@ unittest
     }
 
     auto api = new BotApiMock(null);
-
-    api.setChatStickerSet("chat-id", "sticker-set");
-    api.deleteChatStickerSet("chat-id");
 
     api.sendSticker("chat-id", "sticker");
     api.getStickerSet("sticker-set");

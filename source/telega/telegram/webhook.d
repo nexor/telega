@@ -1,7 +1,8 @@
 module telega.telegram.webhook;
 
 import std.typecons : Nullable;
-import telega.botapi : BotApi, TelegramMethod, HTTPMethod, InputFile;
+import telega.botapi : BotApi, TelegramMethod, HTTPMethod;
+import telega.telegram.basic : InputFile;
 
 struct WebhookInfo
 {
