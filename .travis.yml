@@ -1,23 +1,20 @@
 sudo: required
 
 env:
-  - COMPILER=dmd   CONFIG=default
-  - COMPILER=dmd   CONFIG=requests-driver
-
-  - COMPILER=ldc2  CONFIG=default
-  - COMPILER=ldc2  CONFIG=requests-driver
+  - CONFIG=default
+  - CONFIG=requests-driver
 
 services:
   - docker
 
 before_install:
-  - docker build -t nexor/telega -f Dockerfile.travisci .
-  - docker images
+  - docker-compose run -it --rm dmd $COMPILER --version
+  - docker-compose run -it --rm ldc $COMPILER --version
+  - docker-compose build
 
 script:
-  - docker run -it --rm nexor/telega $COMPILER --version
-  - docker run -it --rm nexor/telega dub test --config=$CONFIG --compiler=$COMPILER
-  - docker run -it --rm nexor/telega dub build -b release --config=$CONFIG --compiler=$COMPILER
+  - docker-compose run -it --rm dmd dub --config=$CONFIG
+  - docker-compose run -it --rm ldc dub --config=$CONFIG
 
 notifications:
   email: false

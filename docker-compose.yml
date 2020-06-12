@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+    dmd:
+        build:
+            context: .
+            dockerfile: ./docker/dmd/Dockerfile
+        volumes:
+            - ./:/dlang/app
+    ldc:
+        build:
+            context: .
+            dockerfile: ./docker/ldc/Dockerfile
+        volumes:
+            - ./:/dlang/app
