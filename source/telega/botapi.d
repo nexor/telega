@@ -8,6 +8,7 @@ import std.exception : enforce;
 import std.traits : isSomeString, isIntegral;
 import telega.http : HttpClient;
 import telega.serialization : serializeToJsonString, JsonableAlgebraicProxy;
+import telega.telegram.stickers : Sticker;
 import telega.telegram.games : Game, Animation, CallbackGame;
 
 enum HTTPMethod
@@ -642,35 +643,6 @@ struct InputFile
 {
     // no fields
 }
-
-struct Sticker
-{
-    string       file_id;
-    uint         width;
-    uint         height;
-    PhotoSize    thumb;
-    string       emoji;
-    string       set_name;
-    MaskPosition mask_position;
-    uint         file_size;
-}
-
-struct StickerSet
-{
-    string    name;
-    string    title;
-    bool      contains_masks;
-    Sticker[] stickers;
-}
-
-struct MaskPosition
-{
-    string point;
-    float  x_shift;
-    float  y_shift;
-    float  scale;
-}
-
 
 /*** Inline mode types ***/
 
@@ -1632,71 +1604,6 @@ struct DeleteMessageMethod
     uint   message_id;
 }
 
-struct SendStickerMethod
-{
-    mixin TelegramMethod!"/sendStickerMethod";
-
-    ChatId      chat_id;
-    string      sticker; // TODO InputFile|string
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
-}
-
-struct GetStickerSetMethod
-{
-    mixin TelegramMethod!("/getStickerSetMethod", HTTPMethod.GET);
-
-    string name;
-}
-
-struct UploadStickerFileMethod
-{
-    mixin TelegramMethod!"/uploadStickerFileMethod";
-
-    int       user_id;
-    InputFile png_sticker;
-}
-
-struct CreateNewStickerSetMethod
-{
-    mixin TelegramMethod!"/createNewStickerSetMethod";
-
-    int          user_id;
-    string       name;
-    string       title;
-    string       png_sticker; // TODO InputFile|string
-    string       emojis;
-    bool         contains_masks;
-    MaskPosition mask_position;
-}
-
-struct AddStickerToSetMethod
-{
-    mixin TelegramMethod!"/addStickerToSetMethod";
-
-    int          user_id;
-    string       name;
-    string       png_sticker; // TODO InputFile|string
-    string       emojis;
-    MaskPosition mask_position;
-}
-
-struct SetStickerPositionInSetMethod
-{
-    mixin TelegramMethod!"/setStickerPositionInSetMethod";
-
-    string sticker;
-    int    position;
-}
-
-struct DeleteStickerFromSetMethod
-{
-    mixin TelegramMethod!"/deleteStickerFromSetMethod";
-
-    string sticker;
-}
-
 struct AnswerInlineQueryMethod
 {
     mixin TelegramMethod!"/answerInlineQuery";
@@ -2500,117 +2407,6 @@ class BotApi
             return deleteMessage(m);
         }
 
-        Message sendSticker(ref SendStickerMethod m)
-        {
-            return callMethod!Message(m);
-        }
-
-        // TODO sticker is InputFile|string
-        Message sendSticker(T1)(T1 chatId, string sticker)
-            if (isTelegramId!T1)
-        {
-            SendStickerMethod m = {
-                chat_id : chatId,
-                sticker : sticker
-            };
-
-            return sendSticker(m);
-        }
-
-        StickerSet getStickerSet(ref GetStickerSetMethod m)
-        {
-            return callMethod!StickerSet(m);
-        }
-
-        StickerSet getStickerSet(string name)
-        {
-            GetStickerSetMethod m = {
-                name : name
-            };
-
-            return getStickerSet(m);
-        }
-
-        File uploadStickerFile(ref UploadStickerFileMethod m)
-        {
-            return callMethod!File(m);
-        }
-
-        File uploadStickerFile(int userId, InputFile pngSticker)
-        {
-            UploadStickerFileMethod m = {
-                user_id : userId,
-                png_sticker : pngSticker
-            };
-
-            return uploadStickerFile(m);
-        }
-
-        bool createNewStickerSet(ref CreateNewStickerSetMethod m)
-        {
-            return callMethod!bool(m);
-        }
-
-        // TODO pngSticker is InputFile|string
-        bool createNewStickerSet(int userId, string name, string title, string pngSticker, string emojis)
-        {
-            CreateNewStickerSetMethod m = {
-                user_id : userId,
-                name : name,
-                title : title,
-                png_sticker : pngSticker,
-                emojis : emojis
-            };
-
-            return createNewStickerSet(m);
-        }
-
-        bool addStickerToSet(ref AddStickerToSetMethod m)
-        {
-            return callMethod!bool(m);
-        }
-
-        bool addStickerToSet(int userId, string name, string pngSticker, string emojis)
-        {
-            AddStickerToSetMethod m = {
-                user_id : userId,
-                name : name,
-                png_sticker : pngSticker,
-                emojis : emojis
-            };
-
-            return addStickerToSet(m);
-        }
-
-        bool setStickerPositionInSet(ref SetStickerPositionInSetMethod m)
-        {
-            return callMethod!bool(m);
-        }
-
-        bool setStickerPositionInSet(string sticker, uint position)
-        {
-            SetStickerPositionInSetMethod m = {
-                sticker : sticker,
-                position : position
-            };
-
-            return setStickerPositionInSet(m);
-        }
-
-        bool deleteStickerFromSet(ref DeleteStickerFromSetMethod m)
-        {
-            return callMethod!bool(m);
-        }
-
-        bool deleteStickerFromSet(string sticker)
-        {
-            DeleteStickerFromSetMethod m = {
-                sticker : sticker
-            };
-
-            return deleteStickerFromSet(m);
-        }
-
         bool answerInlineQuery(ref AnswerInlineQueryMethod m)
         {
             return callMethod!bool(m);
@@ -2701,13 +2497,6 @@ class BotApi
             api.editMessageReplyMarkup("chat-id", 123, ReplyMarkup());
 
             api.deleteMessage("chat-id", 123);
-            api.sendSticker("chat-id", "sticker");
-            api.getStickerSet("sticker-set");
-            api.uploadStickerFile(1, InputFile());
-            api.createNewStickerSet(1, "name", "title", "png-sticker", "emojis");
-            api.addStickerToSet(1, "name", "png-sticker", "emojis");
-            api.setStickerPositionInSet("sticker", 42);
-            api.deleteStickerFromSet("sticker");
 
             InlineQueryResult[] iqr = new InlineQueryResult[20];
 
