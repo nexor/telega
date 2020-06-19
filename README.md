@@ -1,6 +1,7 @@
 # Telega
 Telegram bot API implementation.
 
+[![Dub version](https://img.shields.io/dub/v/telega.svg)](http://code.dlang.org/packages/telega)
 [![Build Status](https://travis-ci.org/nexor/telega.svg?branch=master)](https://travis-ci.org/nexor/telega)
 
 ## Implemented features
