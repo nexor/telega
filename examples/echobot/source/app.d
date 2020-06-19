@@ -24,7 +24,9 @@ int main(string[] args)
 
 void listenUpdates()
 {
-    import telega.botapi;
+    import telega.botapi : BotApi;
+    import telega.telegram.basic : Update, sendMessage;
+    import telega.helpers : UpdatesRange;
 
     try {
         auto api = new BotApi(botToken);
