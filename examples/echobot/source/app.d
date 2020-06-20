@@ -1,45 +1,43 @@
-import vibe.core.core;
-import vibe.core.log;
-import std.typecons;
-
-string botToken = "";
+import vibe.core.core : runApplication, runTask;
+import vibe.core.log : setLogLevel, logInfo, LogLevel;
+import std.process : environment;
+import std.exception : enforce;
 
 int main(string[] args)
 {
+    string botToken = environment.get("BOT_TOKEN");
+
     if (args.length > 1 && args[1] != null) {
         logInfo("Setting token from first argument");
         botToken = args[1];
-    } else {
-        logError("Please provide bot token as a first argument");
-
-        return 1;
     }
 
-    setLogLevel(LogLevel.diagnostic);
+    enforce(botToken !is null, "Please provide bot token as a first argument or set BOT_TOKEN env variable");
 
-    runTask(&listenUpdates);
+    setLogLevel(LogLevel.diagnostic);
+    runTask(&listenUpdates, botToken);
 
     return runApplication();
 }
 
-void listenUpdates()
+void listenUpdates(string token)
 {
     import telega.botapi : BotApi;
-    import telega.telegram.basic : Update, sendMessage;
-    import telega.helpers : UpdatesRange;
+    import telega.telegram.basic : Update, getUpdates, sendMessage;
+    import std.algorithm.iteration : filter, each;
+    import std.algorithm.comparison : max;
 
-    try {
-        auto api = new BotApi(botToken);
+    int offset;
+    auto api = new BotApi(token);
 
-        foreach (Update update; new UpdatesRange(api, 0)) {
-            if (!update.message.isNull && !update.message.text.isNull) {
-                logInfo("Text from %s: %s", update.message.chat.id, update.message.text);
-                api.sendMessage(update.message.chat.id, update.message.text);
-            }
-        }
-    } catch (Exception e) {
-        logError(e.toString());
-
-        throw e;
+    while (true)
+    {
+        api.getUpdates(offset)
+            .filter!(u => !u.message.text.isNull) // we need all updates with text message
+            .each!((Update u) {
+                logInfo("Text from %s: %s", u.message.chat.id, u.message.text);
+                api.sendMessage(u.message.chat.id, u.message.text);
+                offset = max(offset, u.id)+1;
+            });
     }
 }
