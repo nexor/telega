@@ -7,16 +7,27 @@ jobs:
         strategy:
             matrix:
                 os: [ubuntu-latest]
-                dc: [dmd-latest, ldc-latest]
+                #dc: [dmd-latest, ldc-latest]
+                config: [default, requests-driver]
 
         runs-on: ${{ matrix.os }}
         steps:
             - uses: actions/checkout@v2
 
-            - name: Install D compiler
-              uses: dlang-community/setup-dlang@v1
-              with:
-                  compiler: ${{ matrix.dc }}
+            #- name: Install D compiler
+            #  uses: dlang-community/setup-dlang@v1
+            #  with:
+            #      compiler: ${{ matrix.dc }}
 
+            - name: Setup compilers
+              run: |
+                docker-compose build
+                docker-compose run --rm dmd dmd --version
+                docker-compose run --rm ldc ldc2 --version
+
+            #- name: Run tests
+            #  run: dub -q test
             - name: Run tests
-              run: dub -q test
+              run: |
+                docker-compose run --rm dmd dub test --config=${{ matrix.config }}
+                docker-compose run --rm ldc dub build -b release --config=${{ matrix.config }}
