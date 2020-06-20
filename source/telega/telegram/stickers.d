@@ -1,5 +1,6 @@
 module telega.telegram.stickers;
 
+import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, isTelegramId, ChatId;
 import telega.telegram.basic : PhotoSize, ReplyMarkup, InputFile, Message, File;
 
@@ -39,9 +40,23 @@ struct SendStickerMethod
 
     ChatId      chat_id;
     string      sticker; // TODO InputFile|string
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    import telega.serialization : serializeToJsonString;
+
+    SendStickerMethod m = {
+        chat_id: "111",
+        sticker: "s",
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","sticker":"s"}`
+    );
 }
 
 struct GetStickerSetMethod
