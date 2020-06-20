@@ -625,11 +625,11 @@ struct SendPhotoMethod
 
     ChatId      chat_id;
     string      photo;
-    string      caption;
+    Nullable!string      caption;
     Nullable!ParseMode   parse_mode;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
 }
 
 unittest
@@ -637,6 +637,22 @@ unittest
     SendPhotoMethod m = {
         chat_id: "111",
         photo: "Photo url"
+    };
+
+    import std.stdio;
+
+    m.serializeToJsonString().writeln;
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","photo":"Photo url"}`);
+}
+unittest
+{
+    SendPhotoMethod m = {
+        chat_id: "111",
+        photo: "Photo url",
+        disable_notification: false,
+        reply_to_message_id: 0
     };
 
     assert(m.serializeToJsonString() ==
@@ -649,14 +665,14 @@ struct SendAudioMethod
 
     ChatId      chat_id;
     string      audio;
-    string      caption;
+    Nullable!string      caption;
     Nullable!ParseMode   parse_mode;
-    uint        duration;
-    string      performer;
-    string      title;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!uint        duration;
+    Nullable!string      performer;
+    Nullable!string      title;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
 
 }
 
@@ -665,6 +681,20 @@ unittest
     SendAudioMethod m = {
         chat_id: "111",
         audio: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","audio":"data"}`);
+}
+
+unittest
+{
+    SendAudioMethod m = {
+        chat_id: "111",
+        audio: "data",
+        duration: 0,
+        disable_notification:false,
+        reply_to_message_id: 0,
     };
 
     assert(m.serializeToJsonString() ==
@@ -677,11 +707,11 @@ struct SendDocumentMethod
 
     ChatId      chat_id;
     string      document;
-    string      caption;
+    Nullable!string      caption;
     Nullable!ParseMode   parse_mode;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
 }
 
 unittest
@@ -689,6 +719,19 @@ unittest
     SendDocumentMethod m = {
         chat_id: "111",
         document: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","document":"data"}`);
+}
+
+unittest
+{
+    SendDocumentMethod m = {
+        chat_id: "111",
+        document: "data",
+        disable_notification: false,
+        reply_to_message_id: 0,
     };
 
     assert(m.serializeToJsonString() ==
@@ -701,15 +744,15 @@ struct SendVideoMethod
 
     string      chat_id;
     string      video;
-    uint        duration;
-    uint        width;
-    uint        height;
-    string      caption;
+    Nullable!uint        duration;
+    Nullable!uint        width;
+    Nullable!uint        height;
+    Nullable!string      caption;
     Nullable!ParseMode   parse_mode;
-    bool        supports_streaming;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!bool        supports_streaming;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
 }
 
 unittest
@@ -717,6 +760,24 @@ unittest
     SendVideoMethod m = {
         chat_id: "111",
         video: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","video":"data"}`
+    );
+}
+
+unittest
+{
+    SendVideoMethod m = {
+        chat_id: "111",
+        video: "data",
+        duration: 0,
+        width: 0,
+        height: 0,
+        supports_streaming: false,
+        disable_notification: false,
+        reply_to_message_id: 0
     };
 
     assert(m.serializeToJsonString() ==
@@ -730,12 +791,12 @@ struct SendVoiceMethod
 
     ChatId      chat_id;
     string      voice;
-    string      caption;
+    Nullable!string      caption;
     Nullable!ParseMode   parse_mode;
-    uint        duration;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!uint        duration;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
 }
 
 unittest
@@ -743,6 +804,20 @@ unittest
     SendVoiceMethod m = {
         chat_id: "111",
         voice: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","voice":"data"}`);
+}
+
+unittest
+{
+    SendVoiceMethod m = {
+        chat_id: "111",
+        voice: "data",
+        duration: 0,
+        disable_notification: false,
+        reply_to_message_id: 0,
     };
 
     assert(m.serializeToJsonString() ==
@@ -755,11 +830,23 @@ struct SendVideoNoteMethod
 
     ChatId      chat_id;
     string      video_note;
-    uint        duration;
-    uint        length;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!uint        duration;
+    Nullable!uint        length;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendVideoNoteMethod m = {
+        chat_id: "111",
+        video_note: "data"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","video_note":"data"}`
+    );
 }
 
 struct SendMediaGroupMethod
@@ -768,8 +855,29 @@ struct SendMediaGroupMethod
 
     ChatId       chat_id;
     InputMedia[] media;
-    bool         disable_notification;
-    uint         reply_to_message_id;
+    Nullable!bool         disable_notification;
+    Nullable!uint         reply_to_message_id;
+}
+
+unittest
+{
+    InputMedia im;
+
+    InputMediaPhoto imp = {
+        type: "t",
+        media: "m"
+    };
+
+    im = imp;
+
+    SendMediaGroupMethod m = {
+        chat_id: "111",
+        media: [im],
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","media":[{"type":"t","media":"m"}]}`
+    );
 }
 
 struct SendLocationMethod
@@ -779,10 +887,23 @@ struct SendLocationMethod
     ChatId      chat_id;
     float       latitude;
     float       longitude;
-    uint        live_period;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!uint        live_period;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendLocationMethod m = {
+        chat_id: "111",
+        latitude: 0.01,
+        longitude: 0.02
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","latitude":0.01,"longitude":0.02}`
+    );
 }
 
 struct EditMessageLiveLocationMethod
@@ -816,10 +937,25 @@ struct SendVenueMethod
     float       longitude;
     string      title;
     string      address;
-    string      foursquare_id;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!string      foursquare_id;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendVenueMethod m = {
+        chat_id: "111",
+        latitude: 0.01,
+        longitude: 0.02,
+        title: "t",
+        address: "a"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","latitude":0.01,"longitude":0.02,"title":"t","address":"a"}`
+    );
 }
 
 struct SendContactMethod
@@ -829,10 +965,23 @@ struct SendContactMethod
     ChatId      chat_id;
     string      phone_number;
     string      first_name;
-    string      last_name;
-    bool        disable_notification;
-    uint        reply_to_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!string      last_name;
+    Nullable!bool        disable_notification;
+    Nullable!uint        reply_to_message_id;
+    Nullable!ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    SendContactMethod m = {
+        chat_id: "111",
+        phone_number: "+7123",
+        first_name: "fn"
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","phone_number":"+7123","first_name":"fn"}`
+    );
 }
 
 enum ChatAction : string
