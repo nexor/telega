@@ -6,11 +6,10 @@ jobs:
         name: Dub Tests
         strategy:
             matrix:
-                os: [ubuntu-latest]
-                #dc: [dmd-latest, ldc-latest]
+                dc: [dmd, ldc]
                 config: [default, requests-driver]
 
-        runs-on: ${{ matrix.os }}
+        runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
 
@@ -19,15 +18,12 @@ jobs:
             #  with:
             #      compiler: ${{ matrix.dc }}
 
-            - name: Setup compilers
+            - name: Build container and show compiler version
               run: |
                 docker-compose build
-                docker-compose run --rm dmd dmd --version
-                docker-compose run --rm ldc ldc2 --version
+                docker-compose run --rm ${{ matrix.dc }}
 
-            #- name: Run tests
-            #  run: dub -q test
             - name: Run tests
               run: |
-                docker-compose run --rm dmd dub test --config=${{ matrix.config }}
-                docker-compose run --rm ldc dub build -b release --config=${{ matrix.config }}
+                docker-compose run --rm ${{ matrix.dc }} dub -q test --config=${{ matrix.config }}
+                docker-compose run --rm ${{ matrix.dc }} dub build -b release --config=${{ matrix.config }}
