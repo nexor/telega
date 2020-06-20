@@ -94,11 +94,11 @@ struct SendMessageMethod
     ReplyMarkup reply_markup;
 }
 
-// short form
-Message sendMessage(BotApi api, ref SendMessageMethod m)
-
-// full form
+// short form - only required args
 Message sendMessage(T)(BotApi api, T chatId, string text) if (isTelegramId!T)
+
+// full form - need to build SendTelegramMethod struct first
+Message sendMessage(BotApi api, ref SendMessageMethod m)
 ```
 
 ### Some hints
