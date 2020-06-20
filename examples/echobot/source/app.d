@@ -1,16 +1,21 @@
 import vibe.core.core;
 import vibe.core.log;
 import std.typecons;
+import std.process : environment;
 
-string botToken = "";
+string botToken = null;
 
 int main(string[] args)
 {
+    botToken = environment.get("BOT_TOKEN");
+
     if (args.length > 1 && args[1] != null) {
         logInfo("Setting token from first argument");
         botToken = args[1];
-    } else {
-        logError("Please provide bot token as a first argument");
+    }
+
+    if (botToken is null) {
+        logError("Please provide bot token as a first argument or set BOT_TOKEN env variable");
 
         return 1;
     }
