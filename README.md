@@ -1,12 +1,12 @@
 # Telega
-Telegram bot API implementation.
+(Telegram bot API)[https://core.telegram.org/bots/api] implementation.
 
 [![Dub version](https://img.shields.io/dub/v/telega.svg)](http://code.dlang.org/packages/telega)
 [![Build Status](https://travis-ci.org/nexor/telega.svg?branch=master)](https://travis-ci.org/nexor/telega)
 
 ## Quickstart
 
-Simple example of echobot
+Simple echo bot example
 
 ```d
 import vibe.core.core : runApplication, runTask;
@@ -77,25 +77,34 @@ Each method is typically implemented using 3 constructs:
  - a function that accepts a few arguments representing required method arguments
  - a function that accepts a reference to a method struct for calling method with required and optional arguments
 
-unbanChatMember, restrictChatMember, promoteChatMember, exportChatInviteLink,
-setChatPhoto, deleteChatPhoto, setChatTitle, setChatDescription,
-pinChatMessage, unpinChatMessage, leaveChat, getChat,
-getChatAdministrators, getChatMembersCount, getChatMember,
-setChatStickerSet, deleteChatStickerSet, answerCallbackQuery,
-editMessageText, editMessageCaption, editMessageReplyMarkup,
-deleteMessage, sendSticker, getStickerSet, uploadStickerFile,
-createNewStickerSet, addStickerToSet, setStickerPositionInSet, deleteStickerFromSet
+For example:
+```
+// full method structure
+struct SendMessageMethod
+{
+    mixin TelegramMethod!"/sendMessage";
 
-**TBD additional:** sending files, inline mode, payments, games, webhook mode
+    ChatId    chat_id;
+    string    text;
+    Nullable!ParseMode parse_mode;
+    Nullable!bool      disable_web_page_preview;
+    Nullable!bool      disable_notification;
+    Nullable!uint      reply_to_message_id;
 
-### Types
+    ReplyMarkup reply_markup;
+}
 
-Webhook, Update, User, Chat, Message, PhotoSize, MessageEntity, Audio,
-Document, Video, Voice,
-VideoNote, Contact, Location, Venue, UserProfilePhotos, File,
-ReplyKeyboardMarkup, KeyboardButton, ReplyKeyboardRemove,
-InlineKeyboardMarkup, InlineKeyboardButton, CallbackQuery,
-ForceReply, ChatPhoto, ChatMember, ResponseParameters, InputMedia,
-InputMediaPhoto, InputMediaVideo, InputFile, ChosenInlineResult
-Sticker, StickerSet, MaskPosition InlineQuery,
-all InlineQueryResult* types, all InputMessageContent types
+// short form
+Message sendMessage(BotApi api, ref SendMessageMethod m)
+
+// full form
+Message sendMessage(T)(BotApi api, T chatId, string text) if (isTelegramId!T)
+```
+
+### Some hints
+`ChatId` type is actually `long` or `string`
+
+`isTelegramId!T` template checks T to be some string or number
+
+### Support
+(Issues)[https://github.com/nexor/telega/issues] and PR's are welcome.
