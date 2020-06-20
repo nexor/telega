@@ -1,5 +1,5 @@
 name: Run all D Tests
-on: [push, pull_request]
+on: [pull_request]
 
 jobs:
     test:
@@ -12,11 +12,6 @@ jobs:
         runs-on: ubuntu-latest
         steps:
             - uses: actions/checkout@v2
-
-            #- name: Install D compiler
-            #  uses: dlang-community/setup-dlang@v1
-            #  with:
-            #      compiler: ${{ matrix.dc }}
 
             - name: Build container and show compiler version
               run: |
