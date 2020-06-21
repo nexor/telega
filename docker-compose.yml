@@ -7,9 +7,11 @@ services:
             dockerfile: ./docker/dmd/Dockerfile
         volumes:
             - ./:/dlang/app
+        command: dmd --version
     ldc:
         build:
             context: .
             dockerfile: ./docker/ldc/Dockerfile
         volumes:
             - ./:/dlang/app
+        command: ldc2 --version

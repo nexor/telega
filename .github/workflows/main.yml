@@ -1,0 +1,24 @@
+name: Run all D Tests
+on: [pull_request]
+
+jobs:
+    test:
+        name: Dub Tests
+        strategy:
+            matrix:
+                dc: [dmd, ldc]
+                config: [default, requests-driver]
+
+        runs-on: ubuntu-latest
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Build container and show compiler version
+              run: |
+                # build container and show compiler version
+                docker-compose run --rm ${{ matrix.dc }}
+
+            - name: Run tests
+              run: |
+                docker-compose run --rm ${{ matrix.dc }} dub -q test --config=${{ matrix.config }}
+                docker-compose run --rm ${{ matrix.dc }} dub build -b release --config=${{ matrix.config }}

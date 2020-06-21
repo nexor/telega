@@ -21,7 +21,9 @@ int main(string[] args)
 
 void listenUpdates()
 {
-    import telega.botapi;
+    import telega.botapi : BotApi, BaseApiUrl;
+    import telega.telegram.basic : Update, sendMessage, ReplyKeyboardRemove, ReplyKeyboardMarkup, SendMessageMethod;
+    import telega.helpers : UpdatesRange, isMessageType;
     import std.algorithm.iteration : filter;
 
     try {
@@ -61,7 +63,7 @@ void listenUpdates()
 
 auto createReplyKeyboardMarkup()
 {
-    import telega.botapi : ReplyKeyboardMarkup, KeyboardButton;
+    import telega.telegram.basic : ReplyKeyboardMarkup, KeyboardButton;
 
     // create keyboard initialized with one row with 2 buttons
     ReplyKeyboardMarkup markup = ReplyKeyboardMarkup([

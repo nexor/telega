@@ -9,6 +9,10 @@ int main(string[] args)
     if (args.length > 1 && args[1] != null) {
         logInfo("Setting token from first argument");
         botToken = args[1];
+    } else {
+        logError("Please provide bot token as a first argument");
+
+        return 1;
     }
 
     setLogLevel(LogLevel.debugV);
@@ -21,7 +25,9 @@ int main(string[] args)
 
 void listenUpdates()
 {
-    import telega.botapi;
+    import telega.botapi : BotApi, BaseApiUrl;
+    import telega.telegram.basic : Update, Message, sendMessage;
+    import telega.helpers : UpdatesRange, isMessageType;
     import telega.drivers.requests : RequestsHttpClient;
     import std.algorithm.iteration : filter, map;
 
