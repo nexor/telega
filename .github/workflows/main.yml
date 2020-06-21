@@ -15,7 +15,7 @@ jobs:
 
             - name: Build container and show compiler version
               run: |
-                docker-compose build
+                # build container and show compiler version
                 docker-compose run --rm ${{ matrix.dc }}
 
             - name: Run tests
