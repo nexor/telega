@@ -106,7 +106,11 @@ struct JsonableAlgebraicProxy(Typelist ...)
 
     private Algebraic!Typelist value;
 
-    //alias value this;
+    this(T)(T value)
+        if (staticIndexOf!(T, Typelist) >= 0)
+    {
+        opAssign(value);
+    }
 
     void opAssign(T)(T value)
         if (staticIndexOf!(T, Typelist) >= 0)
@@ -135,4 +139,17 @@ struct JsonableAlgebraicProxy(Typelist ...)
             }
         }
     }
+}
+
+unittest
+{
+    struct A {
+        int val;
+    }
+
+    alias AProxy = JsonableAlgebraicProxy!A;
+
+    AProxy[] aelements;
+
+    assert(__traits(compiles, aelements ~= cast(AProxy)A(3)));
 }

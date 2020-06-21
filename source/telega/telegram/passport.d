@@ -17,6 +17,7 @@ struct PassportData
 struct PassportFile
 {
     string file_id;
+    string file_unique_id;
     uint file_size;
     uint file_date;
 }
@@ -166,20 +167,18 @@ unittest
     SetPassportDataErrorsMethod m = {
         user_id: 42,
         errors: [
-
-        ]
-    };
-    /*
-    TODO
-    PassportElementErrorUnspecified(
+            PassportElementError(PassportElementErrorUnspecified(
                 "unspecified",
                 EncryptedPassportElement.Type.Email,
                 "#123",
                 "Error Message"
-                );
-    */
+            ))
+        ]
+    };
 
-    assert(m.serializeToJsonString() == `{"user_id":42}`);
+    assert(m.serializeToJsonString() ==
+    `{"user_id":42,"errors":[{"source":"unspecified","type":"email","element_hash":"#123","message":"Error Message"}]}`
+    );
 }
 
 bool setPassportDataErrors(BotApi api, uint userId, PassportElementError[] errors)
