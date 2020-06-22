@@ -167,12 +167,12 @@ unittest
     SetPassportDataErrorsMethod m = {
         user_id: 42,
         errors: [
-            PassportElementError(PassportElementErrorUnspecified(
+            PassportElementErrorUnspecified(
                 "unspecified",
                 EncryptedPassportElement.Type.Email,
                 "#123",
                 "Error Message"
-            ))
+            )
         ]
     };
 
