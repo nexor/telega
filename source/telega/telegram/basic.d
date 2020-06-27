@@ -319,13 +319,13 @@ struct Location
     float latitude;
 }
 
-// TODO Add Nullable fields
 struct Venue
 {
     Location location;
     string   title;
     string   address;
-    string   foursquare_id;
+    Nullable!string   foursquare_id;
+    Nullable!string   foursquare_type;
 }
 
 // TODO Add Nullable fields
@@ -570,6 +570,7 @@ struct InputLocationMessageContent
     Nullable!uint  live_period;
 }
 
+/// outgoing
 struct InputVenueMessageContent
 {
     float  latitude;
@@ -577,7 +578,23 @@ struct InputVenueMessageContent
     string title;
     string address;
     Nullable!string foursquare_id;
-    // TODO new field Nullable!string foursquare_type;
+    Nullable!string foursquare_type;
+}
+
+unittest
+{
+    InputVenueMessageContent ivmc = {
+        latitude : 0.01,
+        longitude : 0.02,
+        title : "t",
+        address : "a",
+        foursquare_id : "fid",
+        foursquare_type : "ft"
+    };
+
+    assert(ivmc.serializeToJsonString() ==
+        `{"latitude":0.01,"longitude":0.02,"title":"t","address":"a","foursquare_id":"fid","foursquare_type":"ft"}`
+    );
 }
 
 struct InputContactMessageContent
@@ -970,6 +987,7 @@ struct SendVenueMethod
     string      title;
     string      address;
     Nullable!string      foursquare_id;
+    Nullabele!string     foursquare_type;
     Nullable!bool        disable_notification;
     Nullable!uint        reply_to_message_id;
     Nullable!ReplyMarkup reply_markup;
