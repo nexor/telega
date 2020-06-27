@@ -214,9 +214,28 @@ enum ParseMode : string
     None     = "",
 }
 
+enum MessageEntityType : string
+{
+    Mention = "mention",
+    Hashtag = "hashtag",
+    Cashtag = "cashtag",
+    BotCommand = "bot_command",
+    Url = "url",
+    Email = "email",
+    PhoneNumber = "phone_number",
+    Bold = "bold",
+    Italic = "italic",
+    Underline = "underline",
+    Strikethrough = "strikethrough",
+    Code = "code",
+    Pre = "pre",
+    TextLink = "text_link",
+    TextMension = "text_mention"
+}
+
 struct MessageEntity
 {
-    string        type;
+    MessageEntityType        type;
     uint          offset;
     uint          length;
     Nullable!string  url;
