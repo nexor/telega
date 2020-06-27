@@ -1,34 +1,27 @@
 name        "telega"
 description "Telegram Bot API implementation"
 authors     "Pavel Chebotarev"
-
 license "MIT"
 
 dependency "vibe-core" version="~>1.9.2"
 dependency "asdf" version="~>0.5.7"
+dependency "dests" version="~>0.3.1"
 
 buildRequirements "disallowInlining"
 
 configuration "default" {
     dependency "vibe-d:http" version="~>0.8.6"
-
-    versions   "VibeDisableCommandLineParsing"
-    versions   "TelegaVibedDriver"
-    versions   "VibeUseOpenSSL11"
-
     targetType "library"
+
+    versions "VibeDisableCommandLineParsing" "TelegaVibedDriver" "VibeUseOpenSSL11"
 }
 
 configuration "requests-driver" {
     dependency "requests" version="~>1.0.4"
     dependency "socks-client" version="~>0.1.0"
-
-    versions "TelegaRequestsDriver"
-    versions "VibeUseOpenSSL11"
-
     subConfiguration "requests" "std"
     subConfiguration "socks-client" "std"
 
     targetType "library"
+    versions "TelegaRequestsDriver" "VibeUseOpenSSL11"
 }
-
