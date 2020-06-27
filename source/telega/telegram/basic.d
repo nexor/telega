@@ -463,7 +463,13 @@ struct ResponseParameters
     uint retry_after;
 }
 
-alias InputMediaStructs = AliasSeq!(InputMediaPhoto, InputMediaVideo);
+alias InputMediaStructs = AliasSeq!(
+    InputMediaPhoto,
+    InputMediaVideo,
+    InputMediaAnimation,
+    InputMediaAudio,
+    InputMediaDocument
+);
 
 alias InputMedia = JsonableAlgebraicProxy!InputMediaStructs;
 
@@ -487,9 +493,38 @@ struct InputMediaVideo
     Nullable!bool   supports_streaming;
 }
 
-// TODO InputMediaAnimation
-// TODO InputMediaAudio
-// TODO InputMediaDocument
+struct InputMediaAnimation
+{
+    string type = "animation";
+    string media;
+    Nullable!string thumb; // TODO InputFile
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint width;
+    Nullable!uint height;
+    Nullable!uint duration;
+}
+
+struct InputMediaAudio
+{
+    string type = "audio";
+    string media;
+    Nullable!string thumb; // TODO InputFile
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint duration;
+    Nullable!string performer;
+    Nullable!string title;
+}
+
+struct InputMediaDocument
+{
+    string type = "document";
+    string media;
+    Nullable!string thumb; // TODO InputFile
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+}
 
 struct InputFile
 {
