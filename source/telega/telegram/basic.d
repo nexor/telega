@@ -303,13 +303,13 @@ struct VideoNote
     uint      file_size;
 }
 
-// TODO Add Nullable fields
 struct Contact
 {
     string phone_number;
     string first_name;
-    string last_name;
-    string user_id;
+    Nullable!string last_name;
+    Nullable!string user_id;
+    Nullable!string vcard;
 }
 
 // TODO Add Nullable fields
@@ -602,7 +602,7 @@ struct InputContactMessageContent
     string phone_number;
     string first_name;
     Nullable!string last_name;
-    // TODO new field Nullable!string vcard;
+    Nullable!string vcard;
 }
 
 struct ChosenInlineResult
@@ -1016,6 +1016,7 @@ struct SendContactMethod
     string      phone_number;
     string      first_name;
     Nullable!string      last_name;
+    Nullable!string      vcard;
     Nullable!bool        disable_notification;
     Nullable!uint        reply_to_message_id;
     Nullable!ReplyMarkup reply_markup;
