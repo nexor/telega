@@ -1,0 +1,25 @@
+{
+	"name": "vscode-telega",
+	"dockerFile": "Dockerfile",
+
+	"appPort": [],
+
+	"settings": {
+		"terminal.integrated.shell.linux": "/bin/bash"
+	},
+
+	// "postCreateCommand": "",
+
+	"mounts": [
+	],
+
+	"remoteEnv": {
+		"APP_ENV": "dev"
+	},
+
+	"remoteUser": "vscode",
+
+	"extensions": [
+		"webfreak.code-d"
+	]
+}

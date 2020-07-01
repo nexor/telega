@@ -21,7 +21,6 @@ __dummy.html
 docs/
 
 .env
-.devcontainer
 
 # Code coverage
 *.lst
