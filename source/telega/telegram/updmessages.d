@@ -1,13 +1,13 @@
 module telega.telegram.updmessages;
 
-import std.typecons : Nullable;
+import std.typecons : Nullable, nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.basic : ParseMode, ReplyMarkup, ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove,
-        InlineKeyboardMarkup, isReplyMarkup;
+        InlineKeyboardMarkup, isReplyMarkup, InputMedia, InputMediaPhoto;
 
 struct EditMessageTextMethod
 {
-    mixin TelegramMethod!"/editMessageTextMethod";
+    mixin TelegramMethod!"/editMessageText";
 
     ChatId      chat_id;
     uint        message_id;
@@ -20,7 +20,7 @@ struct EditMessageTextMethod
 
 struct EditMessageCaptionMethod
 {
-    mixin TelegramMethod!"/editMessageCaptionMethod";
+    mixin TelegramMethod!"/editMessageCaption";
 
     ChatId      chat_id;
     uint        message_id;
@@ -30,6 +30,37 @@ struct EditMessageCaptionMethod
     ReplyMarkup reply_markup;
 }
 
+struct EditMessageMediaMethod
+{
+    mixin TelegramMethod!"/editMessageMedia";
+
+    ChatId     chat_id;
+    uint       message_id;
+    string     inline_message_id;
+    InputMedia media;
+    Nullable!ReplyMarkup reply_markup;
+}
+
+unittest
+{
+    import telega.serialization : serializeToJsonString;
+
+    InputMediaPhoto imp = {
+        type: "t",
+        media: "m"
+    };
+
+    EditMessageMediaMethod m = {
+        chat_id: "111",
+        message_id: 1,
+        media: InputMedia(imp),
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"chat_id":"111","message_id":1,"media":{"type":"t","media":"m"}}`
+    );
+}
+
 struct EditMessageReplyMarkupMethod
 {
     mixin TelegramMethod!"/editMessageReplyMarkupMethod";
@@ -37,7 +68,7 @@ struct EditMessageReplyMarkupMethod
     ChatId      chat_id;
     uint        message_id;
     string      inline_message_id;
-    ReplyMarkup reply_markup;
+    Nullable!ReplyMarkup reply_markup;
 }
 
 struct DeleteMessageMethod
@@ -102,6 +133,33 @@ bool editMessageCaption(BotApi api, string inlineMessageId, string caption = nul
     return editMessageCaption(api, m);
 }
 
+bool editMessageMedia(BotApi api, ref EditMessageMediaMethod m)
+{
+    return api.callMethod!bool(m);
+}
+
+bool editMessageMedia(T)(BotApi api, T chatId, uint messageId, InputMedia media)
+    if (isTelegramId!T)
+{
+    EditMessageMediaMethod m = {
+        chat_id: chatId,
+        message_id: messageId,
+        media: media
+    };
+
+    return editMessageMedia(api, m);
+}
+
+bool editMessageMedia(BotApi api, string inlineMessageId, InputMedia media)
+{
+    EditMessageMediaMethod m = {
+        inline_message_id: inlineMessageId,
+        media: media
+    };
+
+    return editMessageMedia(api, m);
+}
+
 bool editMessageReplyMarkup(BotApi api, ref EditMessageReplyMarkupMethod m)
 {
     return api.callMethod!bool(m);
@@ -115,7 +173,7 @@ bool editMessageReplyMarkup(T1, T2)(BotApi api, T1 chatId, uint messageId, T2 re
         message_id : messageId
     };
 
-    m.reply_markup = replyMarkup;
+    m.reply_markup = (cast(ReplyMarkup)replyMarkup).nullable;
 
     return editMessageReplyMarkup(api, m);
 }
@@ -173,6 +231,13 @@ unittest
     api.editMessageCaption("chat-id", 123, null);
     api.editMessageCaption("inline-message-id", "new caption");
     api.editMessageCaption("inline-message-id", null);
+
+    InputMediaPhoto imp = {
+        type: "t",
+        media: "m"
+    };
+    api.editMessageMedia("chat-id", 123, InputMedia(imp));
+    api.editMessageMedia("inline-message-id", InputMedia(imp));
 
     api.editMessageReplyMarkup("chat-id", 123, ForceReply());
     api.editMessageReplyMarkup("chat-id", 123, ReplyKeyboardMarkup());

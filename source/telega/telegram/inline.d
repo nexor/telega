@@ -182,6 +182,7 @@ struct InlineQueryResultVenue
     string title;
     string address;
     Nullable!string foursquare_id;
+    Nullable!string foursquare_type;
     Nullable!string thumb_url;
     Nullable!uint thumb_width;
     Nullable!uint thumb_height;
@@ -196,6 +197,7 @@ struct InlineQueryResultContact
     string phone_number;
     string first_name;
     Nullable!string last_name;
+    Nullable!string vcard;
     Nullable!string thumb_url;
     Nullable!uint thumb_width;
     Nullable!uint thumb_height;

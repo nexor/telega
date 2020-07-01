@@ -214,9 +214,28 @@ enum ParseMode : string
     None     = "",
 }
 
+enum MessageEntityType : string
+{
+    Mention = "mention",
+    Hashtag = "hashtag",
+    Cashtag = "cashtag",
+    BotCommand = "bot_command",
+    Url = "url",
+    Email = "email",
+    PhoneNumber = "phone_number",
+    Bold = "bold",
+    Italic = "italic",
+    Underline = "underline",
+    Strikethrough = "strikethrough",
+    Code = "code",
+    Pre = "pre",
+    TextLink = "text_link",
+    TextMension = "text_mention"
+}
+
 struct MessageEntity
 {
-    string        type;
+    MessageEntityType        type;
     uint          offset;
     uint          length;
     Nullable!string  url;
@@ -284,13 +303,13 @@ struct VideoNote
     uint      file_size;
 }
 
-// TODO Add Nullable fields
 struct Contact
 {
     string phone_number;
     string first_name;
-    string last_name;
-    string user_id;
+    Nullable!string last_name;
+    Nullable!string user_id;
+    Nullable!string vcard;
 }
 
 // TODO Add Nullable fields
@@ -300,13 +319,13 @@ struct Location
     float latitude;
 }
 
-// TODO Add Nullable fields
 struct Venue
 {
     Location location;
     string   title;
     string   address;
-    string   foursquare_id;
+    Nullable!string   foursquare_id;
+    Nullable!string   foursquare_type;
 }
 
 // TODO Add Nullable fields
@@ -463,7 +482,13 @@ struct ResponseParameters
     uint retry_after;
 }
 
-alias InputMediaStructs = AliasSeq!(InputMediaPhoto, InputMediaVideo);
+alias InputMediaStructs = AliasSeq!(
+    InputMediaPhoto,
+    InputMediaVideo,
+    InputMediaAnimation,
+    InputMediaAudio,
+    InputMediaDocument
+);
 
 alias InputMedia = JsonableAlgebraicProxy!InputMediaStructs;
 
@@ -487,9 +512,38 @@ struct InputMediaVideo
     Nullable!bool   supports_streaming;
 }
 
-// TODO InputMediaAnimation
-// TODO InputMediaAudio
-// TODO InputMediaDocument
+struct InputMediaAnimation
+{
+    string type = "animation";
+    string media;
+    Nullable!string thumb; // TODO InputFile
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint width;
+    Nullable!uint height;
+    Nullable!uint duration;
+}
+
+struct InputMediaAudio
+{
+    string type = "audio";
+    string media;
+    Nullable!string thumb; // TODO InputFile
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+    Nullable!uint duration;
+    Nullable!string performer;
+    Nullable!string title;
+}
+
+struct InputMediaDocument
+{
+    string type = "document";
+    string media;
+    Nullable!string thumb; // TODO InputFile
+    Nullable!string caption;
+    Nullable!ParseMode parse_mode;
+}
 
 struct InputFile
 {
@@ -516,6 +570,7 @@ struct InputLocationMessageContent
     Nullable!uint  live_period;
 }
 
+/// outgoing
 struct InputVenueMessageContent
 {
     float  latitude;
@@ -523,7 +578,23 @@ struct InputVenueMessageContent
     string title;
     string address;
     Nullable!string foursquare_id;
-    // TODO new field Nullable!string foursquare_type;
+    Nullable!string foursquare_type;
+}
+
+unittest
+{
+    InputVenueMessageContent ivmc = {
+        latitude : 0.01,
+        longitude : 0.02,
+        title : "t",
+        address : "a",
+        foursquare_id : "fid",
+        foursquare_type : "ft"
+    };
+
+    assert(ivmc.serializeToJsonString() ==
+        `{"latitude":0.01,"longitude":0.02,"title":"t","address":"a","foursquare_id":"fid","foursquare_type":"ft"}`
+    );
 }
 
 struct InputContactMessageContent
@@ -531,7 +602,7 @@ struct InputContactMessageContent
     string phone_number;
     string first_name;
     Nullable!string last_name;
-    // TODO new field Nullable!string vcard;
+    Nullable!string vcard;
 }
 
 struct ChosenInlineResult
@@ -916,6 +987,7 @@ struct SendVenueMethod
     string      title;
     string      address;
     Nullable!string      foursquare_id;
+    Nullable!string     foursquare_type;
     Nullable!bool        disable_notification;
     Nullable!uint        reply_to_message_id;
     Nullable!ReplyMarkup reply_markup;
@@ -944,6 +1016,7 @@ struct SendContactMethod
     string      phone_number;
     string      first_name;
     Nullable!string      last_name;
+    Nullable!string      vcard;
     Nullable!bool        disable_notification;
     Nullable!uint        reply_to_message_id;
     Nullable!ReplyMarkup reply_markup;
