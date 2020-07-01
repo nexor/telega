@@ -987,7 +987,7 @@ struct SendVenueMethod
     string      title;
     string      address;
     Nullable!string      foursquare_id;
-    Nullabele!string     foursquare_type;
+    Nullable!string     foursquare_type;
     Nullable!bool        disable_notification;
     Nullable!uint        reply_to_message_id;
     Nullable!ReplyMarkup reply_markup;
