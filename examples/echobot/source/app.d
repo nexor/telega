@@ -1,4 +1,4 @@
-import vibe.core.core : runApplication, runTask;
+import vibe.core.core : runApplication, runTask, disableDefaultSignalHandlers;
 import vibe.core.log : setLogLevel, logInfo, LogLevel;
 import std.process : environment;
 import std.exception : enforce;
@@ -16,6 +16,7 @@ int main(string[] args)
 
     setLogLevel(LogLevel.diagnostic);
     runTask(&listenUpdates, botToken);
+    disableDefaultSignalHandlers();
 
     return runApplication();
 }
@@ -33,11 +34,16 @@ void listenUpdates(string token)
     while (true)
     {
         api.getUpdates(offset)
-            .filter!(u => !u.message.text.isNull) // we need all updates with text message
             .each!((Update u) {
-                logInfo("Text from %s: %s", u.message.chat.id, u.message.text);
-                api.sendMessage(u.message.chat.id, u.message.text);
-                offset = max(offset, u.id)+1;
+                // we need all updates with text message
+                if (!u.message.isNull && !u.message.get.text.isNull)
+                {
+                    logInfo("Text from %s: %s", u.message.chat.id, u.message.text);
+                    api.sendMessage(u.message.chat.id, u.message.text);
+                }
+
+                // mark update as processed
+                offset = max(offset, u.id) + 1;
             });
     }
 }

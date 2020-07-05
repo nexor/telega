@@ -1,8 +1,8 @@
 module telega.telegram.basic;
 
-import std.typecons : Nullable;
+import std.typecons : Nullable, nullable;
 import asdf : Asdf, serializedAs, deserialize;
-import telega.serialization : JsonableAlgebraicProxy, serializeToJsonString;
+import telega.serialization : JsonableAlgebraicProxy, SerializableEnumProxy, serializeToJsonString;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.stickers : Sticker;
 import telega.telegram.games : Game, Animation, CallbackGame;
@@ -187,8 +187,6 @@ struct Update
         return update_id;
     }
 }
-
-
 
 unittest
 {
@@ -618,14 +616,55 @@ struct ChosenInlineResult
 /*                        Telegram methods                        */
 /******************************************************************/
 
+@serializedAs!(SerializableEnumProxy!UpdateType)
+enum UpdateType: string
+{
+    Message = "message",
+    EditedMessage = "edited_message",
+    ChannelPost = "channel_post",
+    EditedChannelPost = "edited_channel_post",
+    InlineQuery = "inline_query",
+    ChosenInlineResult = "chosen_inline_result",
+    CallbackQuery = "callback_query",
+    ShippingQuery = "shipping_query",
+    PreCheckoutQuery = "pre_checkout_query",
+    Poll = "poll",
+    PollAnswer = "poll_answer"
+}
+
 struct GetUpdatesMethod
 {
+    enum ubyte DEFAULT_LIMIT = 5;
+    enum uint DEFAULT_TIMEOUT = 30;
+
     mixin TelegramMethod!"/getUpdates";
 
-    int   offset;
-    ubyte limit;
-    uint  timeout;
-    string[] allowed_updates;
+    Nullable!int   offset;
+    Nullable!ubyte limit;
+    Nullable!uint  timeout;
+    Nullable!(UpdateType[]) allowed_updates;
+
+    void updateOffset(uint updateId)
+    {
+        import std.algorithm.comparison : max;
+
+        if (offset.isNull) {
+            offset = updateId + 1;
+        } else {
+            offset = max(offset.get, updateId) + 1;
+        }
+    }
+}
+
+unittest
+{
+    GetUpdatesMethod m = {
+        offset: 1,
+        allowed_updates: [UpdateType.EditedMessage]
+    };
+
+    assert(m.serializeToJsonString() ==
+        `{"offset":1,"allowed_updates":["edited_message"]}`);
 }
 
 struct GetMeMethod
@@ -1094,16 +1133,21 @@ struct AnswerCallbackQueryMethod
 
 // API methods
 
-Update[] getUpdates(BotApi api, int offset, ubyte limit = 5, uint timeout = 30, string[] allowedUpdates = [])
+Update[] getUpdates(BotApi api, ref GetUpdatesMethod m)
+{
+    return api.callMethod!(Update[])(m);
+}
+
+Update[] getUpdates(BotApi api, int offset, ubyte limit = 5, uint timeout = 30, UpdateType[] allowedUpdates = [])
 {
     GetUpdatesMethod m = {
         offset:  offset,
         limit:   limit,
         timeout: timeout,
-        allowed_updates: allowedUpdates
+        allowed_updates: allowedUpdates.nullable
     };
 
-    return api.callMethod!(Update[], GetUpdatesMethod)(m);
+    return api.getUpdates(m);
 }
 
 User getMe(BotApi api)

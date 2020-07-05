@@ -1,7 +1,7 @@
 module telega.helpers;
 
 import telega.botapi : BotApi;
-import telega.telegram.basic : Update, getUpdates;
+import telega.telegram.basic : UpdateType, Update, getUpdates;
 
 class UpdatesRange
 {
@@ -13,7 +13,7 @@ class UpdatesRange
         BotApi _api;
         uint _maxUpdateId;
 
-        string[] _allowedUpdates = [];
+        UpdateType[] _allowedUpdates = [];
         ubyte _updatesLimit = 5;
         uint _timeout = 30;
 
