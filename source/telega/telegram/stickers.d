@@ -4,6 +4,11 @@ import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, isTelegramId, ChatId;
 import telega.telegram.basic : PhotoSize, ReplyMarkup, InputFile, Message, File;
 
+version (unittest)
+{
+    import telega.test : assertEquals;
+}
+
 struct Sticker
 {
     string       file_id;
@@ -54,9 +59,8 @@ unittest
         sticker: "s",
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","sticker":"s"}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","sticker":"s"}`);
 }
 
 struct GetStickerSetMethod

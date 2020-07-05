@@ -9,6 +9,10 @@ import std.traits : isSomeString, isIntegral;
 import telega.http : HttpClient;
 import telega.serialization : serializeToJsonString, JsonableAlgebraicProxy;
 
+version (unittest)
+{
+    import telega.test : assertEquals;
+}
 
 enum HTTPMethod
 {
@@ -92,29 +96,36 @@ unittest
     ChatId chatId;
 
     chatId = 45;
-    assert(chatId.isString() == false);
+    chatId.isString()
+        .assertEquals(false);
 
     chatId = "@chat";
-    assert(chatId.isString() == true);
+    chatId.isString()
+        .assertEquals(true);
 
     string chatIdString = chatId;
-    assert(chatIdString == "@chat");
+    chatIdString
+        .assertEquals("@chat");
 
     long chatIdNum = cast(long)chatId;
-    assert(chatIdNum == 0);
+    chatIdNum
+        .assertEquals(0);
 
     chatId = 42;
 
     chatIdNum = cast(long)chatId;
-    assert(chatIdNum == 42);
+    chatIdNum
+        .assertEquals(42);
 
     string chatIdFunc(ChatId id)
     {
         return id;
     }
 
-    assert(chatIdFunc(cast(ChatId)"abc") == "abc");
-    assert(chatIdFunc(cast(ChatId)45) == "45");
+    chatIdFunc(cast(ChatId)"abc")
+        .assertEquals("abc");
+    chatIdFunc(cast(ChatId)45)
+        .assertEquals("45");
 }
 
 

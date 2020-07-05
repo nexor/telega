@@ -3,6 +3,11 @@ module telega.serialization;
 import std.meta : AliasSeq, staticIndexOf;
 import asdf : Asdf, serializeValue, serializeToAsdf, serializeToJson, serializedAs, parseJson;
 
+version (unittest)
+{
+    import telega.test : assertEquals;
+}
+
 string serializeToJsonString(T)(T value)
 {
     import std.conv : to;
@@ -25,10 +30,12 @@ unittest
     S s;
     s.a = 42;
 
-    assert(`{"a":42}` == s.serializeToJson());
+    s.serializeToJson()
+        .assertEquals(`{"a":42}`);
 
     s.a = "123";
-    assert(`{"a":"123"}` == s.serializeToJson());
+    s.serializeToJson()
+        .assertEquals(`{"a":"123"}`);
 }
 
 /**
@@ -64,7 +71,7 @@ unittest
 {
     E e = E.Val1;
 
-    assert(e.serializeToJson() == `"value_1"`);
+    assertEquals(e.serializeToJson(), `"value_1"`);
 }
 
 void removeNulledNodes(ref Asdf a)
@@ -133,7 +140,8 @@ unittest
 
     removeNulledNodes(asdf);
 
-    assert(asdf.to!string == cleanJson.parseJson.to!string);
+    asdf.to!string
+        .assertEquals(cleanJson.parseJson.to!string);
 }
 
 struct JsonableAlgebraicProxy(Typelist ...)

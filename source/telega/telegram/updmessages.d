@@ -5,6 +5,11 @@ import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.basic : ParseMode, ReplyMarkup, ForceReply, ReplyKeyboardMarkup, ReplyKeyboardRemove,
         InlineKeyboardMarkup, isReplyMarkup, InputMedia, InputMediaPhoto;
 
+version (unittest)
+{
+    import telega.test : assertEquals;
+}
+
 struct EditMessageTextMethod
 {
     mixin TelegramMethod!"/editMessageText";
@@ -56,9 +61,8 @@ unittest
         media: InputMedia(imp),
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","message_id":1,"media":{"type":"t","media":"m"}}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","message_id":1,"media":{"type":"t","media":"m"}}`);
 }
 
 struct EditMessageReplyMarkupMethod
