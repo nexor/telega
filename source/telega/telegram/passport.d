@@ -4,6 +4,11 @@ import std.typecons;
 import telega.botapi;
 import telega.serialization;
 
+version (unittest)
+{
+    import telega.test : assertEquals;
+}
+
 /******************************************************************/
 /*                              Types                             */
 /******************************************************************/
@@ -176,9 +181,11 @@ unittest
         ]
     };
 
-    assert(m.serializeToJsonString() ==
-    `{"user_id":42,"errors":[{"source":"unspecified","type":"email","element_hash":"#123","message":"Error Message"}]}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(
+            `{"user_id":42,"errors":[{"source":"unspecified","type":"email","element_hash":"#123",` ~
+            `"message":"Error Message"}]}`
+        );
 }
 
 bool setPassportDataErrors(BotApi api, uint userId, PassportElementError[] errors)

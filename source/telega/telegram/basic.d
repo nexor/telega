@@ -9,6 +9,12 @@ import telega.telegram.games : Game, Animation, CallbackGame;
 import telega.telegram.payments : Invoice, SuccessfulPayment, ShippingQuery, PreCheckoutQuery;
 import telega.telegram.inline : InlineQuery;
 
+
+version (unittest)
+{
+    import telega.test : assertEquals;
+}
+
 /******************************************************************/
 /*                    Telegram types and enums                    */
 /******************************************************************/
@@ -34,7 +40,8 @@ unittest
 
     User u = deserialize!User(json);
 
-    assert(u.last_name.isNull);
+    u.last_name.isNull
+        .assertEquals(true);
 }
 
 unittest
@@ -48,7 +55,8 @@ unittest
 
     User u = deserialize!User(json);
 
-    assert(false == u.last_name.isNull);
+    u.last_name.isNull
+        .assertEquals(false);
 }
 
 
@@ -110,8 +118,10 @@ unittest
 
     Chat c = deserialize!Chat(json);
 
-    assert(c.id == 42);
-    assert(c.type == ChatType.Group);
+    c.id
+        .assertEquals(42);
+    c.type
+        .assertEquals(ChatType.Group);
 }
 
 struct Message
@@ -200,9 +210,12 @@ unittest
 
     Update u = deserialize!Update(json);
 
-    assert(u.id == 143);
-    assert(u.message.message_id == 243);
-    assert(u.message.text.get == "message text");
+    u.id
+        .assertEquals(143);
+    u.message.message_id
+        .assertEquals(243);
+    u.message.text.get
+        .assertEquals("message text");
 }
 
 enum ParseMode : string
@@ -590,9 +603,10 @@ unittest
         foursquare_type : "ft"
     };
 
-    assert(ivmc.serializeToJsonString() ==
+    ivmc.serializeToJsonString()
+        .assertEquals(
         `{"latitude":0.01,"longitude":0.02,"title":"t","address":"a","foursquare_id":"fid","foursquare_type":"ft"}`
-    );
+        );
 }
 
 struct InputContactMessageContent
@@ -663,8 +677,8 @@ unittest
         allowed_updates: [UpdateType.EditedMessage]
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"offset":1,"allowed_updates":["edited_message"]}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"offset":1,"allowed_updates":["edited_message"]}`);
 }
 
 struct GetMeMethod
@@ -693,8 +707,8 @@ unittest
         text: "Message text"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","text":"Message text"}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","text":"Message text"}`);
 }
 
 struct ForwardMessageMethod
@@ -731,8 +745,8 @@ unittest
 
     m.serializeToJsonString().writeln;
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","photo":"Photo url"}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","photo":"Photo url"}`);
 }
 unittest
 {
@@ -743,8 +757,8 @@ unittest
         reply_to_message_id: 0
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","photo":"Photo url","disable_notification":false,"reply_to_message_id":0}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","photo":"Photo url","disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendAudioMethod
@@ -771,8 +785,8 @@ unittest
         audio: "data"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","audio":"data"}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","audio":"data"}`);
 }
 
 unittest
@@ -785,8 +799,10 @@ unittest
         reply_to_message_id: 0,
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","audio":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`);
+    m.serializeToJsonString()
+        .assertEquals(
+            `{"chat_id":"111","audio":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`
+        );
 }
 
 struct SendDocumentMethod
@@ -809,8 +825,8 @@ unittest
         document: "data"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","document":"data"}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","document":"data"}`);
 }
 
 unittest
@@ -822,8 +838,8 @@ unittest
         reply_to_message_id: 0,
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","document":"data","disable_notification":false,"reply_to_message_id":0}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","document":"data","disable_notification":false,"reply_to_message_id":0}`);
 }
 
 struct SendVideoMethod
@@ -850,9 +866,8 @@ unittest
         video: "data"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","video":"data"}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","video":"data"}`);
 }
 
 unittest
@@ -868,9 +883,11 @@ unittest
         reply_to_message_id: 0
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","video":"data","duration":0,"width":0,"height":0,"supports_streaming":false,"disable_notification":false,"reply_to_message_id":0}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(
+            `{"chat_id":"111","video":"data","duration":0,"width":0,"height":0,"supports_streaming":false,` ~
+            `"disable_notification":false,"reply_to_message_id":0}`
+        );
 }
 
 struct SendVoiceMethod
@@ -894,8 +911,8 @@ unittest
         voice: "data"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","voice":"data"}`);
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","voice":"data"}`);
 }
 
 unittest
@@ -908,8 +925,10 @@ unittest
         reply_to_message_id: 0,
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","voice":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`);
+    m.serializeToJsonString()
+        .assertEquals(
+            `{"chat_id":"111","voice":"data","duration":0,"disable_notification":false,"reply_to_message_id":0}`
+        );
 }
 
 struct SendVideoNoteMethod
@@ -932,9 +951,8 @@ unittest
         video_note: "data"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","video_note":"data"}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","video_note":"data"}`);
 }
 
 struct SendMediaGroupMethod
@@ -963,9 +981,8 @@ unittest
         media: [im],
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","media":[{"type":"t","media":"m"}]}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","media":[{"type":"t","media":"m"}]}`);
 }
 
 struct SendLocationMethod
@@ -989,9 +1006,8 @@ unittest
         longitude: 0.02
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","latitude":0.01,"longitude":0.02}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","latitude":0.01,"longitude":0.02}`);
 }
 
 struct EditMessageLiveLocationMethod
@@ -1042,9 +1058,8 @@ unittest
         address: "a"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","latitude":0.01,"longitude":0.02,"title":"t","address":"a"}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","latitude":0.01,"longitude":0.02,"title":"t","address":"a"}`);
 }
 
 struct SendContactMethod
@@ -1069,9 +1084,8 @@ unittest
         first_name: "fn"
     };
 
-    assert(m.serializeToJsonString() ==
-        `{"chat_id":"111","phone_number":"+7123","first_name":"fn"}`
-    );
+    m.serializeToJsonString()
+        .assertEquals(`{"chat_id":"111","phone_number":"+7123","first_name":"fn"}`);
 }
 
 enum ChatAction : string
