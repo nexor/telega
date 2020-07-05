@@ -634,12 +634,26 @@ struct ChosenInlineResult
 
 struct GetUpdatesMethod
 {
+    enum ubyte DEFAULT_LIMIT = 5;
+    enum uint DEFAULT_TIMEOUT = 30;
+
     mixin TelegramMethod!"/getUpdates";
 
     Nullable!int   offset;
     Nullable!ubyte limit;
     Nullable!uint  timeout;
     Nullable!(UpdateType[]) allowed_updates;
+
+    void updateOffset(uint updateId)
+    {
+        import std.algorithm.comparison : max;
+
+        if (offset.isNull) {
+            offset = updateId + 1;
+        } else {
+            offset = max(offset.get, updateId) + 1;
+        }
+    }
 }
 
 unittest
@@ -1119,6 +1133,11 @@ struct AnswerCallbackQueryMethod
 
 // API methods
 
+Update[] getUpdates(BotApi api, ref GetUpdatesMethod m)
+{
+    return api.callMethod!(Update[])(m);
+}
+
 Update[] getUpdates(BotApi api, int offset, ubyte limit = 5, uint timeout = 30, UpdateType[] allowedUpdates = [])
 {
     GetUpdatesMethod m = {
@@ -1128,7 +1147,7 @@ Update[] getUpdates(BotApi api, int offset, ubyte limit = 5, uint timeout = 30, 
         allowed_updates: allowedUpdates.nullable
     };
 
-    return api.callMethod!(Update[], GetUpdatesMethod)(m);
+    return api.getUpdates(m);
 }
 
 User getMe(BotApi api)

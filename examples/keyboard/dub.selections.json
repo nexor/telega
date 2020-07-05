@@ -15,7 +15,7 @@
 		"requests": "1.0.15",
 		"socks-client": "0.1.0",
 		"stdx-allocator": "2.77.5",
-		"taggedalgebraic": "0.11.15",
+		"taggedalgebraic": "0.11.16",
 		"telega": {"path":"../../"},
 		"vibe-core": "1.9.2",
 		"vibe-d": "0.8.6"
