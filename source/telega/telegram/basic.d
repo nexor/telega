@@ -167,22 +167,6 @@ struct Message
     }
 }
 
-@serializedAs!(SerializableEnumProxy!UpdateType)
-enum UpdateType: string
-{
-    Message = "message",
-    EditedMessage = "edited_message",
-    ChannelPost = "channel_post",
-    EditedChannelPost = "edited_channel_post",
-    InlineQuery = "inline_query",
-    ChosenInlineResult = "chosen_inline_result",
-    CallbackQuery = "callback_query",
-    ShippingQuery = "shipping_query",
-    PreCheckoutQuery = "pre_checkout_query",
-    Poll = "poll",
-    PollAnswer = "poll_answer"
-}
-
 struct Update
 {
     uint             update_id;
@@ -631,6 +615,22 @@ struct ChosenInlineResult
 /******************************************************************/
 /*                        Telegram methods                        */
 /******************************************************************/
+
+@serializedAs!(SerializableEnumProxy!UpdateType)
+enum UpdateType: string
+{
+    Message = "message",
+    EditedMessage = "edited_message",
+    ChannelPost = "channel_post",
+    EditedChannelPost = "edited_channel_post",
+    InlineQuery = "inline_query",
+    ChosenInlineResult = "chosen_inline_result",
+    CallbackQuery = "callback_query",
+    ShippingQuery = "shipping_query",
+    PreCheckoutQuery = "pre_checkout_query",
+    Poll = "poll",
+    PollAnswer = "poll_answer"
+}
 
 struct GetUpdatesMethod
 {
