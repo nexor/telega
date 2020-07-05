@@ -7,8 +7,8 @@ ARG USER_GID=$USER_UID
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-ENV COMPILER_LDC=ldc-1.21.0
-ENV COMPILER_DMD=dmd-2.092.0
+ENV COMPILER_LDC=ldc-1.22.0
+ENV COMPILER_DMD=dmd-2.092.1
 
 # Configure apt and install packages
 RUN apt-get update \
