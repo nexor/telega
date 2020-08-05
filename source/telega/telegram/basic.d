@@ -319,7 +319,7 @@ struct Contact
     string phone_number;
     string first_name;
     Nullable!string last_name;
-    Nullable!string user_id;
+    Nullable!long user_id;
     Nullable!string vcard;
 }
 
