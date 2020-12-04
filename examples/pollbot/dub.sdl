@@ -1,0 +1,4 @@
+name "pollbot"
+description "A simple telegram poll bot"
+
+dependency "telega" version="~master" path="../../"

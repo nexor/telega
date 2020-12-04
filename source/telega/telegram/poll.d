@@ -2,12 +2,34 @@ module telega.telegram.poll;
 
 import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
-import telega.telegram.basic : MessageEntity, User, ReplyMarkup;
+import telega.telegram.basic : Message, MessageEntity, User, ReplyMarkup;
+import asdf : serializedAs;
 
+@serializedAs!PollTypeProxy
 enum PollType : string
 {
     Quiz = "quiz",
     Regular = "regular"
+}
+
+struct PollTypeProxy
+{
+    PollType t;
+
+    this(PollType type)
+    {
+        t = type;
+    }
+
+    PollType opCast(T : PollType)()
+    {
+        return t;
+    }
+
+    void serialize(S)(ref S serializer)
+    {
+        serializer.putValue(cast(string)t);
+    }
 }
 
 struct PollOption
@@ -31,8 +53,8 @@ struct Poll
     uint total_voter_count;
     bool is_closed;
     bool is_anonymous;
-    PollType type;
-    bool allow_multiple_answers;
+    string type;
+    bool allows_multiple_answers;
     Nullable!uint correct_option_id;
     Nullable!string explanation;
     Nullable!MessageEntity[] explanation_entities;
@@ -100,4 +122,29 @@ Poll stopPoll(T1)(BotApi api, T1 chatId, uint messageId)
     };
 
     return stopPoll(api, m);
+}
+
+unittest
+{
+    class BotApiMock : BotApi
+    {
+        this(string token)
+        {
+            super(token);
+        }
+
+        T callMethod(T, M)(M method)
+        {
+            T result;
+
+            logDiagnostic("[%d] Requesting %s", requestCounter, method.name);
+
+            return result;
+        }
+    }
+
+    auto api = new BotApiMock(null);
+
+    api.sendPoll("chat-id", "question", ["q1", "q2"]);
+    api.stopPoll("chat-id", 123);
 }

@@ -8,6 +8,7 @@ import telega.telegram.stickers : Sticker;
 import telega.telegram.games : Game, Animation, CallbackGame;
 import telega.telegram.payments : Invoice, SuccessfulPayment, ShippingQuery, PreCheckoutQuery;
 import telega.telegram.inline : InlineQuery;
+import telega.telegram.poll : Poll, PollAnswer;
 
 
 version (unittest)
@@ -145,6 +146,7 @@ struct Message
     Nullable!Document        document;
     Nullable!Animation       animation;
     Nullable!Game            game;
+    Nullable!Poll            poll;
     Nullable!PhotoSize[]     photo;
     Nullable!Sticker         sticker;
     Nullable!Video           video;
@@ -190,6 +192,8 @@ struct Update
     Nullable!CallbackQuery      callback_query;
     Nullable!ShippingQuery      shipping_query;
     Nullable!PreCheckoutQuery   pre_checkout_query;
+    Nullable!Poll               poll;
+    Nullable!PollAnswer         poll_answer;
 
     @property @safe @nogc nothrow pure
     uint id()

@@ -15,3 +15,9 @@ services:
         volumes:
             - ./:/dlang/app
         command: ldc2 --version
+    example:
+        image: dlang2/ldc-ubuntu
+        env_file: .env
+        volumes:
+            - ./:/dlang/app
+            - ./.dub:/root/.dub
