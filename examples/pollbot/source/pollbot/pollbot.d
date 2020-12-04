@@ -34,6 +34,8 @@ class PollBot
 
     private void onText(ref Message m)
     {
+        import std.format : format;
+
         if (m.text == "/poll") {
             logInfo("Starting poll in %s", m.chat.id);
 
@@ -64,17 +66,15 @@ class PollBot
             }
 
             Poll pollResult = api.stopPoll(currentPoll.get.chat.id, currentPoll.get.id);
-            api.sendMessage(currentPoll.get.chat.id, "Poll results: ");
+            api.sendMessage(
+                currentPoll.get.chat.id,
+                "Poll results:\n  Total votes: %d"
+                    .format(
+                        pollResult.total_voter_count
+                    )
+            );
+            currentPoll = Nullable!Message.init;
+            logInfo("Poll %s stopped", pollResult.id);
         }
-    }
-
-    private void onNewPoll()
-    {
-
-    }
-
-    private void onPollStopped()
-    {
-
     }
 }

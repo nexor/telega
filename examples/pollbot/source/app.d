@@ -2,7 +2,6 @@ import vibe.core.core : runApplication, runTask, disableDefaultSignalHandlers;
 import vibe.core.log : setLogLevel, logInfo, LogLevel;
 import std.process : environment;
 import std.exception : enforce;
-import telega.telegram.basic : Message;
 
 int main(string[] args)
 {
@@ -15,7 +14,7 @@ int main(string[] args)
 
     enforce(botToken !is null, "Please provide bot token as a first argument or set BOT_TOKEN env variable");
 
-    setLogLevel(LogLevel.debugV);
+    setLogLevel(LogLevel.diagnostic);
     runTask(&listenUpdates, botToken);
     disableDefaultSignalHandlers();
 
