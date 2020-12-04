@@ -18,8 +18,6 @@
 # DUB
 .dub
 docs.json
-__dummy.html
-docs/
 
 .env
 
@@ -29,3 +27,4 @@ docs/
 /telega-test-unittest
 
 /examples/.cache
+/examples/pollbot/pollbot
