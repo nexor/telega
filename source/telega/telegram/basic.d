@@ -135,6 +135,7 @@ struct Message
     Nullable!Chat        forward_from_chat;
     Nullable!uint        forward_from_message_id;
     Nullable!string      forward_signature;
+    Nullable!string      forward_sender_name;
     Nullable!uint        forward_date;
     Nullable!uint        edit_date;
     Nullable!string      media_group_id;

@@ -25,6 +25,7 @@ docs.json
 *.lst
 /telega-test-default
 /telega-test-unittest
+/telega-test-requests-driver
 
 /examples/.cache
 /examples/pollbot/pollbot
