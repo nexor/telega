@@ -3,7 +3,7 @@ description "Telegram Bot API implementation"
 authors     "Pavel Chebotarev"
 license "MIT"
 
-dependency "vibe-core" version="~>1.9.2"
+dependency "vibe-core" version="~>1.9"
 dependency "asdf" version="~>0.5.7"
 dependency "dests" version="~>0.3.1"
 
