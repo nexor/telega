@@ -22,10 +22,10 @@ dc-build:
 	docker-compose build
 
 run-example-echobot:
-	docker-compose run --workdir=/dlang/app/examples/echobot --rm example dub
+	docker-compose -f docker-compose.examples.yml run --workdir=/dlang/app/examples/echobot --rm example dub
 
 run-example-keyboard:
-	docker-compose run --workdir=/dlang/app/examples/keyboard --rm example dub
+	docker-compose -f docker-compose.examples.yml run --workdir=/dlang/app/examples/keyboard --rm example dub
 
 run-example-pollbot:
-	docker-compose run --workdir=/dlang/app/examples/pollbot --rm example dub
+	docker-compose -f docker-compose.examples.yml run --workdir=/dlang/app/examples/pollbot --rm example dub
