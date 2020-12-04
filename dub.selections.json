@@ -6,8 +6,8 @@
 		"botan-math": "1.0.3",
 		"cachetools": "0.3.1",
 		"dests": "0.3.1",
-		"diet-ng": "1.7.2",
-		"eventcore": "0.9.6",
+		"diet-ng": "1.7.4",
+		"eventcore": "0.9.11",
 		"libasync": "0.8.6",
 		"libevent": "2.0.2+2.0.16",
 		"memutils": "1.0.4",
@@ -16,8 +16,8 @@
 		"requests": "1.0.15",
 		"socks-client": "0.1.0",
 		"stdx-allocator": "2.77.5",
-		"taggedalgebraic": "0.11.15",
-		"vibe-core": "1.9.2",
+		"taggedalgebraic": "0.11.18",
+		"vibe-core": "1.9.4",
 		"vibe-d": "0.8.6"
 	}
 }

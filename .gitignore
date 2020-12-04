@@ -1,3 +1,4 @@
+
 # Compiled Object files
 *.o
 *.obj
@@ -17,8 +18,6 @@
 # DUB
 .dub
 docs.json
-__dummy.html
-docs/
 
 .env
 
@@ -26,3 +25,7 @@ docs/
 *.lst
 /telega-test-default
 /telega-test-unittest
+/telega-test-requests-driver
+
+/examples/.cache
+/examples/pollbot/pollbot

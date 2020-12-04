@@ -7,9 +7,6 @@ ARG USER_GID=$USER_UID
 # Avoid warnings by switching to noninteractive
 ENV DEBIAN_FRONTEND=noninteractive
 
-ENV COMPILER_LDC=ldc-1.22.0
-ENV COMPILER_DMD=dmd-2.092.1
-
 # Configure apt and install packages
 RUN apt-get update \
     && apt-get -y install --no-install-recommends apt-utils dialog 2>&1 \
@@ -33,7 +30,10 @@ RUN apt-get autoremove -y \
 
 RUN apt-get update && apt-get install -y curl libcurl4 build-essential zlib1g-dev libssl-dev libxml2
 RUN curl -fsS -o /tmp/install.sh https://dlang.org/install.sh
-ENV SHLVL=2
+
+ENV COMPILER_LDC=ldc-1.24.0
+ENV COMPILER_DMD=dmd-2.094.2
+
 RUN bash /tmp/install.sh -p /dlang install "${COMPILER_LDC}"
 RUN bash /tmp/install.sh -p /dlang install "${COMPILER_DMD}"
 

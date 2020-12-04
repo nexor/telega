@@ -21,6 +21,7 @@ struct ChatMember
     Nullable!bool   can_invite_users;
     Nullable!bool   can_restrict_members;
     Nullable!bool   can_pin_messages;
+    Nullable!bool   is_member;
     Nullable!bool   can_promote_members;
     Nullable!bool   can_send_messages;
     Nullable!bool   can_send_media_messages;
