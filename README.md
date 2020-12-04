@@ -4,6 +4,22 @@
 [![Dub version](https://img.shields.io/dub/v/telega.svg)](http://code.dlang.org/packages/telega)
 [![Build Status](https://travis-ci.org/nexor/telega.svg?branch=master)](https://travis-ci.org/nexor/telega)
 
+## Run examples
+To run examples from `examples/` dir you need to [create a bot](https://core.telegram.org/bots#6-botfather) and
+put it as BOT_TOKEN variable in `.env` file at the root of this repository.
+
+```
+$ cat .env
+BOT_TOKEN=123456789:BotTokenHere
+```
+
+Now you can run examples using make command
+```
+$ make run-example-echobot
+$ make run-example-keyboard
+$ make run-example-pollbot
+```
+
 ## Quickstart
 
 Simple echo bot example
@@ -64,8 +80,7 @@ dub add telega
 
  - [ ] Sending files
  - [ ] Inline mode
- - [ ] Bot API 4.0
- - [ ] Bot API 4.1 and newer
+ - [ ] Bot API 4.3 and newer
 
 ## Help
 You can find some examples in the [examples dir](examples/)
