@@ -328,6 +328,21 @@ struct Contact
     Nullable!string vcard;
 }
 
+unittest
+{
+    string json = `{
+        "phone_number": "+123456789",
+        "first_name": "FirstName",
+        "last_name": "LstName",
+        "user_id": 42
+    }`;
+
+    Contact c = deserialize!Contact(json);
+
+    c.phone_number.assertEquals("+123456789");
+    c.user_id.assertEquals(42);
+}
+
 // TODO Add Nullable fields
 struct Location
 {
