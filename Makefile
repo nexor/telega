@@ -1,3 +1,10 @@
+clean:
+	rm -rf .dub
+	rm -rf examples/.cache/*
+	rm -rf examples/echobot/.dub
+	rm -rf examples/keyboard/.dub
+	rm -rf examples/pollbot/.dub
+
 unit-tests: dc-build unit-tests-dmd unit-tests-ldc
 
 unit-tests-dmd:

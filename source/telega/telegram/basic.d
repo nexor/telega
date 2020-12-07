@@ -125,7 +125,7 @@ unittest
         .assertEquals(ChatType.Group);
 }
 
-struct Message
+mixin template MessageFields()
 {
     uint                 message_id;
     uint                 date;
@@ -153,8 +153,6 @@ struct Message
     Nullable!Video           video;
     Nullable!Voice           voice;
     Nullable!VideoNote       video_note;
-    // TODO Nullable!Message reply_to_message;
-    // TODO Nullable!Message pinned_message;
     Nullable!string          caption;
     Nullable!Contact         contact;
     Nullable!Location        location;
@@ -178,6 +176,42 @@ struct Message
     {
         return message_id;
     }
+}
+
+struct PlainMessage
+{
+    mixin MessageFields;
+}
+
+struct Message
+{
+    mixin MessageFields;
+
+    Nullable!PlainMessage reply_to_message;
+    Nullable!PlainMessage pinned_message;
+}
+
+unittest
+{
+    string json = `{
+        "message_id": 1,
+        "date" : 2,
+        "chat": {
+            "id":102223333,
+            "username":"uname",
+            "type":"private"
+        },
+        "text": "message text"
+    }`;
+
+    Message m = deserialize!Message(json);
+
+    m.message_id
+        .assertEquals(1);
+    m.date
+        .assertEquals(2);
+    m.text
+        .assertEquals("message text");
 }
 
 struct Update
