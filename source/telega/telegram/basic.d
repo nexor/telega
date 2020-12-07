@@ -178,6 +178,11 @@ mixin template MessageFields()
     }
 }
 
+struct PlainMessage
+{
+    mixin MessageFields;
+}
+
 struct Message
 {
     mixin MessageFields;
@@ -207,11 +212,6 @@ unittest
         .assertEquals(2);
     m.text
         .assertEquals("message text");
-}
-
-struct PlainMessage
-{
-    mixin MessageFields;
 }
 
 struct Update
