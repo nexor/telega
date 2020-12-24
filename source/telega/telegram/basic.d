@@ -1,7 +1,8 @@
 module telega.telegram.basic;
 
 import std.typecons : Nullable, nullable;
-import asdf : Asdf, serializedAs, deserialize;
+import asdf : Asdf, deserialize;
+import asdf.serialization : serdeProxy, serdeKeys, serdeOptional;
 import telega.serialization : JsonableAlgebraicProxy, SerializableEnumProxy, serializeToJsonString;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.stickers : Sticker;
@@ -26,8 +27,11 @@ struct User
     bool   is_bot;
     string first_name;
 
+    @serdeOptional
     Nullable!string last_name;
+    @serdeOptional
     Nullable!string username;
+    @serdeOptional
     Nullable!string language_code;
 }
 
@@ -62,7 +66,7 @@ unittest
 
 
 
-@serializedAs!ChatTypeProxy
+@serdeProxy!(SerializableEnumProxy!ChatType)
 enum ChatType : string
 {
     Private    = "private",
@@ -71,40 +75,30 @@ enum ChatType : string
     Channel    = "channel"
 }
 
-struct ChatTypeProxy
-{
-    ChatType t;
-
-    this(ChatType type)
-    {
-        t = type;
-    }
-
-    ChatType opCast(T : ChatType)()
-    {
-        return t;
-    }
-
-    static ChatTypeProxy deserialize(Asdf v)
-    {
-        return ChatTypeProxy(cast(ChatType)cast(string)v);
-    }
-}
-
 struct Chat
 {
     long id;
     ChatType type;
+    @serdeOptional
     Nullable!string title;
+    @serdeOptional
     Nullable!string first_name;
+    @serdeOptional
     Nullable!string last_name;
+    @serdeOptional
     Nullable!string username;
+    @serdeOptional
     Nullable!bool all_members_are_administrators;
+    @serdeOptional
     Nullable!ChatPhoto photo;
+    @serdeOptional
     Nullable!string description;
+    @serdeOptional
     Nullable!string invite_link;
-    // TODO Nullable!Message pinned_message;
+    // TODO @serdeOptional Nullable!Message pinned_message;
+    @serdeOptional
     Nullable!string sticker_set_name;
+    @serdeOptional
     Nullable!bool can_set_sticker_set;
 }
 
@@ -130,47 +124,87 @@ struct Message
     uint                 message_id;
     uint                 date;
     Chat                 chat;
+    @serdeOptional
     Nullable!User        from;
+    @serdeOptional
     Nullable!User        forward_from;
+    @serdeOptional
     Nullable!Chat        forward_from_chat;
+    @serdeOptional
     Nullable!uint        forward_from_message_id;
+    @serdeOptional
     Nullable!string      forward_signature;
+    @serdeOptional
     Nullable!string      forward_sender_name;
+    @serdeOptional
     Nullable!uint        forward_date;
+    @serdeOptional
     Nullable!uint        edit_date;
+    @serdeOptional
     Nullable!string      media_group_id;
+    @serdeOptional
     Nullable!string      author_signature;
+    @serdeOptional
     Nullable!string      text;
+    @serdeOptional
     Nullable!MessageEntity[] entities;
+    @serdeOptional
     Nullable!MessageEntity[] caption_entities;
+    @serdeOptional
     Nullable!Audio           audio;
+    @serdeOptional
     Nullable!Document        document;
+    @serdeOptional
     Nullable!Animation       animation;
+    @serdeOptional
     Nullable!Game            game;
+    @serdeOptional
     Nullable!Poll            poll;
+    @serdeOptional
     Nullable!PhotoSize[]     photo;
+    @serdeOptional
     Nullable!Sticker         sticker;
+    @serdeOptional
     Nullable!Video           video;
+    @serdeOptional
     Nullable!Voice           voice;
+    @serdeOptional
     Nullable!VideoNote       video_note;
-    // TODO Nullable!Message reply_to_message;
-    // TODO Nullable!Message pinned_message;
+    // TODO @serdeOptional Nullable!Message reply_to_message;
+    // TODO @serdeOptional Nullable!Message pinned_message;
+    @serdeOptional
     Nullable!string          caption;
+    @serdeOptional
     Nullable!Contact         contact;
+    @serdeOptional
     Nullable!Location        location;
+    @serdeOptional
     Nullable!Venue           venue;
+    @serdeOptional
     Nullable!User[]          new_chat_members;
+    @serdeOptional
     Nullable!User            left_chat_member;
+    @serdeOptional
     Nullable!string          new_chat_title;
+    @serdeOptional
     Nullable!PhotoSize[]     new_chat_photo;
+    @serdeOptional
     Nullable!bool            delete_chat_photo;
+    @serdeOptional
     Nullable!bool            group_chat_created;
+    @serdeOptional
     Nullable!bool            supergroup_chat_created;
+    @serdeOptional
     Nullable!bool            channel_chat_created;
+    @serdeOptional
     Nullable!long            migrate_to_chat_id;
+    @serdeOptional
     Nullable!long            migrate_from_chat_id;
+    @serdeOptional
     Nullable!Invoice         invoice;
+    @serdeOptional
     Nullable!SuccessfulPayment successful_payment;
+    @serdeOptional
     Nullable!string              connected_website;
 
     @property
@@ -183,17 +217,28 @@ struct Message
 struct Update
 {
     uint             update_id;
+    @serdeOptional
     Nullable!Message message;
 
+    @serdeOptional
     Nullable!Message edited_message;
+    @serdeOptional
     Nullable!Message channel_post;
+    @serdeOptional
     Nullable!Message edited_channel_post;
+    @serdeOptional
     Nullable!InlineQuery        inline_query;
+    @serdeOptional
     Nullable!ChosenInlineResult chosen_inline_result;
+    @serdeOptional
     Nullable!CallbackQuery      callback_query;
+    @serdeOptional
     Nullable!ShippingQuery      shipping_query;
+    @serdeOptional
     Nullable!PreCheckoutQuery   pre_checkout_query;
+    @serdeOptional
     Nullable!Poll               poll;
+    @serdeOptional
     Nullable!PollAnswer         poll_answer;
 
     @property @safe @nogc nothrow pure
@@ -209,6 +254,11 @@ unittest
         "update_id": 143,
         "message": {
             "message_id": 243,
+            "chat": {
+                "id": 1,
+                "type": "group"
+            },
+            "date": 1234567890,
             "text": "message text"
         }
     }`;
@@ -217,9 +267,9 @@ unittest
 
     u.id
         .assertEquals(143);
-    u.message.message_id
+    u.message.get.message_id
         .assertEquals(243);
-    u.message.text.get
+    u.message.get.text.get
         .assertEquals("message text");
 }
 
@@ -254,7 +304,9 @@ struct MessageEntity
     MessageEntityType        type;
     uint          offset;
     uint          length;
+    @serdeOptional
     Nullable!string  url;
+    @serdeOptional
     Nullable!User    user;
 }
 
@@ -323,8 +375,11 @@ struct Contact
 {
     string phone_number;
     string first_name;
+    @serdeOptional
     Nullable!string last_name;
+    @serdeOptional
     Nullable!uint user_id;
+    @serdeOptional
     Nullable!string vcard;
 }
 
@@ -340,7 +395,7 @@ unittest
     Contact c = deserialize!Contact(json);
 
     c.phone_number.assertEquals("+123456789");
-    c.user_id.assertEquals(42);
+    c.user_id.get.assertEquals(42);
 }
 
 // TODO Add Nullable fields
@@ -355,7 +410,9 @@ struct Venue
     Location location;
     string   title;
     string   address;
+    @serdeOptional
     Nullable!string   foursquare_id;
+    @serdeOptional
     Nullable!string   foursquare_type;
 }
 
@@ -650,7 +707,7 @@ struct ChosenInlineResult
 /*                        Telegram methods                        */
 /******************************************************************/
 
-@serializedAs!(SerializableEnumProxy!UpdateType)
+@serdeProxy!(SerializableEnumProxy!UpdateType)
 enum UpdateType: string
 {
     Message = "message",

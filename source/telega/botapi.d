@@ -1,8 +1,8 @@
 module telega.botapi;
 
 import vibe.core.log;
-import asdf : Asdf, serializedAs;
-import asdf.serialization : deserialize;
+import asdf : Asdf;
+import asdf.serialization : deserialize, serdeProxy;
 import std.typecons : Nullable;
 import std.exception : enforce;
 import std.traits : isSomeString, isIntegral;
@@ -20,7 +20,7 @@ enum HTTPMethod
 	POST
 }
 
-@serializedAs!ChatIdProxy
+@serdeProxy!ChatIdProxy
 struct ChatId
 {
     import std.conv;
@@ -145,13 +145,13 @@ enum isTelegramId(T) = isSomeString!T || isIntegral!T || is(T == ChatId);
 
 mixin template TelegramMethod(string path, HTTPMethod method = HTTPMethod.POST)
 {
-    import asdf.serialization : serializationIgnore;
+    import asdf.serialization : serdeIgnore;
 
     public:
-        @serializationIgnore
+        @serdeIgnore
         immutable string      _path       = path;
 
-        @serializationIgnore
+        @serdeIgnore
         immutable HTTPMethod  _httpMethod = method;
 }
 

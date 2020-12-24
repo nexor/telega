@@ -1,7 +1,8 @@
 module telega.serialization;
 
 import std.meta : AliasSeq, staticIndexOf;
-import asdf : Asdf, serializeValue, serializeToAsdf, serializeToJson, serializedAs, parseJson;
+import asdf : Asdf, serializeValue, serializeToAsdf, serializeToJson, parseJson;
+import asdf.serialization : serdeProxy, SerdeException, deserializeScopedString;
 
 version (unittest)
 {
@@ -41,13 +42,14 @@ unittest
 /**
  * Proxy struct for serializing string enums as their values, not key names
  */
-@serializedAs!string
-struct SerializableEnumProxy(T)
-    if (is(T : string))
+@serdeProxy!string
+struct SerializableEnumProxy(E)
+    if (is(E : string))
 {
-    T e;
+    E e;
+    alias e this;
 
-    this(T e)
+    this(E e)
     {
         this.e = e;
     }
@@ -56,11 +58,25 @@ struct SerializableEnumProxy(T)
     {
         return cast(string)e;
     }
+
+    SerdeException deserializeFromAsdf(Asdf v)
+    {
+        string val;
+
+        if (auto e = deserializeScopedString(v, val)) {
+            return e;
+        }
+
+        this = cast(E)val;
+
+        return null;
+    }
+
 }
 
 version (unittest)
 {
-    @serializedAs!(SerializableEnumProxy!E)
+    @serdeProxy!(SerializableEnumProxy!E)
     static enum E : string
     {
         Val1 = "value_1"

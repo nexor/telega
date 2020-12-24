@@ -3,33 +3,14 @@ module telega.telegram.poll;
 import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.basic : Message, MessageEntity, User, ReplyMarkup;
-import asdf : serializedAs;
+import telega.serialization : SerializableEnumProxy;
+import asdf.serialization : serdeProxy;
 
-@serializedAs!PollTypeProxy
+@serdeProxy!(SerializableEnumProxy!PollType)
 enum PollType : string
 {
     Quiz = "quiz",
     Regular = "regular"
-}
-
-struct PollTypeProxy
-{
-    PollType t;
-
-    this(PollType type)
-    {
-        t = type;
-    }
-
-    PollType opCast(T : PollType)()
-    {
-        return t;
-    }
-
-    void serialize(S)(ref S serializer)
-    {
-        serializer.putValue(cast(string)t);
-    }
 }
 
 struct PollOption
