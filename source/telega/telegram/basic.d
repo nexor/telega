@@ -280,6 +280,7 @@ enum ParseMode : string
     None     = "",
 }
 
+@serdeProxy!(SerializableEnumProxy!MessageEntityType)
 enum MessageEntityType : string
 {
     Mention = "mention",

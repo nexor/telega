@@ -4,7 +4,7 @@ import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.basic : Message, MessageEntity, User, ReplyMarkup;
 import telega.serialization : SerializableEnumProxy;
-import asdf.serialization : serdeProxy;
+import asdf.serialization : serdeProxy, serdeOptional;
 
 @serdeProxy!(SerializableEnumProxy!PollType)
 enum PollType : string
@@ -36,10 +36,15 @@ struct Poll
     bool is_anonymous;
     string type;
     bool allows_multiple_answers;
+    @serdeOptional
     Nullable!uint correct_option_id;
+    @serdeOptional
     Nullable!string explanation;
+    @serdeOptional
     Nullable!MessageEntity[] explanation_entities;
+    @serdeOptional
     Nullable!uint open_period;
+    @serdeOptional
     Nullable!uint close_date;
 }
 

@@ -2,7 +2,7 @@ module telega.botapi;
 
 import vibe.core.log;
 import asdf : Asdf;
-import asdf.serialization : deserialize, serdeProxy;
+import asdf.serialization : deserialize, serdeProxy, serdeOptional;
 import std.typecons : Nullable;
 import std.exception : enforce;
 import std.traits : isSomeString, isIntegral;
@@ -179,7 +179,9 @@ class BotApi
         {
             bool   ok;
             T      result;
+            @serdeOptional
             ushort error_code;
+            @serdeOptional
             string description;
         }
 
