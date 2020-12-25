@@ -1,0 +1,9 @@
+name        "telega-api-generator"
+description "Telegram Bot API dlang code generator"
+authors     "Pavel Chebotarev"
+license "MIT"
+
+targetType "executable"
+
+dependency "requests" version="~>2.0"
+dependency "arsd-official:dom" version="~>9.0.4"

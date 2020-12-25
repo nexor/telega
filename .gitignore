@@ -21,6 +21,8 @@ docs.json
 
 .env
 
+/generator/telega-api-generator
+
 # Code coverage
 *.lst
 /telega-test-default
