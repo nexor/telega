@@ -317,6 +317,7 @@ struct PhotoSize
     int           width;
     int           height;
 
+    @serdeOptional
     Nullable!uint file_size;
 }
 
@@ -652,7 +653,6 @@ struct ChatPhoto
     string big_file_id;
 }
 
-// TODO Add Nullable fields
 struct ResponseParameters
 {
     @serdeOptional
