@@ -1,24 +1,26 @@
 {
 	"fileVersion": 1,
 	"versions": {
-		"asdf": "0.5.7",
-		"botan": "1.12.18",
+		"asdf": "0.7.5",
+		"botan": "1.12.19",
 		"botan-math": "1.0.3",
 		"cachetools": "0.3.1",
 		"dests": "0.3.1",
-		"diet-ng": "1.7.2",
-		"eventcore": "0.9.6",
+		"diet-ng": "1.7.4",
+		"eventcore": "0.9.11",
 		"libasync": "0.8.6",
 		"libevent": "2.0.2+2.0.16",
 		"memutils": "1.0.4",
+		"mir-algorithm": "3.10.16",
+		"mir-core": "1.1.58",
 		"mir-linux-kernel": "1.0.1",
 		"openssl": "1.1.6+1.0.1g",
 		"requests": "1.0.15",
 		"socks-client": "0.1.0",
 		"stdx-allocator": "2.77.5",
-		"taggedalgebraic": "0.11.16",
+		"taggedalgebraic": "0.11.18",
 		"telega": {"path":"../../"},
-		"vibe-core": "1.9.2",
+		"vibe-core": "1.11.3",
 		"vibe-d": "0.8.6"
 	}
 }

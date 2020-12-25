@@ -3,33 +3,20 @@ module telega.telegram.poll;
 import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.basic : Message, MessageEntity, User, ReplyMarkup;
-import asdf : serializedAs;
+import telega.serialization : SerializableEnumProxy;
+import asdf.serialization : serdeProxy, serdeOptional;
 
-@serializedAs!PollTypeProxy
+version(unittest)
+{
+    import asdf : deserialize;
+    import telega.test : assertEquals;
+}
+
+@serdeProxy!(SerializableEnumProxy!PollType)
 enum PollType : string
 {
     Quiz = "quiz",
     Regular = "regular"
-}
-
-struct PollTypeProxy
-{
-    PollType t;
-
-    this(PollType type)
-    {
-        t = type;
-    }
-
-    PollType opCast(T : PollType)()
-    {
-        return t;
-    }
-
-    void serialize(S)(ref S serializer)
-    {
-        serializer.putValue(cast(string)t);
-    }
 }
 
 struct PollOption
@@ -53,13 +40,41 @@ struct Poll
     uint total_voter_count;
     bool is_closed;
     bool is_anonymous;
-    string type;
+    PollType type;
     bool allows_multiple_answers;
+    @serdeOptional
     Nullable!uint correct_option_id;
+    @serdeOptional
     Nullable!string explanation;
+    @serdeOptional
     Nullable!MessageEntity[] explanation_entities;
+    @serdeOptional
     Nullable!uint open_period;
+    @serdeOptional
     Nullable!uint close_date;
+}
+
+unittest
+{
+    string json = `{
+        "id": "poll1",
+        "question": "q",
+        "options": [
+
+        ],
+        "total_voter_count": 0,
+        "is_closed": false,
+        "is_anonymous": false,
+        "type": "quiz",
+        "allows_multiple_answers": false,
+        "correct_option_id": 2
+    }`;
+
+    Poll p = deserialize!Poll(json);
+
+    p.id.assertEquals("poll1");
+    p.correct_option_id.get.assertEquals(2);
+    p.type.assertEquals(PollType.Quiz);
 }
 
 struct SendPollMethod

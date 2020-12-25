@@ -2,7 +2,7 @@ module telega.telegram.payments;
 
 import std.typecons : Nullable;
 import telega.telegram.basic : User;
-
+import asdf.serialization : serdeOptional;
 
 /*** Payments types ***/
 struct LabeledPrice
@@ -30,12 +30,15 @@ struct ShippingAddress
     string post_code;
 }
 
-// TODO add nullable fields
 struct OrderInfo
 {
-    string name;
-    string phone_number;
-    string email;
+    @serdeOptional
+    Nullable!string name;
+    @serdeOptional
+    Nullable!string phone_number;
+    @serdeOptional
+    Nullable!string email;
+    @serdeOptional
     Nullable!ShippingAddress shipping_address;
 }
 
@@ -46,13 +49,14 @@ struct ShippingOption
     LabeledPrice[] prices;
 }
 
-// TODO add nullable fields
 struct SuccessfulPayment
 {
     string currency;
     uint   total_amount;
     string invoice_payload;
-    string shipping_option_id;
+    @serdeOptional
+    Nullable!string shipping_option_id;
+    @serdeOptional
     Nullable!OrderInfo order_info;
     string telegram_payment_charge_id;
     string provider_payment_charge_id;
@@ -66,7 +70,6 @@ struct ShippingQuery
     ShippingAddress shipping_address;
 }
 
-// TODO add nullable fields
 struct PreCheckoutQuery
 {
     string             id;
@@ -74,6 +77,8 @@ struct PreCheckoutQuery
     string             currency;
     uint               total_amount;
     string             invoice_payload;
-    string             shipping_option_id;
+    @serdeOptional
+    Nullable!string    shipping_option_id;
+    @serdeOptional
     Nullable!OrderInfo order_info;
 }

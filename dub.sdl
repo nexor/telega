@@ -4,7 +4,7 @@ authors     "Pavel Chebotarev"
 license "MIT"
 
 dependency "vibe-core" version="~>1.9"
-dependency "asdf" version="~>0.5.7"
+dependency "asdf" version="~>0.7.5"
 dependency "dests" version="~>0.3.1"
 
 buildRequirements "disallowInlining"

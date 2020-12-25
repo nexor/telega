@@ -1,7 +1,8 @@
 module telega.telegram.basic;
 
 import std.typecons : Nullable, nullable;
-import asdf : Asdf, serializedAs, deserialize;
+import asdf : Asdf, deserialize;
+import asdf.serialization : serdeProxy, serdeKeys, serdeOptional;
 import telega.serialization : JsonableAlgebraicProxy, SerializableEnumProxy, serializeToJsonString;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod, ChatId, isTelegramId;
 import telega.telegram.stickers : Sticker;
@@ -26,8 +27,11 @@ struct User
     bool   is_bot;
     string first_name;
 
+    @serdeOptional
     Nullable!string last_name;
+    @serdeOptional
     Nullable!string username;
+    @serdeOptional
     Nullable!string language_code;
 }
 
@@ -62,7 +66,7 @@ unittest
 
 
 
-@serializedAs!ChatTypeProxy
+@serdeProxy!(SerializableEnumProxy!ChatType)
 enum ChatType : string
 {
     Private    = "private",
@@ -71,40 +75,30 @@ enum ChatType : string
     Channel    = "channel"
 }
 
-struct ChatTypeProxy
-{
-    ChatType t;
-
-    this(ChatType type)
-    {
-        t = type;
-    }
-
-    ChatType opCast(T : ChatType)()
-    {
-        return t;
-    }
-
-    static ChatTypeProxy deserialize(Asdf v)
-    {
-        return ChatTypeProxy(cast(ChatType)cast(string)v);
-    }
-}
-
 struct Chat
 {
     long id;
     ChatType type;
+    @serdeOptional
     Nullable!string title;
+    @serdeOptional
     Nullable!string first_name;
+    @serdeOptional
     Nullable!string last_name;
+    @serdeOptional
     Nullable!string username;
+    @serdeOptional
     Nullable!bool all_members_are_administrators;
+    @serdeOptional
     Nullable!ChatPhoto photo;
+    @serdeOptional
     Nullable!string description;
+    @serdeOptional
     Nullable!string invite_link;
-    // TODO Nullable!Message pinned_message;
+    // TODO @serdeOptional Nullable!Message pinned_message;
+    @serdeOptional
     Nullable!string sticker_set_name;
+    @serdeOptional
     Nullable!bool can_set_sticker_set;
 }
 
@@ -130,47 +124,87 @@ struct Message
     uint                 message_id;
     uint                 date;
     Chat                 chat;
+    @serdeOptional
     Nullable!User        from;
+    @serdeOptional
     Nullable!User        forward_from;
+    @serdeOptional
     Nullable!Chat        forward_from_chat;
+    @serdeOptional
     Nullable!uint        forward_from_message_id;
+    @serdeOptional
     Nullable!string      forward_signature;
+    @serdeOptional
     Nullable!string      forward_sender_name;
+    @serdeOptional
     Nullable!uint        forward_date;
+    @serdeOptional
     Nullable!uint        edit_date;
+    @serdeOptional
     Nullable!string      media_group_id;
+    @serdeOptional
     Nullable!string      author_signature;
+    @serdeOptional
     Nullable!string      text;
+    @serdeOptional
     Nullable!MessageEntity[] entities;
+    @serdeOptional
     Nullable!MessageEntity[] caption_entities;
+    @serdeOptional
     Nullable!Audio           audio;
+    @serdeOptional
     Nullable!Document        document;
+    @serdeOptional
     Nullable!Animation       animation;
+    @serdeOptional
     Nullable!Game            game;
+    @serdeOptional
     Nullable!Poll            poll;
+    @serdeOptional
     Nullable!PhotoSize[]     photo;
+    @serdeOptional
     Nullable!Sticker         sticker;
+    @serdeOptional
     Nullable!Video           video;
+    @serdeOptional
     Nullable!Voice           voice;
+    @serdeOptional
     Nullable!VideoNote       video_note;
-    // TODO Nullable!Message reply_to_message;
-    // TODO Nullable!Message pinned_message;
+    // TODO @serdeOptional Nullable!Message reply_to_message;
+    // TODO @serdeOptional Nullable!Message pinned_message;
+    @serdeOptional
     Nullable!string          caption;
+    @serdeOptional
     Nullable!Contact         contact;
+    @serdeOptional
     Nullable!Location        location;
+    @serdeOptional
     Nullable!Venue           venue;
+    @serdeOptional
     Nullable!User[]          new_chat_members;
+    @serdeOptional
     Nullable!User            left_chat_member;
+    @serdeOptional
     Nullable!string          new_chat_title;
+    @serdeOptional
     Nullable!PhotoSize[]     new_chat_photo;
+    @serdeOptional
     Nullable!bool            delete_chat_photo;
+    @serdeOptional
     Nullable!bool            group_chat_created;
+    @serdeOptional
     Nullable!bool            supergroup_chat_created;
+    @serdeOptional
     Nullable!bool            channel_chat_created;
+    @serdeOptional
     Nullable!long            migrate_to_chat_id;
+    @serdeOptional
     Nullable!long            migrate_from_chat_id;
+    @serdeOptional
     Nullable!Invoice         invoice;
+    @serdeOptional
     Nullable!SuccessfulPayment successful_payment;
+    @serdeOptional
     Nullable!string              connected_website;
 
     @property
@@ -183,17 +217,28 @@ struct Message
 struct Update
 {
     uint             update_id;
+    @serdeOptional
     Nullable!Message message;
 
+    @serdeOptional
     Nullable!Message edited_message;
+    @serdeOptional
     Nullable!Message channel_post;
+    @serdeOptional
     Nullable!Message edited_channel_post;
+    @serdeOptional
     Nullable!InlineQuery        inline_query;
+    @serdeOptional
     Nullable!ChosenInlineResult chosen_inline_result;
+    @serdeOptional
     Nullable!CallbackQuery      callback_query;
+    @serdeOptional
     Nullable!ShippingQuery      shipping_query;
+    @serdeOptional
     Nullable!PreCheckoutQuery   pre_checkout_query;
+    @serdeOptional
     Nullable!Poll               poll;
+    @serdeOptional
     Nullable!PollAnswer         poll_answer;
 
     @property @safe @nogc nothrow pure
@@ -209,6 +254,11 @@ unittest
         "update_id": 143,
         "message": {
             "message_id": 243,
+            "chat": {
+                "id": 1,
+                "type": "group"
+            },
+            "date": 1234567890,
             "text": "message text"
         }
     }`;
@@ -217,9 +267,9 @@ unittest
 
     u.id
         .assertEquals(143);
-    u.message.message_id
+    u.message.get.message_id
         .assertEquals(243);
-    u.message.text.get
+    u.message.get.text.get
         .assertEquals("message text");
 }
 
@@ -230,6 +280,7 @@ enum ParseMode : string
     None     = "",
 }
 
+@serdeProxy!(SerializableEnumProxy!MessageEntityType)
 enum MessageEntityType : string
 {
     Mention = "mention",
@@ -254,7 +305,9 @@ struct MessageEntity
     MessageEntityType        type;
     uint          offset;
     uint          length;
+    @serdeOptional
     Nullable!string  url;
+    @serdeOptional
     Nullable!User    user;
 }
 
@@ -264,6 +317,7 @@ struct PhotoSize
     int           width;
     int           height;
 
+    @serdeOptional
     Nullable!uint file_size;
 }
 
@@ -271,60 +325,147 @@ struct Audio
 {
     string file_id;
     uint   duration;
+    @serdeOptional
     Nullable!string performer;
+    @serdeOptional
     Nullable!string title;
+    @serdeOptional
     Nullable!string mime_type;
+    @serdeOptional
     Nullable!uint   file_size;
+    @serdeOptional
     Nullable!PhotoSize thumb;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "duration": 10,
+        "file_size": 1024
+    }`;
+
+    Audio a = deserialize!Audio(json);
+
+    a.file_id.assertEquals("abc");
+    a.file_size.get.assertEquals(1024);
+}
+
 struct Document
 {
     string    file_id;
-    PhotoSize thumb;
-    string    file_name;
-    string    mime_type;
-    uint      file_size;
+    @serdeOptional
+    Nullable!PhotoSize thumb;
+    @serdeOptional
+    Nullable!string    file_name;
+    @serdeOptional
+    Nullable!string    mime_type;
+    @serdeOptional
+    Nullable!uint      file_size;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "file_size": 1024
+    }`;
+
+    Document d = deserialize!Document(json);
+
+    d.file_id.assertEquals("abc");
+    d.file_size.get.assertEquals(1024);
+}
+
 struct Video
 {
     string file_id;
     uint width;
     uint height;
     uint duration;
-    PhotoSize thumb;
-    string mime_type;
-    uint file_size;
+    @serdeOptional
+    Nullable!PhotoSize thumb;
+    @serdeOptional
+    Nullable!string mime_type;
+    @serdeOptional
+    Nullable!uint file_size;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "width": 1,
+        "height": 2,
+        "duration": 3,
+        "file_size": 1024
+    }`;
+
+    Video v = deserialize!Video(json);
+
+    v.file_id.assertEquals("abc");
+    v.file_size.get.assertEquals(1024);
+}
+
 struct Voice
 {
     string file_id;
     uint   duration;
-    string mime_type;
-    uint   file_size;
+    @serdeOptional
+    Nullable!string mime_type;
+    @serdeOptional
+    Nullable!uint   file_size;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "duration": 3,
+        "file_size": 1024
+    }`;
+
+    Voice v = deserialize!Voice(json);
+
+    v.file_id.assertEquals("abc");
+    v.file_size.get.assertEquals(1024);
+}
+
 struct VideoNote
 {
     string    file_id;
     uint      length;
     uint      duration;
-    PhotoSize thumb;
-    uint      file_size;
+    @serdeOptional
+    Nullable!PhotoSize thumb;
+    @serdeOptional
+    Nullable!uint      file_size;
+}
+
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "length": 2,
+        "duration": 3,
+        "file_size": 1024
+    }`;
+
+    VideoNote vn = deserialize!VideoNote(json);
+
+    vn.file_id.assertEquals("abc");
+    vn.file_size.get.assertEquals(1024);
 }
 
 struct Contact
 {
     string phone_number;
     string first_name;
+    @serdeOptional
     Nullable!string last_name;
+    @serdeOptional
     Nullable!uint user_id;
+    @serdeOptional
     Nullable!string vcard;
 }
 
@@ -340,7 +481,7 @@ unittest
     Contact c = deserialize!Contact(json);
 
     c.phone_number.assertEquals("+123456789");
-    c.user_id.assertEquals(42);
+    c.user_id.get.assertEquals(42);
 }
 
 // TODO Add Nullable fields
@@ -355,7 +496,9 @@ struct Venue
     Location location;
     string   title;
     string   address;
+    @serdeOptional
     Nullable!string   foursquare_id;
+    @serdeOptional
     Nullable!string   foursquare_type;
 }
 
@@ -482,16 +625,20 @@ struct InlineKeyboardButton
     Nullable!bool         pay;
 }
 
-// TODO Add Nullable fields
 struct CallbackQuery
 {
     string           id;
     User             from;
+    @serdeOptional
     Nullable!Message message;
-    string           inline_message_id;
-    string           chat_instance;
-    string           data;
-    string           game_short_name;
+    @serdeOptional
+    Nullable!string  inline_message_id;
+    @serdeOptional
+    Nullable!string  chat_instance;
+    @serdeOptional
+    Nullable!string  data;
+    @serdeOptional
+    Nullable!string  game_short_name;
 }
 
 struct ForceReply
@@ -506,11 +653,12 @@ struct ChatPhoto
     string big_file_id;
 }
 
-// TODO Add Nullable fields
 struct ResponseParameters
 {
-    long migrate_to_chat_id;
-    uint retry_after;
+    @serdeOptional
+    Nullable!long migrate_to_chat_id;
+    @serdeOptional
+    Nullable!uint retry_after;
 }
 
 alias InputMediaStructs = AliasSeq!(
@@ -650,7 +798,7 @@ struct ChosenInlineResult
 /*                        Telegram methods                        */
 /******************************************************************/
 
-@serializedAs!(SerializableEnumProxy!UpdateType)
+@serdeProxy!(SerializableEnumProxy!UpdateType)
 enum UpdateType: string
 {
     Message = "message",

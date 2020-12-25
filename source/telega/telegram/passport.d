@@ -3,6 +3,7 @@ module telega.telegram.passport;
 import std.typecons;
 import telega.botapi;
 import telega.serialization;
+import asdf.serialization : serdeOptional;
 
 version (unittest)
 {
@@ -47,13 +48,21 @@ struct EncryptedPassportElement
     }
 
     string type;
+    @serdeOptional
     Nullable!string data;
+    @serdeOptional
     Nullable!string phone_number;
+    @serdeOptional
     Nullable!string email;
+    @serdeOptional
     Nullable!(PassportFile[]) files;
+    @serdeOptional
     Nullable!PassportFile front_side;
+    @serdeOptional
     Nullable!PassportFile reverse_side;
+    @serdeOptional
     Nullable!PassportFile selfie;
+    @serdeOptional
     Nullable!(PassportFile[]) translation;
     string hash;
 }
