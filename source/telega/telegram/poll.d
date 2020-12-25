@@ -40,7 +40,7 @@ struct Poll
     uint total_voter_count;
     bool is_closed;
     bool is_anonymous;
-    string type;
+    PollType type;
     bool allows_multiple_answers;
     @serdeOptional
     Nullable!uint correct_option_id;
@@ -65,7 +65,7 @@ unittest
         "total_voter_count": 0,
         "is_closed": false,
         "is_anonymous": false,
-        "type": "t",
+        "type": "quiz",
         "allows_multiple_answers": false,
         "correct_option_id": 2
     }`;
@@ -74,6 +74,7 @@ unittest
 
     p.id.assertEquals("poll1");
     p.correct_option_id.get.assertEquals(2);
+    p.type.assertEquals(PollType.Quiz);
 }
 
 struct SendPollMethod
