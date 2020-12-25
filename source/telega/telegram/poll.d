@@ -6,6 +6,12 @@ import telega.telegram.basic : Message, MessageEntity, User, ReplyMarkup;
 import telega.serialization : SerializableEnumProxy;
 import asdf.serialization : serdeProxy, serdeOptional;
 
+version(unittest)
+{
+    import asdf : deserialize;
+    import telega.test : assertEquals;
+}
+
 @serdeProxy!(SerializableEnumProxy!PollType)
 enum PollType : string
 {
@@ -46,6 +52,28 @@ struct Poll
     Nullable!uint open_period;
     @serdeOptional
     Nullable!uint close_date;
+}
+
+unittest
+{
+    string json = `{
+        "id": "poll1",
+        "question": "q",
+        "options": [
+
+        ],
+        "total_voter_count": 0,
+        "is_closed": false,
+        "is_anonymous": false,
+        "type": "t",
+        "allows_multiple_answers": false,
+        "correct_option_id": 2
+    }`;
+
+    Poll p = deserialize!Poll(json);
+
+    p.id.assertEquals("poll1");
+    p.correct_option_id.get.assertEquals(2);
 }
 
 struct SendPollMethod

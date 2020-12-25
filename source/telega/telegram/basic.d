@@ -324,52 +324,136 @@ struct Audio
 {
     string file_id;
     uint   duration;
+    @serdeOptional
     Nullable!string performer;
+    @serdeOptional
     Nullable!string title;
+    @serdeOptional
     Nullable!string mime_type;
+    @serdeOptional
     Nullable!uint   file_size;
+    @serdeOptional
     Nullable!PhotoSize thumb;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "duration": 10,
+        "file_size": 1024
+    }`;
+
+    Audio a = deserialize!Audio(json);
+
+    a.file_id.assertEquals("abc");
+    a.file_size.get.assertEquals(1024);
+}
+
 struct Document
 {
     string    file_id;
-    PhotoSize thumb;
-    string    file_name;
-    string    mime_type;
-    uint      file_size;
+    @serdeOptional
+    Nullable!PhotoSize thumb;
+    @serdeOptional
+    Nullable!string    file_name;
+    @serdeOptional
+    Nullable!string    mime_type;
+    @serdeOptional
+    Nullable!uint      file_size;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "file_size": 1024
+    }`;
+
+    Document d = deserialize!Document(json);
+
+    d.file_id.assertEquals("abc");
+    d.file_size.get.assertEquals(1024);
+}
+
 struct Video
 {
     string file_id;
     uint width;
     uint height;
     uint duration;
-    PhotoSize thumb;
-    string mime_type;
-    uint file_size;
+    @serdeOptional
+    Nullable!PhotoSize thumb;
+    @serdeOptional
+    Nullable!string mime_type;
+    @serdeOptional
+    Nullable!uint file_size;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "width": 1,
+        "height": 2,
+        "duration": 3,
+        "file_size": 1024
+    }`;
+
+    Video v = deserialize!Video(json);
+
+    v.file_id.assertEquals("abc");
+    v.file_size.get.assertEquals(1024);
+}
+
 struct Voice
 {
     string file_id;
     uint   duration;
-    string mime_type;
-    uint   file_size;
+    @serdeOptional
+    Nullable!string mime_type;
+    @serdeOptional
+    Nullable!uint   file_size;
 }
 
-// TODO Add Nullable fields
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "duration": 3,
+        "file_size": 1024
+    }`;
+
+    Voice v = deserialize!Voice(json);
+
+    v.file_id.assertEquals("abc");
+    v.file_size.get.assertEquals(1024);
+}
+
 struct VideoNote
 {
     string    file_id;
     uint      length;
     uint      duration;
-    PhotoSize thumb;
-    uint      file_size;
+    @serdeOptional
+    Nullable!PhotoSize thumb;
+    @serdeOptional
+    Nullable!uint      file_size;
+}
+
+unittest
+{
+    string json = `{
+        "file_id": "abc",
+        "length": 2,
+        "duration": 3,
+        "file_size": 1024
+    }`;
+
+    VideoNote vn = deserialize!VideoNote(json);
+
+    vn.file_id.assertEquals("abc");
+    vn.file_size.get.assertEquals(1024);
 }
 
 struct Contact
@@ -540,16 +624,20 @@ struct InlineKeyboardButton
     Nullable!bool         pay;
 }
 
-// TODO Add Nullable fields
 struct CallbackQuery
 {
     string           id;
     User             from;
+    @serdeOptional
     Nullable!Message message;
-    string           inline_message_id;
-    string           chat_instance;
-    string           data;
-    string           game_short_name;
+    @serdeOptional
+    Nullable!string  inline_message_id;
+    @serdeOptional
+    Nullable!string  chat_instance;
+    @serdeOptional
+    Nullable!string  data;
+    @serdeOptional
+    Nullable!string  game_short_name;
 }
 
 struct ForceReply
@@ -567,8 +655,10 @@ struct ChatPhoto
 // TODO Add Nullable fields
 struct ResponseParameters
 {
-    long migrate_to_chat_id;
-    uint retry_after;
+    @serdeOptional
+    Nullable!long migrate_to_chat_id;
+    @serdeOptional
+    Nullable!uint retry_after;
 }
 
 alias InputMediaStructs = AliasSeq!(
