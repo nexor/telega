@@ -3,15 +3,20 @@ module telega.telegram.webhook;
 import std.typecons : Nullable;
 import telega.botapi : BotApi, TelegramMethod, HTTPMethod;
 import telega.telegram.basic : InputFile;
+import asdf.serialization : serdeOptional;
 
 struct WebhookInfo
 {
     string   url;
     bool     has_custom_certificate;
     uint     pending_update_count;
+    @serdeOptional
     Nullable!uint     last_error_date;
+    @serdeOptional
     Nullable!string   last_error_message;
+    @serdeOptional
     Nullable!uint     max_connections;
+    @serdeOptional
     Nullable!string[] allowed_updates;
 }
 
