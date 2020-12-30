@@ -22,6 +22,7 @@ docs.json
 .env
 
 /generator/telega-api-generator
+/generator/telega-api-generator-test-application
 
 # Code coverage
 *.lst

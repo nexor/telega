@@ -2,9 +2,13 @@ module generator.generator;
 
 import std.stdio : writeln, writefln;
 import std.string : format;
+import std.conv : to;
 import generator.parser : TelegramEntity, TelegramType, TelegramMethod;
-import std.array : assocArray;
-import std.algorithm.iteration;
+import std.array : join;
+import std.algorithm.iteration : map, each;
+import generator.language.declarations;
+import generator.language.modules;
+import generator.language.structs;
 
 static string[string] entityModuleMap;
 
@@ -54,7 +58,7 @@ class CodeGenerator
 
     private string generateType(TelegramType entity)
     {
-        StructItem item = StructItem(entity.name);
+        auto item = new StructDeclaration(entity.name);
 
         return item.toString();
     }
@@ -63,36 +67,5 @@ class CodeGenerator
     {
         return "TODO";
     }
-
-}
-
-struct StructItem
-{
-    private string name;
-    private StructItemField[] fields;
-
-    public this(string name)
-    {
-        this.name = name;
-    }
-
-    public void addField(StructItemField field)
-    {
-        fields ~= field;
-    }
-
-    public string toString()
-    {
-        return format("///\nstruct %s\n{\n%s\n}\n", name, fieldsToString());
-    }
-
-    private string fieldsToString()
-    {
-        return "";
-    }
-}
-
-struct StructItemField
-{
 
 }
