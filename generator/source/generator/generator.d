@@ -36,31 +36,49 @@ shared static this()
 class CodeGenerator
 {
     private string modulesDir = "telegram";
+    private Module[string] modules;
 
     public this(string modulesDir)
     {
         this.modulesDir = modulesDir;
+        foreach (telegramEntityName, moduleId; entityModuleMap) {
+            if (moduleId !in modules) {
+                modules[moduleId] = new Module(moduleId);
+            }
+        }
     }
 
     public void generateFiles(TelegramEntity[string] entities)
     {
         foreach (entity; entities) {
-            if (cast(TelegramType)entity) {
-                generateType(cast(TelegramType)entity).writeln();
+            if (entity.name !in entityModuleMap) {
+                //writefln("Skipping %s", entity.id);
+
+                continue;
+            }
+            assert(entity.name in entityModuleMap, format("Entity %s not found in entityModuleMap", entity.id));
+
+            auto moduleObject = modules[entityModuleMap[entity.name]];
+
+            if (auto telegramType = cast(TelegramType)entity) {
+                moduleObject.addDeclDef(generateType(telegramType));
             } else if (cast(TelegramMethod)entity) {
-                generateMethod(cast(TelegramMethod)entity).writeln();
+                //generateMethod(cast(TelegramMethod)entity).writeln();
             } else {
                 assert(false, "Unknown entity " ~ entity.name);
             }
         }
-        //writeln(entityModuleMap);
+
+        foreach (moduleObject; modules) {
+            writeln(moduleObject.to!string);
+        }
     }
 
-    private string generateType(TelegramType entity)
+    private StructDeclaration generateType(TelegramType entity)
     {
         auto item = new StructDeclaration(entity.name);
 
-        return item.toString();
+        return item;
     }
 
     private string generateMethod(TelegramMethod entity)

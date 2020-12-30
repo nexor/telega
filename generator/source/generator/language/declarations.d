@@ -3,8 +3,9 @@ module generator.language.declarations;
 import std.string : format;
 import std.algorithm.iteration : map;
 import std.conv : to;
+import generator.language.modules : DeclDef;
 
-class Declaration
+class Declaration : DeclDef
 {
 
 }
@@ -12,7 +13,12 @@ class Declaration
 class VarDeclarations : Declaration
 {
     private StorageClass[] storageClasses;
-    private BasicType basicType; 
+    private BasicType basicType;
+}
+
+class AggregateDeclaration : Declaration
+{
+
 }
 
 class StorageClass
@@ -22,12 +28,12 @@ class StorageClass
 
 class DeclaratorIdentifierList
 {
-    
+
 }
 
 class Type
 {
-    
+
 }
 
 class BasicType
