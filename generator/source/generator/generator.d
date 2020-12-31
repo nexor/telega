@@ -77,6 +77,16 @@ class CodeGenerator
     private StructDeclaration generateType(TelegramType entity)
     {
         auto item = new StructDeclaration(entity.name);
+        item.aggregateBody.addDeclDef(
+            new VarDeclarations(
+                new FundamentalType(FundamentalTypeEnum.Bool),
+                new Declarators(
+                    new DeclaratorInitializer(
+                        new VarDeclarator("varname")
+                    )
+                )
+            )
+        );
 
         return item;
     }
