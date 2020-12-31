@@ -13,7 +13,7 @@ class StructDeclaration : AggregateDeclaration
     private string identifier;
     private AggregateBody _aggregateBody;
 
-    public this(string identitier)
+    public this(string identifier)
     {
         assert(identifier.length);
 
@@ -28,7 +28,6 @@ class StructDeclaration : AggregateDeclaration
 
     public override string toString()
     {
-        writefln(":: %s", identifier);
         return format(`struct %s
 {
     %s

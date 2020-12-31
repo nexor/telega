@@ -23,8 +23,7 @@ class Module
 
     public override string toString()
     {
-        writefln("%s = %d", moduleDeclaration.moduleFullyQualifiedName, declDefs.length);
-        return format("%s\n%s", moduleDeclaration.to!string, declDefs.map!(dd => dd.to!string).join("\n"));
+        return format("%s\n%s\n", moduleDeclaration.to!string, declDefs.map!(dd => dd.to!string).join("\n"));
     }
 }
 
@@ -41,9 +40,13 @@ class ModuleDeclaration
 
     public override string toString()
     {
+        const moduleAttributesString = moduleAttributes.length > 0
+            ? moduleAttributes.map!(ma => ma.to!string).join("\n") ~ " "
+            : "";
+
         return format(
-            "%s module %s;",
-            moduleAttributes.length > 0 ? moduleAttributes.map!(ma => ma.to!string).join("\n") : "",
+            "%smodule %s;",
+            moduleAttributesString,
             moduleFullyQualifiedName
         );
     }
