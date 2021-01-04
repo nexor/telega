@@ -6,42 +6,56 @@ import std.conv : to;
 import generator.parser : TelegramEntity, TelegramType, TelegramMethod;
 import std.array : join;
 import std.algorithm.iteration : map, each;
+import std.algorithm.searching : canFind;
 import generator.language.declarations;
 import generator.language.modules;
 import generator.language.structs;
 
-static string[string] entityModuleMap;
-
-shared static this()
+struct ModuleConfig
 {
-    string[] basic = [
-        // types
-        "User", "Chat", "Message", "Update",
-        // methods
-    ];
-    string[] groupchat = [
-        // types
-        // methods
-    ];
-    string[] games = [
-        // types
-        "Game", "Animation", "CallbackGame", "GameHighScore",
-        // methods
-    ];
+    public string[string] getEntityModuleMap(string[] enabledModules)
+    {
+        string[][string] moduleMap = [
+            "basic": [
+                // types
+                "User", "Chat", "Message", "Update",
+                // methods
+            ],
+            "groupchat": [
 
-    basic.each!(val => entityModuleMap[val] = basic.stringof);
-    games.each!(val => entityModuleMap[val] = games.stringof);
+            ],
+            "games": [
+                // types
+                "Game", "Animation", "CallbackGame", "GameHighScore",
+                // methods
+            ]
+        ];
+
+        string[string] result;
+
+        foreach (const moduleName, const string[] moduleEntities; moduleMap) {
+            if (enabledModules.length && !enabledModules.canFind(moduleName)) {
+                continue;
+            }
+            moduleEntities.each!(val => result[val] = moduleName);
+        }
+
+        return result;
+    }
 }
 
 class CodeGenerator
 {
     private string modulesDir = "telegram";
     private Module[string] modules;
+    private string[string] entityModuleMap;
 
-    public this(string modulesDir)
+    public this(string modulesDir, string[] enabledModules)
     {
         this.modulesDir = modulesDir;
-        foreach (telegramEntityName, moduleId; entityModuleMap) {
+        entityModuleMap = ModuleConfig().getEntityModuleMap(enabledModules);
+
+        foreach (const telegramEntityName, const moduleId; entityModuleMap) {
             if (moduleId !in modules) {
                 modules[moduleId] = new Module(moduleId);
             }

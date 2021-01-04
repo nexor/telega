@@ -11,6 +11,7 @@ import std.getopt : getopt, defaultGetoptPrinter;
 
 string url = "https://core.telegram.org/bots/api";
 string targetDir;
+string[] enableModules;
 
 int main(string[] args)
 {
@@ -32,7 +33,7 @@ int main(string[] args)
 
     const targetDir = getTargetDir();
     writefln("Generating entities in %s", targetDir);
-    auto generator = new CodeGenerator(targetDir);
+    auto generator = new CodeGenerator(targetDir, enableModules);
     generator.generateFiles(parser.getEntities());
 
     return 0;
@@ -54,7 +55,8 @@ private bool processHelp(string[] args)
     auto helpInformation = getopt(
         args,
         "target-dir", "Relative path to generate files in", &targetDir,
-        "url", "Telegram bot API documentation URL", &url
+        "url", "Telegram bot API documentation URL", &url,
+        "module", "Generate code for specific module only (can be declared multiple times)", &enableModules
     );
 
     if (helpInformation.helpWanted) {
