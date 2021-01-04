@@ -154,7 +154,11 @@ class TelegramType : TelegramEntity
 struct TypeField
 {
     public string field;
+
+    public bool isArray;
     public string type;
+    public string complexTypeId;
+
     public string description;
 
     public bool isOptional()
