@@ -26,11 +26,11 @@ class TelegramBotApiHTMLParser
     {
         Section s = new Section(h3.directText);
         writefln(`Parsing section "%s"`, s.title);
+        writeln("\n-----------------------------------");
 
         for (Element el = h3.nextElementSibling; el !is null && el.tagName != "h3"; el = el.nextElementSibling) {
             if (el.tagName == "h4") {
                 TelegramEntity entity = this.htmlEntityParser.parseEntity(el);
-                writefln(`  Parsing entity %s`, entity.name);
 
                 entities[entity.id] = entity;
                 s.addEntity(entity);
@@ -46,52 +46,81 @@ class TelegramBotApiHTMLParser
     }
 }
 
-class HtmlEntityParser
+class TelegramBotApiTypeHTMLParser
 {
-    public TelegramEntity parseEntity(Element h4)
+    class CommonTypeParser
     {
-writeln(h4);
-        const Element a = h4.querySelector("a");
-        const id = a.getAttribute("name");
-        const name = h4.directText;
+        private Element parseDescription(Element p, out TelegramType entity)
+        {
+            assert(p.tagName == "p", format("%s is not a valid description tag", p.tagName));
+            if (entity.description.length > 0) {
+                entity.description ~= "\n";
+            }
+            entity.description = p.directText;
+            debug writefln("    Description: %s", entity.description);
 
-        debug {
-            const href = a.getAttribute("href");
-            assert(id == href[1..$], format(`h4 element href "%s" does not correspond to name "%s"`, href, id));
-            assert(
-                id == name.toLower.replace(" ", "-"),
-                format(`h4 element with name %s does not correspond to title %s`, id, name)
-            );
+            Element nextElement = p.nextElementSibling;
+            if (nextElement.tagName != "table") {
+                switch (nextElement.tagName) {
+                    case "p":
+                        parseDescription(nextElement, entity);
+                        break;
+                    case "blockquote":
+                        break;
+                    default:
+                        assert(0, format("Unexpected tag: %s", nextElement.tagName));
+                }
+                nextElement = nextElement.nextElementSibling;
+            }
+
+            return nextElement;
         }
 
-        if (h4.isTelegramMethod) {
-            return parseMethod(h4, id, name);
+        private Element parseNote(Element blockquote, out TelegramType entity)
+        {
+            assert(0);
         }
 
-        return parseType(h4, id, name);
+        private Element parseFields(Element e, out TelegramType entity)
+        {
+            assert(0);
+        }
     }
 
-    private TelegramMethod parseMethod(Element h4, string id, string name)
+    class LoginUrlTypeParser : CommonTypeParser
     {
-        auto entity = new TelegramMethod(id, name);
 
-
-        return entity;
     }
 
-    private TelegramType parseType(Element h4, string id, string name)
+    private CommonTypeParser commonTypeParser;
+    private LoginUrlTypeParser loginUrlTypeParser;
+
+    public this()
+    {
+        commonTypeParser = new CommonTypeParser;
+        loginUrlTypeParser = new LoginUrlTypeParser;
+    }
+
+    public TelegramType opCall(Element h4, string id, string name)
     {
         auto entity = new TelegramType(id, name);
-        Element pDescription = h4.nextElementSibling;
-        assert(pDescription.tagName == "p", format("%s is not a valid description tag", pDescription.tagName));
-        Element tableFields = pDescription.nextElementSibling;
+        Element currentElement = h4.nextElementSibling;
+        switch (id) {
+            case "loginurl":
+                currentElement = loginUrlTypeParser.parseDescription(currentElement, entity);
+                break;
+
+            default:
+                currentElement = commonTypeParser.parseDescription(currentElement, entity);
+        }
+
+        Element tableFields = currentElement;
         assert(tableFields.tagName == "table", format("Unextpected tag %s, expected %s", tableFields.tagName, "table"));
 
-        entity.description = pDescription.directText;
         Element[] rows = tableFields.querySelector("tbody").querySelectorAll("tr");
         foreach (Element row; rows) {
             auto columns = row.querySelectorAll("td");
-            writefln("Field: %s, type: %s, description: %s", columns[0].directText,
+            debug writefln("    Field: %s, type: %s, description: %s", columns[0].directText,
                 this.parseFieldType(columns[1]),
                 columns[2].directText
             );
@@ -110,9 +139,57 @@ writeln(h4);
     }
 }
 
+class TelegramBotApiMethodHTMLParser
+{
+    public TelegramMethod opCall(Element h4, string id, string name)
+    {
+        auto entity = new TelegramMethod(id, name);
+
+        return entity;
+    }
+}
+
+class HtmlEntityParser
+{
+    private TelegramBotApiTypeHTMLParser typeParser;
+    private TelegramBotApiMethodHTMLParser methodParser;
+
+    public this()
+    {
+        typeParser = new TelegramBotApiTypeHTMLParser;
+        methodParser = new TelegramBotApiMethodHTMLParser;
+    }
+
+    public TelegramEntity parseEntity(Element h4)
+    {
+        const Element a = h4.querySelector("a");
+        const id = a.getAttribute("name");
+        const name = h4.directText;
+
+        debug {
+            writeln;
+            writefln("  Parsing h4: %s", h4.directText);
+            const href = a.getAttribute("href");
+            assert(id == href[1..$], format(`h4 element href "%s" does not correspond to name "%s"`, href, id));
+            assert(
+                id == name.toLower.replace(" ", "-"),
+                format(`h4 element with name %s does not correspond to title %s`, id, name)
+            );
+        }
+
+        if (h4.isTelegramMethod) {
+            return methodParser(h4, id, name);
+        }
+
+        return typeParser(h4, id, name);
+    }
+}
+
 class TelegramEntity
 {
     public string description;
+    /// blockquote tag content
+    public string note;
 
     private string _id;
     private string _name;
