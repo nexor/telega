@@ -81,15 +81,42 @@ writeln(h4);
 
     private TelegramType parseType(Element h4, string id, string name)
     {
-        return new TelegramType(id, name);
+        auto entity = new TelegramType(id, name);
+        Element pDescription = h4.nextElementSibling;
+        assert(pDescription.tagName == "p", format("%s is not a valid description tag", pDescription.tagName));
+        Element tableFields = pDescription.nextElementSibling;
+        assert(tableFields.tagName == "table", format("Unextpected tag %s, expected %s", tableFields.tagName, "table"));
+
+        entity.description = pDescription.directText;
+        Element[] rows = tableFields.querySelector("tbody").querySelectorAll("tr");
+        foreach (Element row; rows) {
+            auto columns = row.querySelectorAll("td");
+            writefln("Field: %s, type: %s, description: %s", columns[0].directText,
+                this.parseFieldType(columns[1]),
+                columns[2].directText
+            );
+        }
+
+        return entity;
+    }
+
+    private string parseFieldType(Element td)
+    {
+        if (td.directText.length == 0) {
+            return "LINK";
+        }
+
+        return td.directText;
     }
 }
 
 class TelegramEntity
 {
+    public string description;
+
     private string _id;
     private string _name;
-
+    
     public this(string id, string name)
     {
         _id = id;

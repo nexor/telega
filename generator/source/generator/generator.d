@@ -40,6 +40,7 @@ struct ModuleConfig
             moduleEntities.each!(val => result[val] = moduleName);
         }
 
+        debug result = ["Update":"basic"];
         return result;
     }
 }
