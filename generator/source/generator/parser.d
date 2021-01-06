@@ -50,54 +50,76 @@ class TelegramBotApiTypeHTMLParser
 {
     class CommonTypeParser
     {
-        private Element parseDescription(Element p, out TelegramType entity)
+        protected Element parseDescription(Element p, TelegramType entity)
         {
-            assert(p.tagName == "p", format("%s is not a valid description tag", p.tagName));
-            if (entity.description.length > 0) {
-                entity.description ~= "\n";
+            Element currentElement = p;
+            while(currentElement.tagName != "table") {
+                parseDescriptionTag(currentElement, entity);
+                currentElement = currentElement.nextElementSibling;
             }
-            entity.description = p.directText;
             debug writefln("    Description: %s", entity.description);
 
-            Element nextElement = p.nextElementSibling;
-            if (nextElement.tagName != "table") {
-                switch (nextElement.tagName) {
-                    case "p":
-                        parseDescription(nextElement, entity);
-                        break;
-                    case "blockquote":
-                        break;
-                    default:
-                        assert(0, format("Unexpected tag: %s", nextElement.tagName));
-                }
-                nextElement = nextElement.nextElementSibling;
-            }
+            return currentElement;
+        }
 
-            return nextElement;
+        protected void parseDescriptionTag(Element e, TelegramType entity)
+        {
+            switch (e.tagName) {
+                case "p":
+                    if (entity.description.length > 0) {
+                        entity.description ~= "\n";
+                    }
+                    entity.description ~= e.directText;
+                    break;
+                case "blockquote":
+                    break;
+                default:
+                    assert(0, format("Unexpected tag: %s", e.tagName));
+            }
         }
 
         private Element parseNote(Element blockquote, out TelegramType entity)
         {
-            assert(0);
+            assert(0, "Unexpected parseNote call");
         }
 
         private Element parseFields(Element e, out TelegramType entity)
         {
-            assert(0);
+            assert(0, "Unexpected parseFields call");
+        }
+    }
+
+    class MetaTypeParser : CommonTypeParser
+    {
+        protected override Element parseDescription(Element p, TelegramType entity)
+        {
+            while (p.tagName != "table") {
+                p = p.nextElementSibling;
+            }
+
+            return p;
         }
     }
 
     class LoginUrlTypeParser : CommonTypeParser
     {
-
+        protected override void parseDescriptionTag(Element e, TelegramType entity)
+        {
+            if (e.tagName == "div") {
+                return;
+            }
+            super.parseDescriptionTag(e, entity);
+        }
     }
 
     private CommonTypeParser commonTypeParser;
+    private MetaTypeParser metaTypeParser;
     private LoginUrlTypeParser loginUrlTypeParser;
 
     public this()
     {
         commonTypeParser = new CommonTypeParser;
+        metaTypeParser = new MetaTypeParser;
         loginUrlTypeParser = new LoginUrlTypeParser;
     }
 
@@ -110,11 +132,17 @@ class TelegramBotApiTypeHTMLParser
                 currentElement = loginUrlTypeParser.parseDescription(currentElement, entity);
                 break;
 
+            case "inputmedia":
+                entity.isMeta = true;
+                currentElement = metaTypeParser.parseDescription(currentElement, entity);
+                break;
+
             default:
                 currentElement = commonTypeParser.parseDescription(currentElement, entity);
         }
 
         Element tableFields = currentElement;
+
         assert(tableFields.tagName == "table", format("Unextpected tag %s, expected %s", tableFields.tagName, "table"));
 
         Element[] rows = tableFields.querySelector("tbody").querySelectorAll("tr");
@@ -168,7 +196,7 @@ class HtmlEntityParser
 
         debug {
             writeln;
-            writefln("  Parsing h4: %s", h4.directText);
+            writefln("  Parsing h4: %s, id: %s", h4.directText, id);
             const href = a.getAttribute("href");
             assert(id == href[1..$], format(`h4 element href "%s" does not correspond to name "%s"`, href, id));
             assert(
@@ -216,6 +244,7 @@ class TelegramEntity
 class TelegramType : TelegramEntity
 {
     private TypeField[] fields;
+    private bool isMeta = false;
 
     public this(string id, string name)
     {
