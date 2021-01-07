@@ -5,6 +5,7 @@ import std.stdio : writeln, writefln;
 import std.string : format, replace;
 import std.uni : isLower, toLower;
 import std.algorithm.searching : until;
+import std.algorithm.comparison : among;
 import std.range : generate;
 
 bool isTelegramMethod(Element h4)
@@ -35,7 +36,7 @@ class TelegramBotApiHTMLParser
                     entities[entity.id] = entity;
                     s.addEntity(entity);
                 } else {
-                    writeln("Skipping entity");
+                    writeln("  Skipping entity");
                 }
             }
         }
@@ -56,7 +57,7 @@ class TelegramBotApiTypeHTMLParser
         protected Element parseDescription(Element p, TelegramType entity)
         {
             Element currentElement = p;
-            while(currentElement.tagName != "table") {
+            while(!currentElement.tagName.among("table", "h4")) {
                 parseDescriptionTag(currentElement, entity);
                 currentElement = currentElement.nextElementSibling;
             }
@@ -92,7 +93,7 @@ class TelegramBotApiTypeHTMLParser
         }
     }
 
-    class MetaTypeParser : CommonTypeParser
+    class AggregateTypeParser : CommonTypeParser
     {
         protected override Element parseDescription(Element p, TelegramType entity)
         {
@@ -116,13 +117,13 @@ class TelegramBotApiTypeHTMLParser
     }
 
     private CommonTypeParser commonTypeParser;
-    private MetaTypeParser metaTypeParser;
+    private AggregateTypeParser aggregateTypeParser;
     private LoginUrlTypeParser loginUrlTypeParser;
 
     public this()
     {
         commonTypeParser = new CommonTypeParser;
-        metaTypeParser = new MetaTypeParser;
+        aggregateTypeParser = new AggregateTypeParser;
         loginUrlTypeParser = new LoginUrlTypeParser;
     }
 
@@ -136,13 +137,23 @@ class TelegramBotApiTypeHTMLParser
                 break;
 
             case "inputmedia":
+            case "inlinequeryresult":
+            case "inputmessagecontent":
+            case "passportelementerror":
                 entity.isMeta = true;
-                currentElement = metaTypeParser.parseDescription(currentElement, entity);
+                currentElement = aggregateTypeParser.parseDescription(currentElement, entity);
                 break;
 
             case "inputfile":
             case "sending-files":
+            case "inline-mode-objects":
+            case "formatting-options":
+            case "inline-mode-methods":
                 return null;
+
+            case "callbackgame":
+                commonTypeParser.parseDescription(currentElement, entity);
+                return entity;
 
             default:
                 currentElement = commonTypeParser.parseDescription(currentElement, entity);
@@ -150,7 +161,7 @@ class TelegramBotApiTypeHTMLParser
 
         Element tableFields = currentElement;
 
-        assert(tableFields.tagName == "table", format("Unextpected tag %s, expected %s", tableFields.tagName, "table"));
+        assert(tableFields.tagName == "table", format("Unexpected tag %s, expected %s", tableFields.tagName, "table"));
 
         Element[] rows = tableFields.querySelector("tbody").querySelectorAll("tr");
         foreach (Element row; rows) {
