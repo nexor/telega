@@ -6,7 +6,6 @@ import std.string : format, replace;
 import std.uni : isLower, toLower;
 import std.algorithm.searching : until;
 import std.range : generate;
-import std.typecons : Nullable, nullable;
 
 bool isTelegramMethod(Element h4)
 {
@@ -31,11 +30,12 @@ class TelegramBotApiHTMLParser
 
         for (Element el = h3.nextElementSibling; el !is null && el.tagName != "h3"; el = el.nextElementSibling) {
             if (el.tagName == "h4") {
-                Nullable!TelegramEntity entity = this.htmlEntityParser.parseEntity(el);
-                if (!entity.isNull) {
+                TelegramEntity entity = this.htmlEntityParser.parseEntity(el);
+                if (entity !is null) {
+                    entities[entity.id] = entity;
+                    s.addEntity(entity);
+                } else {
                     writeln("Skipping entity");
-                    entities[entity.get.id] = entity.get;
-                    s.addEntity(entity.get);
                 }
             }
         }
@@ -126,7 +126,7 @@ class TelegramBotApiTypeHTMLParser
         loginUrlTypeParser = new LoginUrlTypeParser;
     }
 
-    public Nullable!TelegramType opCall(Element h4, string id, string name)
+    public TelegramType opCall(Element h4, string id, string name)
     {
         auto entity = new TelegramType(id, name);
         Element currentElement = h4.nextElementSibling;
@@ -141,7 +141,8 @@ class TelegramBotApiTypeHTMLParser
                 break;
 
             case "inputfile":
-                return Nullable!TelegramType.init;
+            case "sending-files":
+                return null;
 
             default:
                 currentElement = commonTypeParser.parseDescription(currentElement, entity);
@@ -160,7 +161,7 @@ class TelegramBotApiTypeHTMLParser
             );
         }
 
-        return nullable!TelegramType(entity);
+        return entity;
     }
 
     private string parseFieldType(Element td)
@@ -175,11 +176,11 @@ class TelegramBotApiTypeHTMLParser
 
 class TelegramBotApiMethodHTMLParser
 {
-    public Nullable!TelegramMethod opCall(Element h4, string id, string name)
+    public TelegramMethod opCall(Element h4, string id, string name)
     {
         auto entity = new TelegramMethod(id, name);
 
-        return nullable!TelegramMethod(entity);
+        return entity;
     }
 }
 
@@ -194,7 +195,7 @@ class HtmlEntityParser
         methodParser = new TelegramBotApiMethodHTMLParser;
     }
 
-    public Nullable!TelegramEntity parseEntity(Element h4)
+    public TelegramEntity parseEntity(Element h4)
     {
         const Element a = h4.querySelector("a");
         const id = a.getAttribute("name");
@@ -212,10 +213,10 @@ class HtmlEntityParser
         }
 
         if (h4.isTelegramMethod) {
-            return Nullable!TelegramEntity(methodParser(h4, id, name));
+            return methodParser(h4, id, name);
         }
 
-        return cast(Nullable!TelegramEntity)typeParser(h4, id, name).get;
+        return typeParser(h4, id, name);
     }
 }
 
