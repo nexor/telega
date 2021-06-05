@@ -5,7 +5,7 @@ import std.conv : to;
 import std.string : format;
 import requests : getContent;
 import arsd.dom;
-import generator.parser : TelegramBotApiHTMLParser;
+import generator.parserold : TelegramBotApiHTMLParser;
 import generator.generator : CodeGenerator;
 import std.getopt : getopt, defaultGetoptPrinter;
 
