@@ -31,8 +31,8 @@ RUN apt-get autoremove -y \
 RUN apt-get update && apt-get install -y curl libcurl4 build-essential zlib1g-dev libssl-dev libxml2
 RUN curl -fsS -o /tmp/install.sh https://dlang.org/install.sh
 
-ENV COMPILER_LDC=ldc-1.24.0
-ENV COMPILER_DMD=dmd-2.094.2
+ENV COMPILER_LDC=ldc-1.26.0
+ENV COMPILER_DMD=dmd-2.097.0
 
 RUN bash /tmp/install.sh -p /dlang install "${COMPILER_LDC}"
 RUN bash /tmp/install.sh -p /dlang install "${COMPILER_DMD}"
