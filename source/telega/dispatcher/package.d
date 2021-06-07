@@ -31,8 +31,8 @@ class Dispatcher{
                         
                     }else if(!u.edited_message.isNull)
                         foreach (filter, handler; editedMessageHandlers){
-                            if (filter.check(u.message.get)){
-                                handler(u.message.get);
+                            if (filter.check(u.edited_message.get)){
+                                handler(u.edited_message.get);
                                 break;
                             }
                         }

@@ -4,7 +4,7 @@ import std.process : environment;
 import std.exception : enforce;
 import telega.botapi:BotApi;
 import telega.telegram.basic:Message;
-import telega.dispatcher:Dispatcher,MessageFilter;
+import telega.dispatcher:Dispatcher,MessageFilter,EditedMessageFilter;
 import telega.telegram.basic : Update, getUpdates, sendMessage;
 int main(string[] args)
 {
@@ -20,9 +20,22 @@ int main(string[] args)
     setLogLevel(LogLevel.diagnostic);
     auto bot = new BotApi(botToken);
     auto dp = new Dispatcher(bot);
-    dp.messageHandlers[new class MessageFilter{
-        bool check(Message m){return ! m.text.isNull;}}] = (Message m){
-            bot.sendMessage(m.chat.id,m.text);};
+    dp.messageHandlers[
+        new class MessageFilter{
+            bool check(Message m){
+                return ! m.text.isNull;
+            }
+        }] = (Message m){
+                bot.sendMessage(m.chat.id,m.text);
+        };
+    dp.editedMessageHandlers[
+        new class EditedMessageFilter{
+            bool check(Message m){
+                return ! m.text.isNull;
+            }
+        }] = (Message m){
+                bot.sendMessage(m.chat.id,m.text);
+        };
     runTask(&dp.runPolling);
     disableDefaultSignalHandlers();
 

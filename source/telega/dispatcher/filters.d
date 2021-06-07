@@ -8,6 +8,9 @@ interface Filter(T){
 
 alias UpdateFilter = Filter!Update;
 alias MessageFilter = Filter!Message;
-
 interface EditedMessageFilter: MessageFilter{};
+
+
+
+
 
