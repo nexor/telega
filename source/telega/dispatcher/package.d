@@ -28,7 +28,14 @@ class Dispatcher{
                                 break;
                             }
                         }
-                    }
+                        
+                    }else if(!u.edited_message.isNull)
+                        foreach (filter, handler; editedMessageHandlers){
+                            if (filter.check(u.message.get)){
+                                handler(u.message.get);
+                                break;
+                            }
+                        }
 
                     // mark update as processed
                     offset = max(offset, u.id) + 1;
