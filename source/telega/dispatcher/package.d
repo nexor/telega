@@ -19,7 +19,6 @@ class Dispatcher{
         {
             bot.getUpdates(offset)
                 .each!((Update u) {
-                    // we need all updates with text message
                     if (!u.message.isNull)
                     {
                         foreach (filter, handler; messageHandlers){
