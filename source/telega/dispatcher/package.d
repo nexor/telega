@@ -19,25 +19,20 @@ class Dispatcher{
         {
             bot.getUpdates(offset)
                 .each!((Update u) {
-                    if (!u.message.isNull)
-                    {
-                        foreach (filter, handler; messageHandlers){
-                            if (filter.check(u.message.get)){
-                                handler(u.message.get);
-                                break;
-                            }
-                        }
-                        
-                    }else if(!u.edited_message.isNull)
-                        foreach (filter, handler; editedMessageHandlers){
-                            if (filter.check(u.edited_message.get)){
-                                handler(u.edited_message.get);
-                                break;
-                            }
-                        }
-
-                    // mark update as processed
                     offset = max(offset, u.id) + 1;
+                    static foreach(updateField,handlerContainer; [
+                        "message":"messageHandlers",
+                        "edited_message":"editedMessageHandlers"])
+                        mixin(`
+                        if (!u.`~updateField~`.isNull){
+                            foreach (filter, handler; `~ handlerContainer~ `){
+                                if (filter.check(u.`~updateField~`.get)){
+                                    handler(u.`~updateField~`.get);
+                                    break;
+                                }
+                            }
+                            //return;
+                        }`);
                 });
         }
     
