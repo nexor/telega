@@ -7,6 +7,13 @@ class DivDevPageContent
 
 class H3Section
 {
+    public immutable string title;
+
+    public this(string title)
+    {
+        this.title = title;
+    }
+
     H4Section[] h4sections;
 }
 

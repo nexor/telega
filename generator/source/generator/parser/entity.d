@@ -2,28 +2,83 @@ module generator.parser.entity;
 
 class TelegramEntity
 {
-    public string description;
+    public immutable string id, name;
+    public string description, note;
     /// blockquote tag content
-    public string note;
-
-    private string _id;
-    private string _name;
     
     public this(string id, string name)
     {
-        _id = id;
-        _name = name;
+        this.id = id;
+        this.name = name;
+    }
+}
+
+class TelegramType : TelegramEntity
+{
+    private TypeField[] fields;
+    private bool isMeta = false;
+
+    public this(string id, string name)
+    {
+        super(id, name);
     }
 
-    @property
-    public string id()
+    public void addField(TypeField field)
     {
-        return _id;
+        fields ~= field;
+    }
+}
+
+struct TypeField
+{
+    public string field;
+
+    public bool isArray;
+    public string type;
+    public string complexTypeId;
+
+    public string description;
+
+    public bool isOptional()
+    {
+        return true;
+    }
+}
+
+class TelegramMethod : TelegramEntity
+{
+    public this(string id, string name)
+    {
+        super(id, name);
+    }
+}
+
+struct MethodParameter
+{
+    string parameter;
+    string type;
+    bool required;
+    string description;
+}
+
+class Section
+{
+    string title;
+    TelegramType[] types;
+    TelegramMethod[] methods;
+
+    public this(string title)
+    {
+        this.title = title;
     }
 
-    @property
-    public string name()
+    public void addEntity(TelegramEntity entity)
     {
-        return _name;
+        if (cast(TelegramMethod)entity) {
+            methods ~= cast(TelegramMethod)entity;
+        }
+        if (cast(TelegramType)entity) {
+            types ~= cast(TelegramType)entity;
+        }
     }
 }

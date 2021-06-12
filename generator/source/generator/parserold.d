@@ -1,12 +1,16 @@
 module generator.parserold;
 
-import arsd.dom : Element;
+import arsd.dom : Document, Element;
 import std.stdio : writeln, writefln;
 import std.string : format, replace;
 import std.uni : isLower, toLower;
 import std.algorithm.searching : until;
 import std.algorithm.comparison : among;
 import std.range : generate;
+
+import generator.parser.entity : TelegramEntity, TelegramType, TypeField, TelegramMethod,
+    MethodParameter, Section;
+import generator.parser.html : DivDevPageContent;
 
 bool isTelegramMethod(Element h4)
 {
@@ -21,6 +25,16 @@ class TelegramBotApiHTMLParser
     public this()
     {
         htmlEntityParser = new HtmlEntityParser;
+    }
+
+    public DivDevPageContent parseDocument(Document document)
+    {
+        auto divDevPageContent = new DivDevPageContent();
+        auto firstH3Element = document.getFirstElementByTagName("p");
+        auto h3section = new H3Section(firstH3Element.directText);
+        divDevPageContent.h3sections ~= h3section;
+        
+        return divDevPageContent;
     }
 
     public Section parseSection(Element h3)
@@ -228,77 +242,5 @@ class HtmlEntityParser
         }
 
         return typeParser(h4, id, name);
-    }
-}
-
-import generator.parser.entity : TelegramEntity;
-
-class TelegramType : TelegramEntity
-{
-    private TypeField[] fields;
-    private bool isMeta = false;
-
-    public this(string id, string name)
-    {
-        super(id, name);
-    }
-
-    public void addField(TypeField field)
-    {
-        fields ~= field;
-    }
-}
-
-struct TypeField
-{
-    public string field;
-
-    public bool isArray;
-    public string type;
-    public string complexTypeId;
-
-    public string description;
-
-    public bool isOptional()
-    {
-        return true;
-    }
-}
-
-class TelegramMethod : TelegramEntity
-{
-    public this(string id, string name)
-    {
-        super(id, name);
-    }
-}
-
-struct MethodParameter
-{
-    string parameter;
-    string type;
-    bool required;
-    string description;
-}
-
-class Section
-{
-    string title;
-    TelegramType[] types;
-    TelegramMethod[] methods;
-
-    public this(string title)
-    {
-        this.title = title;
-    }
-
-    public void addEntity(TelegramEntity entity)
-    {
-        if (cast(TelegramMethod)entity) {
-            methods ~= cast(TelegramMethod)entity;
-        }
-        if (cast(TelegramType)entity) {
-            types ~= cast(TelegramType)entity;
-        }
     }
 }

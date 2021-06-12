@@ -8,6 +8,7 @@ import arsd.dom;
 import generator.parserold : TelegramBotApiHTMLParser;
 import generator.generator : CodeGenerator;
 import std.getopt : getopt, defaultGetoptPrinter;
+import generator.parser.html;
 
 string url = "https://core.telegram.org/bots/api";
 string targetDir;
@@ -27,6 +28,12 @@ int main(string[] args)
 
     auto parser = new TelegramBotApiHTMLParser;
 
+    DivDevPageContent div = parser.parseDocument(document);
+
+    foreach (H3section h3section; div.h3sections) {
+        writefln("Section name is %s", h3section.title);
+    }
+/*
     foreach (Element el; h3Items) {
         parser.parseSection(el);
     }
@@ -35,7 +42,7 @@ int main(string[] args)
     writefln("Generating entities in %s", targetDir);
     auto generator = new CodeGenerator(targetDir, enableModules);
     generator.generateFiles(parser.getEntities());
-
+*/
     return 0;
 }
 
