@@ -12,7 +12,7 @@ struct WebhookInfo
     Nullable!uint     last_error_date;
     Nullable!string   last_error_message;
     Nullable!uint     max_connections;
-    Nullable!string[] allowed_updates;
+    Nullable!(string[]) allowed_updates;
 }
 
 struct SetWebhookMethod
