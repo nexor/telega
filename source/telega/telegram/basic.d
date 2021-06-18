@@ -180,6 +180,42 @@ struct Message
     }
 }
 
+unittest
+{
+    string json = `{
+        "message_id": 1,
+        "date": 2,
+        "chat": {
+            "id": 11,
+            "type": "private"
+        },
+        "photo": [],
+        "new_chat_photo": [
+            {
+                "file_id": "fid",
+                "width" : 3,
+                "height": 4,
+                "file_size": 450
+            }
+        ]
+    }`;
+
+    auto m = deserialize!Message(json);
+    assertEquals(m.message_id, 1);
+    assertEquals(m.chat.id, 11);
+
+    assertEquals(true, m.from.isNull);
+    assertEquals(false, m.photo.isNull);
+    assertEquals(true,  m.photo.get is null);
+
+    assertEquals(false, m.new_chat_photo.isNull);
+    assertEquals(false, m.new_chat_photo.get is null);
+    assertEquals(1,     m.new_chat_photo.get.length);
+    assertEquals("fid", m.new_chat_photo.get[0].file_id);
+    assertEquals(false, m.new_chat_photo.get[0].file_size.isNull);
+    assertEquals(450,   m.new_chat_photo.get[0].file_size.get);
+}
+
 struct Update
 {
     uint             update_id;
