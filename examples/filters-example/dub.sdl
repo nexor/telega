@@ -1,7 +1,0 @@
-name "filters-example"
-description "Test of filters and dispatcher"
-authors "tynuk"
-copyright "Copyright © 2021, tynuk"
-license "MIT"
-
-dependency "telega" version="~master" path="../../"
