@@ -24,13 +24,16 @@ int main(string[] args)
 void listenUpdates(string token)
 {
     import telega.botapi : BotApi;
-    import telega.telegram.basic : Update, getUpdates, sendMessage;
+    import telega.telegram.basic : Update, getUpdates, sendMessage, GetUpdatesMethod;
     import std.algorithm.iteration : filter, each;
     import std.algorithm.comparison : max;
 
     int offset;
     auto api = new BotApi(token);
 
+    api.getUpdates(-1).each!((Update u) {
+           offset = max(offset, u.id) + 1;
+    });
     while (true)
     {
         api.getUpdates(offset)
@@ -39,7 +42,8 @@ void listenUpdates(string token)
                 if (!u.message.isNull && !u.message.get.text.isNull)
                 {
                     logInfo("Text from %s: %s", u.message.chat.id, u.message.text);
-                    api.sendMessage(u.message.chat.id, u.message.text);
+                    auto sm = u.message.reply(u.message.text.get);
+                    api.sendMessage(sm);
                 }
 
                 // mark update as processed

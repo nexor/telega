@@ -178,6 +178,29 @@ struct Message
     {
         return message_id;
     }
+    SendMessageMethod answer(SendMessageMethod sm)
+    {
+        sm.chat_id = this.chat.id;
+        return sm;
+    }
+    SendMessageMethod answer(string text)
+    {
+        SendMessageMethod sm ;
+        sm.chat_id = this.chat.id;
+        sm.text = text;
+        return sm;
+    }
+    SendMessageMethod reply(string text){
+        SendMessageMethod sm;
+        sm.reply_to_message_id = this.id;
+        sm.text = text;
+        return answer(sm);
+    }
+    SendMessageMethod reply(SendMessageMethod sm){
+        sm.reply_to_message_id = this.id;
+        return answer(sm);
+    }
+    
 }
 
 unittest
