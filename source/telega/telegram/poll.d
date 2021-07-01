@@ -57,7 +57,7 @@ struct Poll
     bool allows_multiple_answers;
     Nullable!uint correct_option_id;
     Nullable!string explanation;
-    Nullable!MessageEntity[] explanation_entities;
+    Nullable!(MessageEntity[]) explanation_entities;
     Nullable!uint open_period;
     Nullable!uint close_date;
 }

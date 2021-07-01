@@ -141,43 +141,79 @@ struct Message
     Nullable!string      media_group_id;
     Nullable!string      author_signature;
     Nullable!string      text;
-    Nullable!MessageEntity[] entities;
-    Nullable!MessageEntity[] caption_entities;
-    Nullable!Audio           audio;
-    Nullable!Document        document;
-    Nullable!Animation       animation;
-    Nullable!Game            game;
-    Nullable!Poll            poll;
-    Nullable!PhotoSize[]     photo;
-    Nullable!Sticker         sticker;
-    Nullable!Video           video;
-    Nullable!Voice           voice;
-    Nullable!VideoNote       video_note;
-    // TODO Nullable!Message reply_to_message;
-    // TODO Nullable!Message pinned_message;
-    Nullable!string          caption;
-    Nullable!Contact         contact;
-    Nullable!Location        location;
-    Nullable!Venue           venue;
-    Nullable!User[]          new_chat_members;
-    Nullable!User            left_chat_member;
-    Nullable!string          new_chat_title;
-    Nullable!PhotoSize[]     new_chat_photo;
-    Nullable!bool            delete_chat_photo;
-    Nullable!bool            group_chat_created;
-    Nullable!bool            supergroup_chat_created;
-    Nullable!bool            channel_chat_created;
-    Nullable!long            migrate_to_chat_id;
-    Nullable!long            migrate_from_chat_id;
-    Nullable!Invoice         invoice;
+    Nullable!(MessageEntity[]) entities;
+    Nullable!(MessageEntity[]) caption_entities;
+    Nullable!Audio             audio;
+    Nullable!Document          document;
+    Nullable!Animation         animation;
+    Nullable!Game              game;
+    Nullable!Poll              poll;
+    Nullable!(PhotoSize[])     photo;
+    Nullable!Sticker           sticker;
+    Nullable!Video             video;
+    Nullable!Voice             voice;
+    Nullable!VideoNote         video_note;
+    // TODO Nullable!Message   reply_to_message;
+    // TODO Nullable!Message   pinned_message;
+    Nullable!string            caption;
+    Nullable!Contact           contact;
+    Nullable!Location          location;
+    Nullable!Venue             venue;
+    Nullable!(User[])          new_chat_members;
+    Nullable!User              left_chat_member;
+    Nullable!string            new_chat_title;
+    Nullable!(PhotoSize[])     new_chat_photo;
+    Nullable!bool              delete_chat_photo;
+    Nullable!bool              group_chat_created;
+    Nullable!bool              supergroup_chat_created;
+    Nullable!bool              channel_chat_created;
+    Nullable!long              migrate_to_chat_id;
+    Nullable!long              migrate_from_chat_id;
+    Nullable!Invoice           invoice;
     Nullable!SuccessfulPayment successful_payment;
-    Nullable!string              connected_website;
+    Nullable!string            connected_website;
 
     @property
     uint id()
     {
         return message_id;
     }
+}
+
+unittest
+{
+    string json = `{
+        "message_id": 1,
+        "date": 2,
+        "chat": {
+            "id": 11,
+            "type": "private"
+        },
+        "photo": [],
+        "new_chat_photo": [
+            {
+                "file_id": "fid",
+                "width" : 3,
+                "height": 4,
+                "file_size": 450
+            }
+        ]
+    }`;
+
+    auto m = deserialize!Message(json);
+    assertEquals(m.message_id, 1);
+    assertEquals(m.chat.id, 11);
+
+    assertEquals(true, m.from.isNull);
+    assertEquals(false, m.photo.isNull);
+    assertEquals(true,  m.photo.get is null);
+
+    assertEquals(false, m.new_chat_photo.isNull);
+    assertEquals(false, m.new_chat_photo.get is null);
+    assertEquals(1,     m.new_chat_photo.get.length);
+    assertEquals("fid", m.new_chat_photo.get[0].file_id);
+    assertEquals(false, m.new_chat_photo.get[0].file_size.isNull);
+    assertEquals(450,   m.new_chat_photo.get[0].file_size.get);
 }
 
 struct Update
