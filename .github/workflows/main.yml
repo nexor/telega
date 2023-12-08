@@ -6,19 +6,22 @@ jobs:
         name: Dub Tests
         strategy:
             matrix:
-                dc: [dmd, ldc]
+                dc: [dmd-2.102.2, ldc-1.32.2]
                 config: [default, requests-driver]
 
         runs-on: ubuntu-latest
         steps:
-            - uses: actions/checkout@v2
+            - uses: actions/checkout@v3
 
-            - name: Build container and show compiler version
-              run: |
-                # build container and show compiler version
-                docker-compose run --rm ${{ matrix.dc }}
+            - name: Install D compiler
+              uses: dlang-community/setup-dlang@v1
+              with:
+                  compiler: ${{ matrix.dc }}
 
             - name: Run tests
+              shell: bash
+              env:
+                DC: ${{ matrix.dc }}
               run: |
-                docker-compose run --rm ${{ matrix.dc }} dub -q test --config=${{ matrix.config }}
-                docker-compose run --rm ${{ matrix.dc }} dub build -b release --config=${{ matrix.config }}
+                dub -q test --config=${{ matrix.config }}
+                dub build -b release --config=${{ matrix.config }}
