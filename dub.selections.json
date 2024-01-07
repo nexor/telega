@@ -16,7 +16,7 @@
 		"openssl": "3.3.3",
 		"openssl-static": "1.0.2+3.0.8",
 		"requests": "2.0.9",
-		"socks-client": "0.1.0",
+		"socks-client": "0.2.0",
 		"stdx-allocator": "2.77.5",
 		"taggedalgebraic": "0.11.22",
 		"test_allocator": "0.3.4",
