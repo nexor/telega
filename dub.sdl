@@ -3,7 +3,7 @@ description "Telegram Bot API implementation"
 authors     "Pavel Chebotarev"
 license "MIT"
 
-dependency "vibe-core" version="~>1.9"
+dependency "vibe-core" version=">=1.9.0 <3.0.0-0"
 dependency "asdf" version="~>0.5.7"
 dependency "dests" version="~>0.3.1"
 
@@ -17,8 +17,8 @@ configuration "default" {
 }
 
 configuration "requests-driver" {
-    dependency "requests" version="~>1.0.4"
-    dependency "socks-client" version="~>0.1.0"
+    dependency "requests" version="~>2.0.0"
+    dependency "socks-client" version="~>0.2.0"
     subConfiguration "requests" "std"
     subConfiguration "socks-client" "std"
 

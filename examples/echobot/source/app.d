@@ -2,6 +2,7 @@ import vibe.core.core : runApplication, runTask, disableDefaultSignalHandlers;
 import vibe.core.log : setLogLevel, logInfo, LogLevel;
 import std.process : environment;
 import std.exception : enforce;
+import std.functional : toDelegate;
 
 int main(string[] args)
 {
@@ -15,10 +16,9 @@ int main(string[] args)
     enforce(botToken !is null, "Please provide bot token as a first argument or set BOT_TOKEN env variable");
 
     setLogLevel(LogLevel.diagnostic);
-    runTask(&listenUpdates, botToken);
-    disableDefaultSignalHandlers();
+    listenUpdates(botToken);
 
-    return runApplication();
+    return 0;
 }
 
 void listenUpdates(string token)
@@ -38,8 +38,8 @@ void listenUpdates(string token)
                 // we need all updates with text message
                 if (!u.message.isNull && !u.message.get.text.isNull)
                 {
-                    logInfo("Text from %s: %s", u.message.chat.id, u.message.text);
-                    api.sendMessage(u.message.chat.id, u.message.text);
+                    logInfo("Text from %s: %s", u.message.get.chat.id, u.message.get.text);
+                    api.sendMessage(u.message.get.chat.id, u.message.get.text.get);
                 }
 
                 // mark update as processed

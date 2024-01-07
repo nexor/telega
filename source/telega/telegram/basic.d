@@ -253,9 +253,9 @@ unittest
 
     u.id
         .assertEquals(143);
-    u.message.message_id
+    u.message.get.message_id
         .assertEquals(243);
-    u.message.text.get
+    u.message.get.text.get
         .assertEquals("message text");
 }
 
