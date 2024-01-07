@@ -6,7 +6,7 @@ jobs:
         name: Dub Tests
         strategy:
             matrix:
-                dc: [dmd-2.102.2, ldc-1.32.2]
+                dc: [dmd-latest, ldc-latest]
                 config: [default, requests-driver]
 
         runs-on: ubuntu-latest
