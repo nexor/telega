@@ -709,7 +709,7 @@ struct GetUpdatesMethod
 
     mixin TelegramMethod!"/getUpdates";
 
-    Nullable!int   offset;
+    Nullable!long  offset;
     Nullable!ubyte limit;
     Nullable!uint  timeout;
     Nullable!(UpdateType[]) allowed_updates;
@@ -1208,7 +1208,7 @@ Update[] getUpdates(BotApi api, ref GetUpdatesMethod m)
     return api.callMethod!(Update[])(m);
 }
 
-Update[] getUpdates(BotApi api, int offset, ubyte limit = 5, uint timeout = 30, UpdateType[] allowedUpdates = [])
+Update[] getUpdates(BotApi api, long offset, ubyte limit = 5, uint timeout = 30, UpdateType[] allowedUpdates = [])
 {
     GetUpdatesMethod m = {
         offset:  offset,
