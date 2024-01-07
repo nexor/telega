@@ -15,10 +15,9 @@ int main(string[] args)
     enforce(botToken !is null, "Please provide bot token as a first argument or set BOT_TOKEN env variable");
 
     setLogLevel(LogLevel.diagnostic);
-    runTask(&listenUpdates, botToken);
-    disableDefaultSignalHandlers();
+    listenUpdates(botToken);
 
-    return runApplication();
+    return 0;
 }
 
 

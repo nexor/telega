@@ -17,10 +17,9 @@ int main(string[] args)
 
     setLogLevel(LogLevel.debugV);
 
-    runTask(&listenUpdates);
-    disableDefaultSignalHandlers();
+    listenUpdates();
 
-    return runApplication();
+    return 0;
 }
 
 void listenUpdates()
@@ -42,11 +41,11 @@ void listenUpdates()
         auto updatesRange = new UpdatesRange(api, 0);
         auto messageUpdatesRange = updatesRange
                                        .filter!isMessageType
-                                       .map!(u => u.message);
+                                       .map!(u => u.message.get);
 
         foreach (ref Message m; messageUpdatesRange) {
             logInfo("Text from %s: %s", m.chat.id, m.text);
-            api.sendMessage(m.chat.id, m.text);
+            api.sendMessage(m.chat.id, m.text.get);
 
             logInfo("maxUpdateId is %d", updatesRange.maxUpdateId);
         }
