@@ -17,10 +17,9 @@ int main(string[] args)
 
     setLogLevel(LogLevel.diagnostic);
 
-    runTask(&listenUpdates, botToken);
-    disableDefaultSignalHandlers();
+    listenUpdates(botToken);
 
-    return runApplication();
+    return 0;
 }
 
 void listenUpdates(string botToken)

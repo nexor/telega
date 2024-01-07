@@ -2,7 +2,9 @@ version: '3'
 
 services:
     example:
-        image: dlang2/ldc-ubuntu
+        build:
+            context: .
+            dockerfile: ./docker/ldc/Dockerfile
         env_file: .env
         volumes:
             - ./:/dlang/app

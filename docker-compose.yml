@@ -6,12 +6,12 @@ services:
             context: .
             dockerfile: ./docker/dmd/Dockerfile
         volumes:
-            - ./:/dlang/app
+            - ./:/src
         command: dmd --version
     ldc:
         build:
             context: .
             dockerfile: ./docker/ldc/Dockerfile
         volumes:
-            - ./:/dlang/app
+            - ./:/src
         command: ldc2 --version
