@@ -22,7 +22,7 @@ version (unittest)
 
 struct User
 {
-    int    id;
+    long   id;
     bool   is_bot;
     string first_name;
 
