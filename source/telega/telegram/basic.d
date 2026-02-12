@@ -262,6 +262,7 @@ unittest
 enum ParseMode : string
 {
     Markdown = "Markdown",
+    MarkdownV2 = "MarkdownV2",
     HTML     = "HTML",
     None     = "",
 }
