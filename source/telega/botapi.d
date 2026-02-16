@@ -212,7 +212,7 @@ class BotApi
         {
             T result;
 
-            logDiagnostic("[%d] Requesting %s", requestCounter, method._path);
+            logDebug("[%d] Requesting %s", requestCounter, method._path);
 
             version(unittest)
             {

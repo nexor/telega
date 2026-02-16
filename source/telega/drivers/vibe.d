@@ -35,7 +35,7 @@ class VibedHttpClient: HttpClient
                     (scope res) {
                         answer = res.bodyReader.readAllUTF8(true);
                         logDebug("Response headers:\n  %s\n  %s", res, res.headers);
-                        logDiagnostic("Response body:\n  %s", answer);
+                        logDebugV("Response body:\n  %s", answer);
 
                         enforce(res.statusCode == 200);
                     }
