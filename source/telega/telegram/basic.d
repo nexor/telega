@@ -1555,25 +1555,26 @@ bool answerCallbackQuery(BotApi api, string callbackQueryId)
     return answerCallbackQuery(api, m);
 }
 
-unittest
+version(unittest)
+class BotApiMock : BotApi
 {
-    class BotApiMock : BotApi
+    this(string token)
     {
-        this(string token)
-        {
-            super(token);
-        }
-
-        T callMethod(T, M)(M method)
-        {
-            T result;
-
-            logDiagnostic("[%d] Requesting %s", requestCounter, method.name);
-
-            return result;
-        }
+        super(token);
     }
 
+    T callMethod(T, M)(M method)
+    {
+        T result;
+
+        logDiagnostic("[%d] Requesting %s", requestCounter, method.name);
+
+        return result;
+    }
+}
+
+unittest
+{
     auto api = new BotApiMock(null);
 
     api.getUpdates(5,30);

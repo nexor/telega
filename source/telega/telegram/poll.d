@@ -126,22 +126,7 @@ Poll stopPoll(T1)(BotApi api, T1 chatId, uint messageId)
 
 unittest
 {
-    class BotApiMock : BotApi
-    {
-        this(string token)
-        {
-            super(token);
-        }
-
-        T callMethod(T, M)(M method)
-        {
-            T result;
-
-            logDiagnostic("[%d] Requesting %s", requestCounter, method.name);
-
-            return result;
-        }
-    }
+    import telega.telegram.basic : BotApiMock;
 
     auto api = new BotApiMock(null);
 
