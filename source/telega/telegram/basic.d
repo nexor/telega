@@ -1049,6 +1049,7 @@ struct SendLocationMethod
     ChatId      chat_id;
     float       latitude;
     float       longitude;
+    Nullable!float       horizontal_accuracy;
     Nullable!uint        live_period;
     Nullable!bool        disable_notification;
     Nullable!uint        reply_to_message_id;
