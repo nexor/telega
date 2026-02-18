@@ -5,6 +5,7 @@ import asdf : Asdf, serializedAs;
 import asdf.serialization : deserialize;
 import std.typecons : Nullable;
 import std.exception : enforce;
+import telega.exception : TelegramException;
 import std.traits : isSomeString, isIntegral;
 import telega.http : HttpClient;
 import telega.serialization : serializeToJsonString, JsonableAlgebraicProxy;
@@ -129,15 +130,16 @@ unittest
 }
 
 
-class TelegramBotApiException : Exception
+class TelegramBotApiException : TelegramException
 {
+    /// Telegram bot API code (not to be confused with HTTP codes)
     ushort code;
 
     this(ushort code, string description, string file = __FILE__, size_t line = __LINE__,
          Throwable next = null) @nogc @safe pure nothrow
     {
         this.code = code;
-        super(description, file, line, next);
+        super(description, next, file, line);
     }
 }
 
