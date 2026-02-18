@@ -5,7 +5,9 @@ else enum HaveVibedDriver = false;
 
 static if(HaveVibedDriver):
 
+import std.conv : to;
 import std.exception : enforce;
+import telega.exception : TelegramException;
 import vibe.http.client;
 import vibe.stream.operations : readAllUTF8;
 import vibe.core.log;
@@ -37,7 +39,7 @@ class VibedHttpClient: HttpClient
                         logDebug("Response headers:\n  %s\n  %s", res, res.headers);
                         logDiagnostic("Response body:\n  %s", answer);
 
-                        enforce(res.statusCode == 200);
+                        enforce(res.statusCode == 200, new TelegramException(res.statusCode.to!string~": "~res.statusPhrase));
                     }
                 );
 
